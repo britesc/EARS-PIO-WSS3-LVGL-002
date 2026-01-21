@@ -1,0 +1,20 @@
+/**
+ * @file EARS_systemDef.h
+ * @author Julian (51fiftyone51fiftyone@gmail.com)
+ * @brief EARS Project System Header File.
+ * @version 0.1.0
+ * @date 20260119
+ * 
+ * 
+ */
+#pragma once
+#ifndef __EARS_SYSTEM_DEF_H__
+#define __EARS_SYSTEM_DEF_H__
+
+#define EARS_SYSTEM_NAME        "EARS"
+#define EARS_NAMESPACE          "EARS"
+#define EARS_DESCRIPTION        "Equipment & Ammunition Reporting System"
+#define EARS_STATUS             "Development"
+#define EARS_COPYRIGHT          "Copyright JTB 2026 All Rights Reserved"
+
+#endif // __EARS_SYSTEM_DEF_H__
