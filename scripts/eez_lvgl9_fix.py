@@ -1,10 +1,10 @@
 """
-EEZ Studio LVGL 9.3 Compatibility Fix
+EEZ Studio LVGL 9.x Compatibility Fix
 This script fixes LVGL function calls in EEZ Studio generated code
-to be compatible with LVGL 9.3.0
+to be compatible with LVGL 9.x
 
-Author: JTB
-Created: 20250105
+Author: Claude Sonnet 4.2
+Updated: 20250123 - Fixed regex patterns to properly match animation parameters
 """
 
 # type: ignore - PlatformIO build script
@@ -16,8 +16,13 @@ def fix_eez_lvgl9_compatibility(source, target, env):
     """
     Fix LVGL 9.x compatibility issues in eez-flow.cpp
     
-    Fixes:
-    1. lv_dropdown_set_selected() - Remove 3rd parameter (LV_ANIM_ON/OFF)
+    In LVGL 9.x, several functions no longer accept animation parameters.
+    This script removes the animation parameter from these function calls:
+    - lv_bar_set_value()
+    - lv_roller_set_selected()
+    - lv_slider_set_value()
+    - lv_slider_set_left_value()
+    - lv_dropdown_set_selected()
     """
     
     # Path to the eez-flow.cpp file
@@ -37,35 +42,65 @@ def fix_eez_lvgl9_compatibility(source, target, env):
     original_content = content
     fixes_applied = 0
     
-    # Fix 1: lv_dropdown_set_selected() - Remove animation parameter
-    # Pattern: lv_dropdown_set_selected(obj, value, LV_ANIM_ON/OFF)
-    # Replace with: lv_dropdown_set_selected(obj, value)
+    # Define function patterns to fix
+    # Each pattern removes the animation parameter (third parameter)
     
-    pattern = r'lv_dropdown_set_selected\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*LV_ANIM_(?:ON|OFF)\s*\)'
-    replacement = r'lv_dropdown_set_selected(\1, \2)'
+    function_fixes = [
+        {
+            'name': 'lv_bar_set_value',
+            # Matches: lv_bar_set_value(obj, value, animated ? LV_ANIM_ON : LV_ANIM_OFF)
+            # Replaces with: lv_bar_set_value(obj, value)
+            'pattern': r'lv_bar_set_value\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*[^)]+\?\s*LV_ANIM_ON\s*:\s*LV_ANIM_OFF\s*\)',
+            'replacement': r'lv_bar_set_value(\1, \2)'
+        },
+        {
+            'name': 'lv_roller_set_selected',
+            # Matches: lv_roller_set_selected(obj, value, animated ? LV_ANIM_ON : LV_ANIM_OFF)
+            # Replaces with: lv_roller_set_selected(obj, value)
+            'pattern': r'lv_roller_set_selected\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*[^)]+\?\s*LV_ANIM_ON\s*:\s*LV_ANIM_OFF\s*\)',
+            'replacement': r'lv_roller_set_selected(\1, \2)'
+        },
+        {
+            'name': 'lv_slider_set_value',
+            # Matches: lv_slider_set_value(obj, value, animated ? LV_ANIM_ON : LV_ANIM_OFF)
+            # Replaces with: lv_slider_set_value(obj, value)
+            'pattern': r'lv_slider_set_value\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*[^)]+\?\s*LV_ANIM_ON\s*:\s*LV_ANIM_OFF\s*\)',
+            'replacement': r'lv_slider_set_value(\1, \2)'
+        },
+        {
+            'name': 'lv_slider_set_left_value',
+            # Matches: lv_slider_set_left_value(obj, value, animated ? LV_ANIM_ON : LV_ANIM_OFF)
+            # Replaces with: lv_slider_set_left_value(obj, value)
+            'pattern': r'lv_slider_set_left_value\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*[^)]+\?\s*LV_ANIM_ON\s*:\s*LV_ANIM_OFF\s*\)',
+            'replacement': r'lv_slider_set_left_value(\1, \2)'
+        },
+        {
+            'name': 'lv_dropdown_set_selected',
+            # Matches: lv_dropdown_set_selected(obj, value, LV_ANIM_ON) or LV_ANIM_OFF
+            # Replaces with: lv_dropdown_set_selected(obj, value)
+            'pattern': r'lv_dropdown_set_selected\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*LV_ANIM_(?:ON|OFF)\s*\)',
+            'replacement': r'lv_dropdown_set_selected(\1, \2)'
+        }
+    ]
     
-    content, count = re.subn(pattern, replacement, content)
-    fixes_applied += count
-    
-    if count > 0:
-        print(f"   ✅ Fixed {count} lv_dropdown_set_selected() call(s)")
-    
-    # Add more fixes here as needed for other LVGL 9.x compatibility issues
-    # Example:
-    # pattern2 = r'old_function\((.*?)\)'
-    # replacement2 = r'new_function(\1)'
-    # content, count2 = re.subn(pattern2, replacement2, content)
-    # fixes_applied += count2
+    # Apply each fix
+    for fix in function_fixes:
+        content_before = content
+        content, count = re.subn(fix['pattern'], fix['replacement'], content)
+        
+        if count > 0:
+            print(f"   ✅ Fixed {count} {fix['name']}() call(s)")
+            fixes_applied += count
     
     # Write back if changes were made
     if content != original_content:
         with open(eez_flow_path, 'w', encoding='utf-8') as f:
             f.write(content)
-        print(f"✅ EEZ Studio compatibility fixes applied: {fixes_applied} changes")
+        print(f"✅ EEZ Studio compatibility fixes applied: {fixes_applied} total changes")
     else:
         print("✅ EEZ Studio code already compatible - no fixes needed")
 
 # Register the callback to run before building
 env.AddPreAction("$BUILD_DIR/${PROGNAME}.elf", fix_eez_lvgl9_compatibility)
 
-print("📝 EEZ Studio LVGL 9.3 compatibility fixer loaded")
+print("🔍 EEZ Studio LVGL 9.x compatibility fixer loaded")
