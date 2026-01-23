@@ -2,7 +2,7 @@
  * @file EARS_versionDef.h
  * @author Julian (51fiftyone51fiftyone_at_gmail.com)
  * @brief Version encoding/decoding macros for EARS Project
- * @version 0.5.0
+ * @version 0.7.0
  * @date 20260122
  * 
  * Converts version string components into a single integer for easy comparison
@@ -18,7 +18,10 @@
 #define EARS_APP_VERSION_MAJOR "4"
 #define EARS_APP_VERSION_MINOR "2"
 #define EARS_APP_VERSION_PATCH "0"
-#define EARS_APP_VERSION_BUILD "(Dev)"
+
+#define EARS_APP_BUILD_TIMESTAMP 0
+
+// #define EARS_APP_VERSION_BUILD "(Dev)"
 
 /**
  * @brief Convert string to integer at compile time
@@ -79,5 +82,13 @@
              (int)VERS_GET_MAJOR(v), \
              (int)VERS_GET_MINOR(v), \
              (int)VERS_GET_PATCH(v))
+
+             // Macro to get readable date/time from EARS_APP_BUILD_TIMESTAMP
+             #define EARS_APP_BUILD_YEAR    ((EARS_APP_BUILD_TIMESTAMP / 10000000000ULL) % 10000)
+             #define EARS_APP_BUILD_MONTH   ((EARS_APP_BUILD_TIMESTAMP / 100000000ULL) % 100)
+             #define EARS_APP_BUILD_DAY     ((EARS_APP_BUILD_TIMESTAMP / 1000000ULL) % 100)
+             #define EARS_APP_BUILD_HOUR    ((EARS_APP_BUILD_TIMESTAMP / 10000ULL) % 100)
+             #define EARS_APP_BUILD_MINUTE  ((EARS_APP_BUILD_TIMESTAMP / 100ULL) % 100)
+             #define EARS_APP_BUILD_SECOND  (EARS_APP_BUILD_TIMESTAMP % 100ULL)
 
 #endif // __EARS_VERSION_DEF_H__
