@@ -21,6 +21,20 @@
 #define EARS_COPYRIGHT          "Copyright JTB 2026 All Rights Reserved"
 
 /**********************************************************************
+ * Debug Definitions
+ **********************************************************************/
+#define EARS_DEBUG_BAUD_RATE    115200
+#if EARS_DEBUG == 1
+    #define DEBUG_PRINT(x)      Serial.print(x)
+    #define DEBUG_PRINTLN(x)    Serial.println(x)
+    #define DEBUG_PRINTF(...)   Serial.printf(__VA_ARGS__)
+#else
+    #define DEBUG_PRINT(x)
+    #define DEBUG_PRINTLN(x)
+    #define DEBUG_PRINTF(...)
+#endif
+
+/**********************************************************************
  * NVS Definitions
  **********************************************************************/
 #define EARS_NAMESPACE          "EARS"      // NVS Namespace

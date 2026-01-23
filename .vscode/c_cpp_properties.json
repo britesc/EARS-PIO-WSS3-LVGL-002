@@ -8,6 +8,7 @@
         {
             "name": "PlatformIO",
             "includePath": [
+                "D:/Dev/EARS-PIO-WSS3-LVGL-002/include",
                 "D:/Dev/EARS-PIO-WSS3-LVGL-002/src",
                 "C:/Users/julia/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/newlib/platform_include",
                 "C:/Users/julia/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include",
@@ -246,6 +247,7 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
+                    "D:/Dev/EARS-PIO-WSS3-LVGL-002/include",
                     "D:/Dev/EARS-PIO-WSS3-LVGL-002/src",
                     "C:/Users/julia/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/newlib/platform_include",
                     "C:/Users/julia/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include",
