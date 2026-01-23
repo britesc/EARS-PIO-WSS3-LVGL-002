@@ -19,7 +19,7 @@
 #define EARS_APP_VERSION_MINOR "2"
 #define EARS_APP_VERSION_PATCH "0"
 
-#define EARS_APP_BUILD_TIMESTAMP 0
+#define EARS_APP_BUILD_TIMESTAMP "0"
 
 /**
  * @brief Convert string to integer at compile time
