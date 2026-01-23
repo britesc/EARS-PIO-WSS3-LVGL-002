@@ -106,7 +106,7 @@ void setup()
                  EARS_APP_VERSION_MAJOR, 
                  EARS_APP_VERSION_MINOR, 
                  EARS_APP_VERSION_PATCH,
-                 EARS_APP_VERSION_BUILD);
+                 EARS_STATUS);
     DEBUG_PRINTF("  Status:     %s\n", EARS_STATUS);
     DEBUG_PRINTF("  Compiler:   %s\n", EARS_XTENSA_COMPILER_VERSION);
     DEBUG_PRINTF("  Platform:   %s\n", EARS_ESPRESSIF_PLATFORM_VERSION);
