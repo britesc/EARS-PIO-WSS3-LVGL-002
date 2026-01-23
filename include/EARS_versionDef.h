@@ -21,8 +21,6 @@
 
 #define EARS_APP_BUILD_TIMESTAMP 0
 
-// #define EARS_APP_VERSION_BUILD "(Dev)"
-
 /**
  * @brief Convert string to integer at compile time
  * Helper macro for VERS_ENCODE
