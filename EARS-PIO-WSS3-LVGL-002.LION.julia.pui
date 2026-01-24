@@ -1,9 +1,18 @@
 [Folders]
-.+AFw-=1
+.+AFw-="1"
 
 [Open Files]
 Active File Display Mode=3
-Open File0="-"
+Active File Index=1
+Open File Line0="0"
+Open File Line1="1138"
+Open File Pos0="690"
+Open File Pos1="1807"
+Open File Window Pos0="0,1,-1,-1,-9,-38,0,0,797,322"
+Open File Window Pos1="2,3,-1,-1,-9,-38,32,32,826,350"
+Open File0="..\EARS-PIO-WSS3-LVGL-001\src\main.cpp"
+Open File1="..\EARS-PIO-WSS3-LVGL-001\previous_code_from_src\main.cpp.1"
+Open File2="-"
 Remember Files=1
 
 [Project Information]

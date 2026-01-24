@@ -40,7 +40,7 @@
 // #include <FS.h>
 
 // TODO: Add display driver headers
-// #include <Arduino_GFX_Library.h>
+#include <Arduino_GFX_Library.h>
 
 // TODO: Add EEZ Studio generated UI headers
 // #include "ui/screens.h"
@@ -52,6 +52,24 @@
 // Debug macros are defined in EARS_systemDef.h
 
 // ============================================================================
+// Start of Object Declarations
+// ============================================================================
+
+// ============================================================================
+// Display Settings
+// ============================================================================
+
+static const uint32_t screenWidth = TFT_WIDTH;
+static const uint32_t screenHeight = TFT_HEIGHT;
+
+// ============================================================================
+// Arduino GFX display object
+// ============================================================================
+
+Arduino_DataBus *bus = new Arduino_ESP32SPI(LCD_DC, LCD_CS, SPI_SCLK, SPI_MOSI, SPI_MISO);
+Arduino_GFX *gfx = new Arduino_ILI9488_18bit(bus, LCD_RST, 1 /* rotation */, true /* IPS */);
+
+// ============================================================================
 // FREERTOS CONFIGURATION
 // ============================================================================
 
@@ -61,6 +79,10 @@ TaskHandle_t Core1_Task_Handle = NULL; // Background Processing
 
 // Mutex/Semaphore Handles
 SemaphoreHandle_t xDisplayMutex = NULL;
+
+// ============================================================================
+// End of Object Declarations
+// ============================================================================
 
 // Task Stack Sizes (in bytes)
 #define CORE0_STACK_SIZE 8192 // UI Task (LVGL, Display, Touch)
