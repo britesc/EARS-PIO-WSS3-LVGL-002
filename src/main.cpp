@@ -9,7 +9,7 @@
  *          Once frozen, this file serves as the template for main.cpp development.
  *          Functionality will be added incrementally and frozen section by section.
  *
- * @version 0.2.0
+ * @version 0.2.1
  * @date 20260123
  *
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
