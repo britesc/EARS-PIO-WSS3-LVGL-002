@@ -329,9 +329,14 @@ void initialise_display()
     }
 
     // Optional: Show test pattern for 2 seconds
-    // MAIN_display_test_pattern(gfx);
-    // delay(2000);
-    // gfx->fillScreen(EARS_RGB565_BLACK);
+    MAIN_display_test_pattern(gfx);
+    delay(2000);
+    gfx->fillScreen(EARS_RGB565_BLACK);
+
+    MAIN_draw_filled_rect(gfx, 50, 50, 200, 100, EARS_RGB565_RED);
+    MAIN_draw_button_rect(gfx, 50, 170, 200, 80,
+                          EARS_RGB565_CS_PRIMARY,
+                          EARS_RGB565_CS_TEXT);
 }
 
 /**
