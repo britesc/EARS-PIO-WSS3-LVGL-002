@@ -44,6 +44,7 @@
 
 // Main Application Libraries
 #include "MAIN_displayLib.h"
+#include "MAIN_drawingLib.h"
 
 // TODO: Add EEZ Studio generated UI headers
 // #include "ui/screens.h"
