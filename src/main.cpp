@@ -9,7 +9,7 @@
  *          Once frozen, this file serves as the template for main.cpp development.
  *          Functionality will be added incrementally and frozen section by section.
  *
- * @version 0.2.1
+ * @version 0.2.0
  * @date 20260123
  *
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
@@ -41,6 +41,9 @@
 
 // TODO: Add display driver headers
 #include <Arduino_GFX_Library.h>
+
+// Main Application Libraries
+#include "MAIN_displayLib.h"
 
 // TODO: Add EEZ Studio generated UI headers
 // #include "ui/screens.h"
@@ -157,7 +160,7 @@ void setup()
     // TODO: Uncomment as each module is implemented
 
     // initialise_nvs();
-    // initialise_display();
+    initialise_display();
     // initialise_lvgl();
     // initialise_sd_card();
     // initialise_touch();
@@ -311,19 +314,23 @@ void initialise_serial()
 
 /**
  * @brief Initialise display hardware
- * @todo Implement display initialisation with GFX library
+ * @details Calls MAIN_initialise_display() from MAIN_displayLib
  */
 void initialise_display()
 {
-    DEBUG_PRINTLN("[INIT] Initialising display...");
+    if (!MAIN_initialise_display(gfx))
+    {
+        DEBUG_PRINTLN("[ERROR] Display initialisation failed - halting");
+        while (1)
+        {
+            delay(1000);
+        }
+    }
 
-    // TODO: Implement display initialisation
-    // - Configure SPI pins
-    // - Initialise GFX library
-    // - Set backlight
-    // - Configure rotation and colour mode
-
-    DEBUG_PRINTLN("[TODO] Display initialisation not yet implemented");
+    // Optional: Show test pattern for 2 seconds
+    // MAIN_display_test_pattern(gfx);
+    // delay(2000);
+    // gfx->fillScreen(EARS_RGB565_BLACK);
 }
 
 /**
