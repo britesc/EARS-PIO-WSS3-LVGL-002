@@ -44,7 +44,6 @@
 
 // Main Application Libraries
 #include "MAIN_displayLib.h"
-#include "MAIN_drawingLib.h"
 
 // TODO: Add EEZ Studio generated UI headers
 // #include "ui/screens.h"
@@ -70,8 +69,8 @@ static const uint32_t screenHeight = TFT_HEIGHT;
 // Arduino GFX display object
 // ============================================================================
 
-Arduino_DataBus *bus = new Arduino_ESP32SPI(LCD_DC, LCD_CS, SPI_SCLK, SPI_MOSI, SPI_MISO);
-Arduino_GFX *gfx = new Arduino_ILI9488_18bit(bus, LCD_RST, 1 /* rotation */, true /* IPS */);
+Arduino_DataBus *bus = new Arduino_ESP32SPI(LCD_DC, LCD_CS, SPI_SCLK, SPI_MOSI, SPI_MISO, VSPI, true /* use_dma */, 40000000 /* 40MHz */);
+Arduino_GFX *gfx = new Arduino_ILI9488_18bit(bus, LCD_RST, 0 /* rotation set in init */, true /* IPS */);
 
 // ============================================================================
 // FREERTOS CONFIGURATION
@@ -329,14 +328,9 @@ void initialise_display()
     }
 
     // Optional: Show test pattern for 2 seconds
-    MAIN_display_test_pattern(gfx);
-    delay(2000);
-    gfx->fillScreen(EARS_RGB565_BLACK);
-
-    MAIN_draw_filled_rect(gfx, 50, 50, 200, 100, EARS_RGB565_RED);
-    MAIN_draw_button_rect(gfx, 50, 170, 200, 80,
-                          EARS_RGB565_CS_PRIMARY,
-                          EARS_RGB565_CS_TEXT);
+    // MAIN_display_test_pattern(gfx);
+    // delay(2000);
+    // gfx->fillScreen(EARS_RGB565_BLACK);
 }
 
 /**
