@@ -15,7 +15,7 @@
 // Waveshare 3.5" ESP32-S3 Display Pin Definitions (Arduino GFX)
 
 // TFT Display Pins (SPI)
-#define GFX_BL 45 // Backlight (CHANGED from 6 to avoid conflict with SD_SCK)
+#define GFX_BL 6 // Backlight (CHANGED from 6 to avoid conflict with SD_SCK)
 #define SPI_MISO 2
 #define SPI_MOSI 1
 #define SPI_SCLK 5
