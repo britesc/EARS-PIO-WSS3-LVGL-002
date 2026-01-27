@@ -1,39 +1,29 @@
 /**
- * @file main.cpp - FROZEN MILESTONE v0.3.0
+ * @file main.cpp - DEVELOPMENT STEP 5: NVS Initialization
  * @author Julian (51fiftyone51fiftyone@gmail.com)
- * @brief EARS Main Application - WORKING BASELINE with Development Screen
+ * @brief EARS Main Application - Adding NVS Support
  * @details Equipment & Ammunition Reporting System
  *          Dual-core ESP32-S3 implementation using FreeRTOS
  *
- * MILESTONE: Display working, FreeRTOS dual-core running, live dev screen
- * DATE FROZEN: 20260126
+ * CURRENT STEP: Initialize NVS on Core 1
+ * DATE: 20260127
  *
- * @version 0.3.0
- * @date 20260126
+ * @version 0.3.1
+ * @date 20260127
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  *
  * ============================================================================
  * DEVELOPMENT ROADMAP - NEXT STEPS:
  * ============================================================================
  *
- * ✅ COMPLETED (Steps 1-4):
+ * ✅ COMPLETED (Steps 1-5):
  *    - Display hardware working (ST7796, Arduino GFX 1.5.5)
  *    - FreeRTOS dual-core (Core0=UI @1Hz, Core1=BG @10Hz)
  *    - EARS colour definitions (RGB565)
  *    - MAIN_drawingLib (rectangle functions)
  *    - Live development screen with heartbeat counters
  *    - Display mutex for thread safety
- *
- * 📋 TODO - STEP 5: Initialize NVS on Core 1
- *    Location: Core1_Background_Task() - run once at startup
- *    Purpose: Initialize Non-Volatile Storage for settings
- *    Dependencies: EARS_nvsEepromLib
- *    Tasks:
- *      - Call using_nvseeprom().begin()
- *      - Validate NVS (check version, CRC)
- *      - Handle first-time setup vs existing data
- *      - Store result in global flag for other cores to check
- *    Note: This fixes the backlight manager NVS dependency issue
+ *    - NVS initialization and validation
  *
  * 📋 TODO - STEP 6: Initialize SD Card on Core 1
  *    Location: Core1_Background_Task() - run after NVS init
@@ -104,6 +94,9 @@
 #include "EARS_rgb565ColoursDef.h"
 #include "MAIN_drawingLib.h"
 
+// STEP 5: NVS Library
+#include "EARS_nvsEepromLib.h"
+
 // Display driver
 #include <Arduino_GFX_Library.h>
 
@@ -146,11 +139,14 @@ volatile uint32_t core0_heartbeat = 0;
 volatile uint32_t core1_heartbeat = 0;
 volatile uint32_t display_updates = 0;
 
-// TODO STEP 5: Add NVS status flag
-// volatile bool nvs_ready = false;
+// STEP 5: NVS status flags
+volatile bool nvs_ready = false;
+volatile bool nvs_first_time = false;
+String nvs_status_text = "Initialising...";
 
 // TODO STEP 6: Add SD card status flag
 // volatile bool sdcard_ready = false;
+// String sdcard_status_text = "Not initialised";
 
 // ============================================================================
 // FUNCTION PROTOTYPES
@@ -162,8 +158,8 @@ void initialise_display();
 void draw_development_screen();
 void update_development_screen();
 
-// TODO STEP 5: Add NVS init function
-// void initialise_nvs();
+// STEP 5: NVS init function
+void initialise_nvs();
 
 // TODO STEP 6: Add SD card init function
 // void initialise_sd_card();
@@ -182,15 +178,15 @@ void setup()
     initialise_serial();
 
     DEBUG_PRINTLN("\n\n");
-    DEBUG_PRINTLN("════════════════════════════════════════════════════════════");
+    DEBUG_PRINTLN("╔════════════════════════════════════════════════════════════╗");
     DEBUG_PRINTLN("  EARS - Equipment & Ammunition Reporting System");
-    DEBUG_PRINTLN("════════════════════════════════════════════════════════════");
+    DEBUG_PRINTLN("╚════════════════════════════════════════════════════════════╝");
     DEBUG_PRINTF("  Version:    %s.%s.%s %s\n",
                  EARS_APP_VERSION_MAJOR, EARS_APP_VERSION_MINOR,
                  EARS_APP_VERSION_PATCH, EARS_STATUS);
     DEBUG_PRINTF("  Compiler:   %s\n", EARS_XTENSA_COMPILER_VERSION);
     DEBUG_PRINTF("  Platform:   %s\n", EARS_ESPRESSIF_PLATFORM_VERSION);
-    DEBUG_PRINTLN("════════════════════════════════════════════════════════════");
+    DEBUG_PRINTLN("╔════════════════════════════════════════════════════════════╗");
     DEBUG_PRINTLN();
 
     // ------------------------------------------------------------------------
@@ -296,9 +292,8 @@ void Core1_Background_Task(void *parameter)
 {
     DEBUG_PRINTLN("[CORE1] Background Task started");
 
-    // TODO STEP 5: Initialize NVS (once at startup)
-    // initialise_nvs();
-    // nvs_ready = true;
+    // STEP 5: Initialize NVS (once at startup)
+    initialise_nvs();
 
     // TODO STEP 6: Initialize SD card (after NVS)
     // initialise_sd_card();
@@ -385,6 +380,121 @@ void initialise_display()
 }
 
 // ============================================================================
+// STEP 5: NVS INITIALIZATION
+// ============================================================================
+
+/**
+ * @brief Initialize Non-Volatile Storage (NVS)
+ * @details This function:
+ *          1. Initializes NVS flash
+ *          2. Validates existing data (or creates defaults)
+ *          3. Sets global flags for other cores
+ *          4. Reports status via serial
+ */
+void initialise_nvs()
+{
+    DEBUG_PRINTLN("\n[INIT] ========== NVS Initialization ==========");
+
+    // Step 1: Initialize NVS flash
+    DEBUG_PRINTLN("[NVS] Initializing NVS flash...");
+    if (!using_nvseeprom().begin())
+    {
+        DEBUG_PRINTLN("[ERROR] NVS initialization failed!");
+        nvs_status_text = "FAILED - Flash Error";
+        nvs_ready = false;
+        return;
+    }
+    DEBUG_PRINTLN("[OK] NVS flash initialized");
+
+    // Step 2: Validate NVS data
+    DEBUG_PRINTLN("[NVS] Validating stored data...");
+    NVSValidationResult validation = using_nvseeprom().validateNVS();
+
+    // Step 3: Process validation results
+    switch (validation.status)
+    {
+    case NVSStatus::VALID:
+        DEBUG_PRINTLN("[OK] NVS data valid");
+        DEBUG_PRINTF("[NVS] Version: %d (current: %d)\n",
+                     validation.currentVersion, validation.expectedVersion);
+        DEBUG_PRINTF("[NVS] ZapNumber: %s\n",
+                     validation.zapNumberValid ? validation.zapNumber : "NOT SET");
+        nvs_status_text = "Ready (Valid)";
+        nvs_first_time = false;
+        nvs_ready = true;
+        break;
+
+    case NVSStatus::UPGRADED:
+        DEBUG_PRINTLN("[OK] NVS data upgraded");
+        DEBUG_PRINTF("[NVS] Upgraded from version %d to %d\n",
+                     validation.currentVersion, validation.expectedVersion);
+        nvs_status_text = "Ready (Upgraded)";
+        nvs_first_time = false;
+        nvs_ready = true;
+        break;
+
+    case NVSStatus::MISSING_ZAPNUMBER:
+        DEBUG_PRINTLN("[WARN] First-time setup detected (no ZapNumber)");
+        nvs_status_text = "First-time Setup";
+        nvs_first_time = true;
+        nvs_ready = true; // Ready, but needs user setup
+        break;
+
+    case NVSStatus::MISSING_PASSWORD:
+        DEBUG_PRINTLN("[WARN] Password not set");
+        nvs_status_text = "Password Required";
+        nvs_first_time = true;
+        nvs_ready = true; // Ready, but needs user setup
+        break;
+
+    case NVSStatus::INVALID_VERSION:
+        DEBUG_PRINTLN("[ERROR] Invalid NVS version");
+        DEBUG_PRINTF("[NVS] Found version %d, expected %d\n",
+                     validation.currentVersion, validation.expectedVersion);
+        nvs_status_text = "FAILED - Version";
+        nvs_ready = false;
+        break;
+
+    case NVSStatus::CRC_FAILED:
+        DEBUG_PRINTLN("[ERROR] NVS CRC check failed (data corrupted)");
+        DEBUG_PRINTF("[NVS] Expected CRC: 0x%08X\n", validation.calculatedCRC);
+        nvs_status_text = "FAILED - Corrupted";
+        nvs_ready = false;
+        break;
+
+    case NVSStatus::INITIALIZATION_FAILED:
+        DEBUG_PRINTLN("[ERROR] NVS could not be accessed");
+        nvs_status_text = "FAILED - Access";
+        nvs_ready = false;
+        break;
+
+    default:
+        DEBUG_PRINTLN("[ERROR] Unknown NVS status");
+        nvs_status_text = "FAILED - Unknown";
+        nvs_ready = false;
+        break;
+    }
+
+    // Step 4: Report final status
+    DEBUG_PRINTLN("[NVS] ========================================");
+    DEBUG_PRINTF("[NVS] Status: %s\n", nvs_status_text.c_str());
+    DEBUG_PRINTF("[NVS] Ready: %s\n", nvs_ready ? "YES" : "NO");
+    DEBUG_PRINTF("[NVS] First-time: %s\n", nvs_first_time ? "YES" : "NO");
+    DEBUG_PRINTLN("[NVS] ========================================\n");
+
+    // Step 5: If first-time, we could set default values here
+    if (nvs_first_time && nvs_ready)
+    {
+        DEBUG_PRINTLN("[NVS] First-time setup - initializing defaults...");
+        // Example: Set default version
+        using_nvseeprom().putVersion(EARS_nvsEeprom::KEY_VERSION,
+                                     EARS_nvsEeprom::CURRENT_VERSION);
+        using_nvseeprom().updateNVSCRC();
+        DEBUG_PRINTLN("[OK] Defaults initialized");
+    }
+}
+
+// ============================================================================
 // DEVELOPMENT MODE DISPLAY FUNCTIONS
 // (Keep these until LVGL/EEZ UI is ready - useful for debugging!)
 // ============================================================================
@@ -433,19 +543,59 @@ void draw_development_screen()
     // Status labels
     gfx->setTextColor(EARS_RGB565_CS_TEXT);
     gfx->setTextSize(1);
-    gfx->setCursor(10, 150);
+    gfx->setCursor(10, 230);
     gfx->print("Core 0 (UI):");
-    gfx->setCursor(10, 180);
+    gfx->setCursor(10, 250);
     gfx->print("Core 1 (BG):");
-    gfx->setCursor(10, 210);
+    gfx->setCursor(10, 270);
     gfx->print("Uptime:");
-    gfx->setCursor(10, 240);
-    gfx->print("Display:");
+    gfx->setCursor(10, 290);
+    gfx->print("NVS:");
+
+    // Size Reference Panel - Visual guide for UI elements
+    gfx->setTextColor(EARS_RGB565_CS_TEXT);
+    gfx->setTextSize(1);
+    gfx->setCursor(10, 145);
+    gfx->print("Size Reference (pixels):");
+
+    // Draw size reference rectangles with labels
+    int16_t x_start = 10;
+    int16_t y_base = 160;
+
+    // 12x12
+    MAIN_draw_filled_rect(gfx, x_start, y_base, 12, 12, EARS_RGB565_CS_PRIMARY);
+    gfx->setCursor(x_start, y_base + 15);
+    gfx->print("12");
+
+    // 24x24
+    MAIN_draw_filled_rect(gfx, x_start + 40, y_base, 24, 24, EARS_RGB565_CS_PRIMARY);
+    gfx->setCursor(x_start + 40, y_base + 27);
+    gfx->print("24");
+
+    // 36x36
+    MAIN_draw_filled_rect(gfx, x_start + 90, y_base, 36, 36, EARS_RGB565_CS_PRIMARY);
+    gfx->setCursor(x_start + 90, y_base + 39);
+    gfx->print("36");
+
+    // 48x48
+    MAIN_draw_filled_rect(gfx, x_start + 155, y_base, 48, 48, EARS_RGB565_CS_PRIMARY);
+    gfx->setCursor(x_start + 155, y_base + 51);
+    gfx->print("48");
+
+    // 64x64
+    MAIN_draw_filled_rect(gfx, x_start + 230, y_base, 64, 64, EARS_RGB565_CS_PRIMARY);
+    gfx->setCursor(x_start + 230, y_base + 67);
+    gfx->print("64");
+
+    // 96x96
+    MAIN_draw_filled_rect(gfx, x_start + 320, y_base - 10, 96, 96, EARS_RGB565_CS_PRIMARY);
+    gfx->setCursor(x_start + 320, y_base + 89);
+    gfx->print("96");
 
     // Footer
     gfx->setTextColor(EARS_RGB565_GRAY);
     gfx->setCursor(10, 300);
-    gfx->print("Waiting for LVGL integration...");
+    gfx->print("Step 5: NVS Initialized");
 }
 
 /**
@@ -457,35 +607,58 @@ void update_development_screen()
     uint32_t uptime_sec = millis() / 1000;
 
     // Clear update area
-    MAIN_draw_filled_rect(gfx, 120, 145, 350, 100, EARS_RGB565_BLACK);
+    MAIN_draw_filled_rect(gfx, 120, 225, 350, 80, EARS_RGB565_BLACK);
 
     gfx->setTextColor(EARS_RGB565_WHITE);
     gfx->setTextSize(1);
 
     // Core 0 heartbeat
-    gfx->setCursor(120, 150);
+    gfx->setCursor(120, 230);
     gfx->printf("Running (%lu beats)", core0_heartbeat);
 
     // Core 1 heartbeat
-    gfx->setCursor(120, 180);
+    gfx->setCursor(120, 250);
     gfx->printf("Running (%lu beats)", core1_heartbeat);
 
     // Uptime
-    gfx->setCursor(120, 210);
+    gfx->setCursor(120, 270);
     uint32_t hours = uptime_sec / 3600;
     uint32_t minutes = (uptime_sec % 3600) / 60;
     uint32_t seconds = uptime_sec % 60;
     gfx->printf("%02lu:%02lu:%02lu", hours, minutes, seconds);
 
-    // Display updates
-    gfx->setCursor(120, 240);
-    gfx->printf("%lu updates", display_updates);
+    // STEP 5: NVS status with colour coding
+    gfx->setCursor(120, 290);
+    if (nvs_ready)
+    {
+        if (nvs_first_time)
+        {
+            gfx->setTextColor(EARS_RGB565_YELLOW); // Warning - needs setup
+        }
+        else
+        {
+            gfx->setTextColor(EARS_RGB565_GREEN); // OK - ready
+        }
+    }
+    else
+    {
+        gfx->setTextColor(EARS_RGB565_RED); // Error
+    }
+    gfx->print(nvs_status_text);
 
     // Heartbeat indicator (flashing dot)
     uint16_t color = (core0_heartbeat % 2) ? EARS_RGB565_GREEN : EARS_RGB565_DARKGRAY;
-    gfx->fillCircle(450, 155, 8, color);
+    gfx->fillCircle(450, 235, 8, color);
+
+    // STEP 5: NVS status indicator
+    uint16_t nvs_color = nvs_ready ? EARS_RGB565_GREEN : EARS_RGB565_RED;
+    if (nvs_ready && nvs_first_time)
+    {
+        nvs_color = EARS_RGB565_YELLOW;
+    }
+    gfx->fillCircle(450, 295, 8, nvs_color);
 }
 
 // ============================================================================
-// END OF FILE - FROZEN MILESTONE v0.3.0
+// END OF FILE - STEP 5: NVS Initialization Complete
 // ============================================================================
