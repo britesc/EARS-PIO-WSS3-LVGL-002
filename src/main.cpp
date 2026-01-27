@@ -1,13 +1,102 @@
 /**
- * @file main.cpp - STEP 4 DEVELOPMENT SCREEN FIXED
- * @brief EARS with live development screen - DIRECT BACKLIGHT CONTROL
+ * @file main.cpp - FROZEN MILESTONE v0.3.0
+ * @author Julian (51fiftyone51fiftyone@gmail.com)
+ * @brief EARS Main Application - WORKING BASELINE with Development Screen
+ * @details Equipment & Ammunition Reporting System
+ *          Dual-core ESP32-S3 implementation using FreeRTOS
+ *
+ * MILESTONE: Display working, FreeRTOS dual-core running, live dev screen
+ * DATE FROZEN: 20260126
+ *
+ * @version 0.3.0
+ * @date 20260126
+ * @copyright Copyright (c) 2026 JTB All Rights Reserved
+ *
+ * ============================================================================
+ * DEVELOPMENT ROADMAP - NEXT STEPS:
+ * ============================================================================
+ *
+ * ✅ COMPLETED (Steps 1-4):
+ *    - Display hardware working (ST7796, Arduino GFX 1.5.5)
+ *    - FreeRTOS dual-core (Core0=UI @1Hz, Core1=BG @10Hz)
+ *    - EARS colour definitions (RGB565)
+ *    - MAIN_drawingLib (rectangle functions)
+ *    - Live development screen with heartbeat counters
+ *    - Display mutex for thread safety
+ *
+ * 📋 TODO - STEP 5: Initialize NVS on Core 1
+ *    Location: Core1_Background_Task() - run once at startup
+ *    Purpose: Initialize Non-Volatile Storage for settings
+ *    Dependencies: EARS_nvsEepromLib
+ *    Tasks:
+ *      - Call using_nvseeprom().begin()
+ *      - Validate NVS (check version, CRC)
+ *      - Handle first-time setup vs existing data
+ *      - Store result in global flag for other cores to check
+ *    Note: This fixes the backlight manager NVS dependency issue
+ *
+ * 📋 TODO - STEP 6: Initialize SD Card on Core 1
+ *    Location: Core1_Background_Task() - run after NVS init
+ *    Purpose: Mount SD card for logging, config, images
+ *    Dependencies: EARS_sdCardLib
+ *    Tasks:
+ *      - Call using_sdcard().begin()
+ *      - Create required directories (/logs, /config, /images)
+ *      - Initialize EARS_logger with SD card reference
+ *      - Log system startup info
+ *
+ * 📋 TODO - STEP 7: Initialize LVGL on Core 0
+ *    Location: Core0_UI_Task() - run once at startup
+ *    Purpose: Start LVGL graphics engine for UI
+ *    Dependencies: LVGL 9.3.0, lv_conf.h
+ *    Tasks:
+ *      - Call lv_init()
+ *      - Create display buffer (in PSRAM)
+ *      - Register display driver with Arduino_GFX
+ *      - Set up tick timer for LVGL
+ *      - Load initial screen (can keep dev screen as fallback)
+ *    Note: Keep development screen as fallback until EEZ UI ready
+ *
+ * 📋 TODO - STEP 8: Integrate Touch Input on Core 0
+ *    Location: Core0_UI_Task() - in main loop
+ *    Purpose: Handle touch screen input for LVGL
+ *    Dependencies: Touch I2C driver, LVGL input driver
+ *    Tasks:
+ *      - Initialize touch controller (I2C)
+ *      - Register LVGL input driver
+ *      - Add touch polling to UI task loop
+ *
+ * 📋 TODO - STEP 9: Add EEZ Studio Generated UI
+ *    Location: After LVGL initialization
+ *    Purpose: Load and display EEZ Studio designed screens
+ *    Dependencies: EEZ Studio Flow generated code
+ *    Tasks:
+ *      - Include ui/screens.h and ui/ui.h
+ *      - Call ui_init() after LVGL init
+ *      - Load default screen
+ *      - Replace dev screen with real UI
+ *
+ * 📋 TODO - STEP 10: Enable Backlight Manager (after NVS ready)
+ *    Location: initialise_display()
+ *    Purpose: Replace direct GPIO with proper backlight management
+ *    Dependencies: EARS_backLightManagerLib, working NVS
+ *    Tasks:
+ *      - Replace pinMode/digitalWrite with using_backlightmanager().begin()
+ *      - Load saved brightness from NVS
+ *      - Integrate with screensaver
+ *
+ * ============================================================================
  */
 
+// ============================================================================
+// INCLUDES
+// ============================================================================
 #include <Arduino.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/semphr.h>
 
+// Project Headers
 #include "EARS_versionDef.h"
 #include "EARS_systemDef.h"
 #include "EARS_toolsVersionDef.h"
@@ -15,28 +104,57 @@
 #include "EARS_rgb565ColoursDef.h"
 #include "MAIN_drawingLib.h"
 
+// Display driver
 #include <Arduino_GFX_Library.h>
 
-// Display object
+// TODO STEP 7: Uncomment when ready for LVGL
+// #include <lvgl.h>
+// #include "lv_conf.h"
+
+// TODO STEP 9: Uncomment when EEZ UI is ready
+// #include "ui/screens.h"
+// #include "ui/ui.h"
+
+// ============================================================================
+// Display Settings
+// ============================================================================
+static const uint32_t screenWidth = TFT_WIDTH;
+static const uint32_t screenHeight = TFT_HEIGHT;
+
+// ============================================================================
+// Arduino GFX display object
+// ============================================================================
 Arduino_DataBus *bus = new Arduino_ESP32SPI(LCD_DC, LCD_CS, SPI_SCLK, SPI_MOSI, SPI_MISO);
 Arduino_GFX *gfx = new Arduino_ST7796(bus, LCD_RST, 1, true, TFT_HEIGHT, TFT_WIDTH);
 
-// FreeRTOS
-TaskHandle_t Core0_Task_Handle = NULL;
-TaskHandle_t Core1_Task_Handle = NULL;
+// ============================================================================
+// FREERTOS CONFIGURATION
+// ============================================================================
+TaskHandle_t Core0_Task_Handle = NULL; // UI and Display
+TaskHandle_t Core1_Task_Handle = NULL; // Background Processing
 SemaphoreHandle_t xDisplayMutex = NULL;
 
-#define CORE0_STACK_SIZE 8192
-#define CORE1_STACK_SIZE 4096
-#define CORE0_PRIORITY 2
-#define CORE1_PRIORITY 1
+#define CORE0_STACK_SIZE 8192 // UI Task (LVGL, Display, Touch)
+#define CORE1_STACK_SIZE 4096 // Background Task (Data Processing)
+#define CORE0_PRIORITY 2      // Higher priority for UI responsiveness
+#define CORE1_PRIORITY 1      // Lower priority for background tasks
 
-// Development Mode Variables
+// ============================================================================
+// Development Mode Variables (remove when production ready)
+// ============================================================================
 volatile uint32_t core0_heartbeat = 0;
 volatile uint32_t core1_heartbeat = 0;
 volatile uint32_t display_updates = 0;
 
-// Function Prototypes
+// TODO STEP 5: Add NVS status flag
+// volatile bool nvs_ready = false;
+
+// TODO STEP 6: Add SD card status flag
+// volatile bool sdcard_ready = false;
+
+// ============================================================================
+// FUNCTION PROTOTYPES
+// ============================================================================
 void Core0_UI_Task(void *parameter);
 void Core1_Background_Task(void *parameter);
 void initialise_serial();
@@ -44,6 +162,21 @@ void initialise_display();
 void draw_development_screen();
 void update_development_screen();
 
+// TODO STEP 5: Add NVS init function
+// void initialise_nvs();
+
+// TODO STEP 6: Add SD card init function
+// void initialise_sd_card();
+
+// TODO STEP 7: Add LVGL init function
+// void initialise_lvgl();
+
+// TODO STEP 8: Add touch init function
+// void initialise_touch();
+
+// ============================================================================
+// ARDUINO SETUP - Runs once on Core 1
+// ============================================================================
 void setup()
 {
     initialise_serial();
@@ -60,6 +193,9 @@ void setup()
     DEBUG_PRINTLN("════════════════════════════════════════════════════════════");
     DEBUG_PRINTLN();
 
+    // ------------------------------------------------------------------------
+    // Create synchronization primitives
+    // ------------------------------------------------------------------------
     DEBUG_PRINTLN("[INIT] Creating synchronisation primitives...");
     xDisplayMutex = xSemaphoreCreateMutex();
     if (xDisplayMutex == NULL)
@@ -70,9 +206,16 @@ void setup()
     }
     DEBUG_PRINTLN("[OK] Synchronisation primitives created");
 
+    // ------------------------------------------------------------------------
+    // Initialize display (before tasks for visual feedback)
+    // ------------------------------------------------------------------------
     initialise_display();
 
+    // ------------------------------------------------------------------------
+    // Create FreeRTOS tasks
+    // ------------------------------------------------------------------------
     DEBUG_PRINTLN("[INIT] Creating FreeRTOS tasks...");
+
     xTaskCreatePinnedToCore(Core0_UI_Task, "Core0_UI", CORE0_STACK_SIZE,
                             NULL, CORE0_PRIORITY, &Core0_Task_Handle, 0);
     if (Core0_Task_Handle == NULL)
@@ -97,46 +240,94 @@ void setup()
     DEBUG_PRINTLN("[INIT] System initialisation complete\n");
 }
 
+// ============================================================================
+// ARDUINO LOOP - Runs on Core 1 (kept minimal as tasks handle work)
+// ============================================================================
 void loop()
 {
-    delay(1000);
+    delay(1000); // Prevent tight loop
 }
 
+// ============================================================================
+// CORE 0 TASK - UI, Display, and Touch Processing
+// ============================================================================
 void Core0_UI_Task(void *parameter)
 {
     DEBUG_PRINTLN("[CORE0] UI Task started");
 
+    // TODO STEP 7: Initialize LVGL here (once at startup)
+    // initialise_lvgl();
+
+    // TODO STEP 8: Initialize touch input here
+    // initialise_touch();
+
     TickType_t xLastWakeTime = xTaskGetTickCount();
-    const TickType_t xFrequency = pdMS_TO_TICKS(1000);
+    const TickType_t xFrequency = pdMS_TO_TICKS(1000); // 1 second for dev screen
+
+    // TODO STEP 7: Change to 5ms (200Hz) when LVGL active:
+    // const TickType_t xFrequency = pdMS_TO_TICKS(5);
 
     while (1)
     {
         core0_heartbeat++;
 
+        // Current: Update development screen
         if (xSemaphoreTake(xDisplayMutex, portMAX_DELAY) == pdTRUE)
         {
             update_development_screen();
             xSemaphoreGive(xDisplayMutex);
         }
 
+        // TODO STEP 7: Replace above with LVGL handler:
+        // if (xSemaphoreTake(xDisplayMutex, portMAX_DELAY) == pdTRUE)
+        // {
+        //     lv_task_handler();
+        //     xSemaphoreGive(xDisplayMutex);
+        // }
+
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }
 }
 
+// ============================================================================
+// CORE 1 TASK - Background Processing
+// ============================================================================
 void Core1_Background_Task(void *parameter)
 {
     DEBUG_PRINTLN("[CORE1] Background Task started");
 
+    // TODO STEP 5: Initialize NVS (once at startup)
+    // initialise_nvs();
+    // nvs_ready = true;
+
+    // TODO STEP 6: Initialize SD card (after NVS)
+    // initialise_sd_card();
+    // sdcard_ready = true;
+
     TickType_t xLastWakeTime = xTaskGetTickCount();
-    const TickType_t xFrequency = pdMS_TO_TICKS(100);
+    const TickType_t xFrequency = pdMS_TO_TICKS(100); // 100ms = 10Hz
 
     while (1)
     {
         core1_heartbeat++;
+
+        // TODO STEP 5+: Add background processing here:
+        // - Monitor system health
+        // - Process data queues
+        // - Handle SD card logging
+        // - Update system statistics
+
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }
 }
 
+// ============================================================================
+// INITIALISATION FUNCTIONS
+// ============================================================================
+
+/**
+ * @brief Initialize serial communication for debugging
+ */
 void initialise_serial()
 {
 #if EARS_DEBUG == 1
@@ -148,11 +339,18 @@ void initialise_serial()
 #endif
 }
 
+/**
+ * @brief Initialize display hardware
+ * @details Uses direct GPIO backlight control (simple and reliable)
+ *
+ * TODO STEP 10: Replace with backlight manager after NVS is ready:
+ * if (!using_backlightmanager().begin(GFX_BL, 0, 5000, 8)) { ... }
+ */
 void initialise_display()
 {
     DEBUG_PRINTLN("[INIT] Initialising display...");
 
-    // DIRECT backlight control (like Steps 1 & 2 that worked!)
+    // Direct backlight control (WORKS RELIABLY)
     pinMode(GFX_BL, OUTPUT);
     digitalWrite(GFX_BL, HIGH);
     DEBUG_PRINTLN("[OK] Backlight ON");
@@ -165,7 +363,7 @@ void initialise_display()
     }
     DEBUG_PRINTLN("[OK] Display initialized");
 
-    // Colour test bars
+    // Color test pattern
     DEBUG_PRINTLN("[TEST] Drawing colour bars...");
     MAIN_clear_screen(gfx, EARS_RGB565_BLACK);
 
@@ -186,6 +384,14 @@ void initialise_display()
     DEBUG_PRINTLN("[OK] Development screen displayed");
 }
 
+// ============================================================================
+// DEVELOPMENT MODE DISPLAY FUNCTIONS
+// (Keep these until LVGL/EEZ UI is ready - useful for debugging!)
+// ============================================================================
+
+/**
+ * @brief Draw initial development screen layout
+ */
 void draw_development_screen()
 {
     MAIN_clear_screen(gfx, EARS_RGB565_BLACK);
@@ -242,6 +448,9 @@ void draw_development_screen()
     gfx->print("Waiting for LVGL integration...");
 }
 
+/**
+ * @brief Update live statistics on development screen
+ */
 void update_development_screen()
 {
     display_updates++;
@@ -253,22 +462,30 @@ void update_development_screen()
     gfx->setTextColor(EARS_RGB565_WHITE);
     gfx->setTextSize(1);
 
+    // Core 0 heartbeat
     gfx->setCursor(120, 150);
     gfx->printf("Running (%lu beats)", core0_heartbeat);
 
+    // Core 1 heartbeat
     gfx->setCursor(120, 180);
     gfx->printf("Running (%lu beats)", core1_heartbeat);
 
+    // Uptime
     gfx->setCursor(120, 210);
     uint32_t hours = uptime_sec / 3600;
     uint32_t minutes = (uptime_sec % 3600) / 60;
     uint32_t seconds = uptime_sec % 60;
     gfx->printf("%02lu:%02lu:%02lu", hours, minutes, seconds);
 
+    // Display updates
     gfx->setCursor(120, 240);
     gfx->printf("%lu updates", display_updates);
 
-    // Heartbeat indicator
+    // Heartbeat indicator (flashing dot)
     uint16_t color = (core0_heartbeat % 2) ? EARS_RGB565_GREEN : EARS_RGB565_DARKGRAY;
     gfx->fillCircle(450, 155, 8, color);
 }
+
+// ============================================================================
+// END OF FILE - FROZEN MILESTONE v0.3.0
+// ============================================================================

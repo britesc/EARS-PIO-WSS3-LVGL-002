@@ -17,9 +17,9 @@
 
 #define EARS_APP_VERSION_MAJOR "4"
 #define EARS_APP_VERSION_MINOR "2"
-#define EARS_APP_VERSION_PATCH "58"
+#define EARS_APP_VERSION_PATCH "60"
 
-#define EARS_APP_BUILD_TIMESTAMP 20260127103828
+#define EARS_APP_BUILD_TIMESTAMP 20260127104351
 
 /**
  * @brief Convert string to integer at compile time
