@@ -1,28 +1,35 @@
 /**
- * @file main.cpp - FROZEN MILESTONE v0.3.0
+ * @file main.cpp - MILESTONE v0.3.2 - LED + SysInfo Integration
  * @author Julian (51fiftyone51fiftyone@gmail.com)
- * @brief EARS Main Application - WORKING BASELINE with Development Screen
+ * @brief EARS Main Application - Development with Hardware LED Indicators + System Info
  * @details Equipment & Ammunition Reporting System
  *          Dual-core ESP32-S3 implementation using FreeRTOS
  *
- * MILESTONE: Display working, FreeRTOS dual-core running, live dev screen
- * DATE FROZEN: 20260126
+ * NEW IN v0.3.2:
+ * - Hardware LED debugging on GPIO40 (Red), GPIO41 (Yellow), GPIO42 (Green)
+ * - LED patterns for initialization status
+ * - Green heartbeat on Core 1
+ * - Error indicators for failed initializations
+ * - System information library (MAIN_sysinfoLib)
+ * - Complete system report on boot
  *
- * @version 0.3.0
- * @date 20260126
+ * @version 0.3.2
+ * @date 20260128
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  *
  * ============================================================================
  * DEVELOPMENT ROADMAP - NEXT STEPS:
  * ============================================================================
  *
- * ✅ COMPLETED (Steps 1-4):
+ * ✅ COMPLETED (Steps 1-4.2):
  *    - Display hardware working (ST7796, Arduino GFX 1.5.5)
  *    - FreeRTOS dual-core (Core0=UI @1Hz, Core1=BG @10Hz)
  *    - EARS colour definitions (RGB565)
  *    - MAIN_drawingLib (rectangle functions)
  *    - Live development screen with heartbeat counters
  *    - Display mutex for thread safety
+ *    - MAIN_ledLib (hardware LED indicators)
+ *    - MAIN_sysinfoLib (ESP32-S3 system information)
  *
  * 📋 TODO - STEP 5: Initialize NVS on Core 1
  *    Location: Core1_Background_Task() - run once at startup
@@ -103,6 +110,12 @@
 #include "EARS_ws35tlcdPins.h"
 #include "EARS_rgb565ColoursDef.h"
 #include "MAIN_drawingLib.h"
+#include "MAIN_sysinfoLib.h"
+
+// Development tools (compile out in production)
+#if EARS_DEBUG == 1
+#include "MAIN_ledLib.h"
+#endif
 
 // Display driver
 #include <Arduino_GFX_Library.h>
@@ -182,16 +195,21 @@ void setup()
     initialise_serial();
 
     DEBUG_PRINTLN("\n\n");
-    DEBUG_PRINTLN("════════════════════════════════════════════════════════════");
-    DEBUG_PRINTLN("  EARS - Equipment & Ammunition Reporting System");
-    DEBUG_PRINTLN("════════════════════════════════════════════════════════════");
+    DEBUG_PRINTLN("╔════════════════════════════════════════════════════════════╗");
+    DEBUG_PRINTLN("║  EARS - Equipment & Ammunition Reporting System           ║");
+    DEBUG_PRINTLN("╚════════════════════════════════════════════════════════════╝");
     DEBUG_PRINTF("  Version:    %s.%s.%s %s\n",
                  EARS_APP_VERSION_MAJOR, EARS_APP_VERSION_MINOR,
                  EARS_APP_VERSION_PATCH, EARS_STATUS);
     DEBUG_PRINTF("  Compiler:   %s\n", EARS_XTENSA_COMPILER_VERSION);
     DEBUG_PRINTF("  Platform:   %s\n", EARS_ESPRESSIF_PLATFORM_VERSION);
-    DEBUG_PRINTLN("════════════════════════════════════════════════════════════");
+    DEBUG_PRINTLN("╚════════════════════════════════════════════════════════════╝");
     DEBUG_PRINTLN();
+
+#if EARS_DEBUG == 1
+    // Print complete system information report
+    MAIN_sysinfo_print_all();
+#endif
 
     // ------------------------------------------------------------------------
     // Create synchronization primitives
@@ -205,6 +223,16 @@ void setup()
             delay(1000);
     }
     DEBUG_PRINTLN("[OK] Synchronisation primitives created");
+
+    // ------------------------------------------------------------------------
+    // Initialize development LEDs (debug mode only)
+    // ------------------------------------------------------------------------
+#if EARS_DEBUG == 1
+    DEBUG_PRINTLN("[INIT] Initialising development LEDs...");
+    MAIN_led_init();
+    MAIN_led_test_sequence(200); // Power-on self-test
+    DEBUG_PRINTLN("[OK] LEDs initialized");
+#endif
 
     // ------------------------------------------------------------------------
     // Initialize display (before tasks for visual feedback)
@@ -221,6 +249,10 @@ void setup()
     if (Core0_Task_Handle == NULL)
     {
         DEBUG_PRINTLN("[ERROR] Failed to create Core 0 task!");
+#if EARS_DEBUG == 1
+        MAIN_led_error_pattern(5);
+        MAIN_led_red_on();
+#endif
         while (1)
             delay(1000);
     }
@@ -232,6 +264,10 @@ void setup()
     if (Core1_Task_Handle == NULL)
     {
         DEBUG_PRINTLN("[ERROR] Failed to create Core 1 task!");
+#if EARS_DEBUG == 1
+        MAIN_led_error_pattern(5);
+        MAIN_led_red_on();
+#endif
         while (1)
             delay(1000);
     }
@@ -311,6 +347,14 @@ void Core1_Background_Task(void *parameter)
     {
         core1_heartbeat++;
 
+#if EARS_DEBUG == 1
+        // Toggle green LED every 500ms (every 5th iteration at 10Hz)
+        if (core1_heartbeat % 5 == 0)
+        {
+            MAIN_led_green_toggle();
+        }
+#endif
+
         // TODO STEP 5+: Add background processing here:
         // - Monitor system health
         // - Process data queues
@@ -358,10 +402,18 @@ void initialise_display()
     if (!gfx->begin())
     {
         DEBUG_PRINTLN("[ERROR] Display init failed!");
+#if EARS_DEBUG == 1
+        MAIN_led_error_pattern(10); // Flash red 10 times
+        MAIN_led_red_on();          // Leave red on
+#endif
         while (1)
             delay(1000);
     }
     DEBUG_PRINTLN("[OK] Display initialized");
+
+#if EARS_DEBUG == 1
+    MAIN_led_success_pattern(); // Quick green double-blink
+#endif
 
     // Color test pattern
     DEBUG_PRINTLN("[TEST] Drawing colour bars...");
@@ -424,11 +476,12 @@ void draw_development_screen()
     gfx->setCursor(250, 60);
     gfx->print("Platform:");
     gfx->setCursor(250, 75);
-    gfx->print("ESP32-S3 @ 240MHz");
+    gfx->printf("%s @ %dMHz", MAIN_sysinfo_get_chip_model().c_str(),
+                MAIN_sysinfo_get_cpu_freq_mhz());
     gfx->setCursor(250, 90);
-    gfx->printf("Compiler: %s", EARS_XTENSA_COMPILER_VERSION);
+    gfx->printf("Heap: %s free", MAIN_sysinfo_format_bytes(MAIN_sysinfo_get_free_heap()).c_str());
     gfx->setCursor(250, 105);
-    gfx->printf("Platform: %s", EARS_ESPRESSIF_PLATFORM_VERSION);
+    gfx->printf("PSRAM: %s free", MAIN_sysinfo_format_bytes(MAIN_sysinfo_get_free_psram()).c_str());
 
     // Status labels
     gfx->setTextColor(EARS_RGB565_CS_TEXT);
@@ -445,7 +498,7 @@ void draw_development_screen()
     // Footer
     gfx->setTextColor(EARS_RGB565_GRAY);
     gfx->setCursor(10, 300);
-    gfx->print("Waiting for LVGL integration...");
+    gfx->print("LED Heartbeat: GPIO42 (Green)");
 }
 
 /**
@@ -487,5 +540,5 @@ void update_development_screen()
 }
 
 // ============================================================================
-// END OF FILE - FROZEN MILESTONE v0.3.0
+// END OF FILE - v0.3.2 with LED + SysInfo Integration
 // ============================================================================

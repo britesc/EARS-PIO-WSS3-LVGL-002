@@ -1,17 +1,19 @@
 /**
- * @file main.cpp - MILESTONE v0.3.1 - LED Integration
+ * @file main.cpp - MILESTONE v0.3.2 - LED + SysInfo Integration
  * @author Julian (51fiftyone51fiftyone@gmail.com)
- * @brief EARS Main Application - Development with Hardware LED Indicators
+ * @brief EARS Main Application - Development with Hardware LED Indicators + System Info
  * @details Equipment & Ammunition Reporting System
  *          Dual-core ESP32-S3 implementation using FreeRTOS
  *
- * NEW IN v0.3.1:
+ * NEW IN v0.3.2:
  * - Hardware LED debugging on GPIO40 (Red), GPIO41 (Yellow), GPIO42 (Green)
  * - LED patterns for initialization status
  * - Green heartbeat on Core 1
  * - Error indicators for failed initializations
+ * - System information library (MAIN_sysinfoLib)
+ * - Complete system report on boot
  *
- * @version 0.3.1
+ * @version 0.3.2
  * @date 20260128
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  *
@@ -19,7 +21,7 @@
  * DEVELOPMENT ROADMAP - NEXT STEPS:
  * ============================================================================
  *
- * ✅ COMPLETED (Steps 1-4.1):
+ * ✅ COMPLETED (Steps 1-4.2):
  *    - Display hardware working (ST7796, Arduino GFX 1.5.5)
  *    - FreeRTOS dual-core (Core0=UI @1Hz, Core1=BG @10Hz)
  *    - EARS colour definitions (RGB565)
@@ -27,6 +29,7 @@
  *    - Live development screen with heartbeat counters
  *    - Display mutex for thread safety
  *    - MAIN_ledLib (hardware LED indicators)
+ *    - MAIN_sysinfoLib (ESP32-S3 system information)
  *
  * 📋 TODO - STEP 5: Initialize NVS on Core 1
  *    Location: Core1_Background_Task() - run once at startup
@@ -107,6 +110,7 @@
 #include "EARS_ws35tlcdPins.h"
 #include "EARS_rgb565ColoursDef.h"
 #include "MAIN_drawingLib.h"
+#include "MAIN_sysinfoLib.h"
 
 // Development tools (compile out in production)
 #if EARS_DEBUG == 1
@@ -192,7 +196,7 @@ void setup()
 
     DEBUG_PRINTLN("\n\n");
     DEBUG_PRINTLN("╔════════════════════════════════════════════════════════════╗");
-    DEBUG_PRINTLN("  EARS - Equipment & Ammunition Reporting System");
+    DEBUG_PRINTLN("║  EARS - Equipment & Ammunition Reporting System           ║");
     DEBUG_PRINTLN("╚════════════════════════════════════════════════════════════╝");
     DEBUG_PRINTF("  Version:    %s.%s.%s %s\n",
                  EARS_APP_VERSION_MAJOR, EARS_APP_VERSION_MINOR,
@@ -201,6 +205,11 @@ void setup()
     DEBUG_PRINTF("  Platform:   %s\n", EARS_ESPRESSIF_PLATFORM_VERSION);
     DEBUG_PRINTLN("╚════════════════════════════════════════════════════════════╝");
     DEBUG_PRINTLN();
+
+#if EARS_DEBUG == 1
+    // Print complete system information report
+    MAIN_sysinfo_print_all();
+#endif
 
     // ------------------------------------------------------------------------
     // Create synchronization primitives
@@ -467,11 +476,12 @@ void draw_development_screen()
     gfx->setCursor(250, 60);
     gfx->print("Platform:");
     gfx->setCursor(250, 75);
-    gfx->print("ESP32-S3 @ 240MHz");
+    gfx->printf("%s @ %dMHz", MAIN_sysinfo_get_chip_model().c_str(),
+                MAIN_sysinfo_get_cpu_freq_mhz());
     gfx->setCursor(250, 90);
-    gfx->printf("Compiler: %s", EARS_XTENSA_COMPILER_VERSION);
+    gfx->printf("Heap: %s free", MAIN_sysinfo_format_bytes(MAIN_sysinfo_get_free_heap()).c_str());
     gfx->setCursor(250, 105);
-    gfx->printf("Platform: %s", EARS_ESPRESSIF_PLATFORM_VERSION);
+    gfx->printf("PSRAM: %s free", MAIN_sysinfo_format_bytes(MAIN_sysinfo_get_free_psram()).c_str());
 
     // Status labels
     gfx->setTextColor(EARS_RGB565_CS_TEXT);
@@ -488,7 +498,7 @@ void draw_development_screen()
     // Footer
     gfx->setTextColor(EARS_RGB565_GRAY);
     gfx->setCursor(10, 300);
-    gfx->print("LED Heartbeat Active (GPIO42)");
+    gfx->print("LED Heartbeat: GPIO42 (Green)");
 }
 
 /**
@@ -530,5 +540,5 @@ void update_development_screen()
 }
 
 // ============================================================================
-// END OF FILE - v0.3.1 with LED Integration
+// END OF FILE - v0.3.2 with LED + SysInfo Integration
 // ============================================================================
