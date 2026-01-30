@@ -1,22 +1,26 @@
 /**
- * @file main.cpp - MILESTONE v0.3.3 - Clean Architecture
+ * @file main.cpp - MILESTONE v0.4.0 - NVS Initialization
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief EARS Main Application - Production-Ready Architecture
  * @details Equipment & Ammunition Reporting System
  *          Dual-core ESP32-S3 implementation using FreeRTOS
  *
- * NEW IN v0.3.3:
- * - All development features moved to MAIN_developmentFeaturesLib
- * - Zero Serial dependency (LEDs + on-screen debugging only)
- * - Clean production build when EARS_DEBUG=0
- * - Dramatically reduced main file size (~200 lines removed)
- * - Professional architecture with clear separation of concerns
+ * NEW IN v0.4.0:
+ * - NVS (Non-Volatile Storage) initialization on Core 1
+ * - NVS validation with comprehensive status reporting
+ * - LED feedback for NVS initialization success/warning/error
+ * - Foundation for SD Card and Backlight Manager
+ *
+ * COMPLETED STEPS:
+ * - Step 1-4.3: Display, FreeRTOS, Libraries, Development Features
+ * - Step 5: NVS Initialization ✓
  *
  * DEVELOPMENT BUILD (EARS_DEBUG=1):
  * - Hardware LED debugging
  * - Development screen with live stats
  * - System information display
  * - Boot banner and diagnostics
+ * - NVS validation status reporting
  *
  * PRODUCTION BUILD (EARS_DEBUG=0):
  * - Zero development overhead
@@ -24,28 +28,24 @@
  * - Minimal binary size
  * - Professional end-user experience
  *
- * @version 0.3.3
- * @date 20260128
+ * @version 0.4.0
+ * @date 20260130
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  *
  * ============================================================================
  * DEVELOPMENT ROADMAP - NEXT STEPS:
  * ============================================================================
  *
- * ✅ COMPLETED (Steps 1-4.3):
+ * ✅ COMPLETED (Steps 1-5):
  *    - Display hardware working (ST7796, Arduino GFX 1.5.5)
  *    - FreeRTOS dual-core (Core0=UI @1Hz, Core1=BG @10Hz)
  *    - EARS colour definitions (RGB565)
  *    - MAIN_drawingLib (rectangle functions)
  *    - MAIN_developmentFeaturesLib (dev screen, heartbeats)
  *    - MAIN_ledLib (hardware LED indicators)
- *    - MAIN_sysinfoLib (system information - kept for production "About")
+ *    - MAIN_sysinfoLib (system information)
  *    - Clean architecture with compile-time dev feature removal
- *
- * 📋 TODO - STEP 5: Initialize NVS on Core 1
- *    Location: Core1_Background_Task() - run once at startup
- *    Purpose: Initialize Non-Volatile Storage for settings
- *    Dependencies: EARS_nvsEepromLib
+ *    - NVS initialization with validation and LED feedback
  *
  * 📋 TODO - STEP 6: Initialize SD Card on Core 1
  *    Location: Core1_Background_Task() - run after NVS init
@@ -80,6 +80,9 @@
 #include "EARS_rgb565ColoursDef.h"
 #include "MAIN_drawingLib.h"
 #include "MAIN_sysinfoLib.h" // Keep for production "About" screen
+
+// EARS Libraries
+#include "EARS_nvsEepromLib.h"
 
 // Development tools (compile out in production)
 #if EARS_DEBUG == 1
@@ -125,8 +128,8 @@ SemaphoreHandle_t xDisplayMutex = NULL;
 // ============================================================================
 // Status Flags
 // ============================================================================
-// TODO STEP 5: Add NVS status flag
-// volatile bool nvs_ready = false;
+// STEP 5: NVS status flag
+volatile bool nvs_ready = false;
 
 // TODO STEP 6: Add SD card status flag
 // volatile bool sdcard_ready = false;
@@ -138,8 +141,8 @@ void Core0_UI_Task(void *parameter);
 void Core1_Background_Task(void *parameter);
 void initialise_display();
 
-// TODO STEP 5: Add NVS init function
-// void initialise_nvs();
+// STEP 5: NVS init function
+void initialise_nvs();
 
 // TODO STEP 6: Add SD card init function
 // void initialise_sd_card();
@@ -311,9 +314,8 @@ void Core1_Background_Task(void *parameter)
     Serial.println("[CORE1] Background Task started");
 #endif
 
-    // TODO STEP 5: Initialize NVS (once at startup)
-    // initialise_nvs();
-    // nvs_ready = true;
+    // STEP 5: Initialize NVS (once at startup)
+    initialise_nvs();
 
     // TODO STEP 6: Initialize SD card (after NVS)
     // initialise_sd_card();
@@ -347,6 +349,102 @@ void Core1_Background_Task(void *parameter)
 // ============================================================================
 // INITIALISATION FUNCTIONS
 // ============================================================================
+
+// ============================================================================
+// STEP 5: NVS INITIALIZATION
+// ============================================================================
+/**
+ * @brief Initialize Non-Volatile Storage
+ * @details Called once at startup from Core1_Background_Task
+ *
+ * Initializes NVS flash, validates existing data, and sets nvs_ready flag.
+ * Provides comprehensive LED feedback:
+ * - Green double-blink: NVS valid and ready
+ * - Yellow slow blinks: NVS needs first-time configuration
+ * - Red fast blinks: NVS initialization failed
+ */
+void initialise_nvs()
+{
+#if EARS_DEBUG == 1
+    Serial.println("[INIT] Initialising NVS...");
+#endif
+
+    // Initialize NVS flash
+    if (!using_nvseeprom().begin())
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[ERROR] NVS initialization failed!");
+        MAIN_led_error_pattern(3);
+        MAIN_led_red_on();
+#endif
+        nvs_ready = false;
+        return;
+    }
+
+#if EARS_DEBUG == 1
+    Serial.println("[OK] NVS flash initialized");
+#endif
+
+    // Validate NVS contents
+    NVSValidationResult validation = using_nvseeprom().validateNVS();
+
+#if EARS_DEBUG == 1
+    Serial.print("[NVS] Status: ");
+    switch (validation.status)
+    {
+    case NVSStatus::VALID:
+        Serial.println("VALID");
+        break;
+    case NVSStatus::UPGRADED:
+        Serial.println("UPGRADED");
+        break;
+    case NVSStatus::INVALID_VERSION:
+        Serial.println("INVALID VERSION");
+        break;
+    case NVSStatus::MISSING_ZAPNUMBER:
+        Serial.println("MISSING ZAPNUMBER");
+        break;
+    case NVSStatus::MISSING_PASSWORD:
+        Serial.println("MISSING PASSWORD");
+        break;
+    case NVSStatus::CRC_FAILED:
+        Serial.println("CRC FAILED");
+        break;
+    case NVSStatus::INITIALIZATION_FAILED:
+        Serial.println("INITIALIZATION FAILED");
+        break;
+    default:
+        Serial.println("UNKNOWN");
+        break;
+    }
+
+    Serial.printf("[NVS] Current Version: %d\n", validation.currentVersion);
+    Serial.printf("[NVS] Expected Version: %d\n", validation.expectedVersion);
+    Serial.printf("[NVS] ZapNumber Valid: %s\n", validation.zapNumberValid ? "YES" : "NO");
+    Serial.printf("[NVS] Password Valid: %s\n", validation.passwordHashValid ? "YES" : "NO");
+    Serial.printf("[NVS] CRC Valid: %s\n", validation.crcValid ? "YES" : "NO");
+#endif
+
+    // Set ready flag based on validation
+    if (validation.status == NVSStatus::VALID ||
+        validation.status == NVSStatus::UPGRADED)
+    {
+        nvs_ready = true;
+#if EARS_DEBUG == 1
+        Serial.println("[OK] NVS ready for use");
+        MAIN_led_success_pattern();
+#endif
+    }
+    else
+    {
+        nvs_ready = false;
+#if EARS_DEBUG == 1
+        Serial.println("[WARN] NVS needs configuration");
+        MAIN_led_warning_pattern(2);
+        MAIN_led_yellow_on();
+#endif
+    }
+}
 
 /**
  * @brief Initialize display hardware
@@ -419,5 +517,5 @@ void initialise_display()
 }
 
 // ============================================================================
-// END OF FILE - v0.3.3 Clean Architecture
+// END OF FILE - v0.4.0 NVS Initialization Complete
 // ============================================================================
