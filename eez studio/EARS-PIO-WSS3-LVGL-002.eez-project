@@ -144,7 +144,7 @@
               "type": "LVGLLabelWidget",
               "left": 196,
               "top": 152,
-              "width": 89,
+              "width": 82,
               "height": 16,
               "customInputs": [],
               "customOutputs": [],
@@ -171,15 +171,15 @@
                 "objID": "b70b99db-02c2-420a-cbdf-e6366dc84e67"
               },
               "groupIndex": 0,
-              "text": "Hello, world!",
+              "text": "Delete This",
               "textType": "literal",
-              "longMode": "WRAP",
+              "longMode": "SCROLL_CIRCULAR",
               "recolor": false
             }
           ],
-          "widgetFlags": "CLICKABLE|PRESS_LOCK|CLICK_FOCUSABLE|GESTURE_BUBBLE|SNAPPABLE|SCROLLABLE|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER",
+          "widgetFlags": "CLICKABLE",
           "hiddenFlagType": "literal",
-          "clickableFlag": true,
+          "clickableFlag": false,
           "clickableFlagType": "literal",
           "checkedStateType": "literal",
           "disabledStateType": "literal",
@@ -189,17 +189,133 @@
             "objID": "8eb86917-c831-b762-5685-8d01972e8a22"
           },
           "groupIndex": 0
+        },
+        {
+          "objID": "e805c6db-3e69-4aa6-8640-04b9c9b3be64",
+          "type": "LVGLActionComponent",
+          "left": 105,
+          "top": 335,
+          "width": 347,
+          "height": 53,
+          "customInputs": [],
+          "customOutputs": [],
+          "actions": [
+            {
+              "objID": "15772d67-14e4-406b-f4e4-9d71ea1e3f58",
+              "action": "changeScreen",
+              "screen": "Screen_Loading",
+              "screenType": "literal",
+              "fadeMode": "FADE_IN",
+              "fadeModeType": "literal",
+              "speed": 200,
+              "speedType": "literal",
+              "delay": 0,
+              "delayType": "literal",
+              "useStack": true,
+              "useStackType": "literal"
+            }
+          ]
         }
       ],
       "connectionLines": [],
       "localVariables": [],
       "userProperties": [],
-      "name": "Start_Screen",
+      "name": "Screen_Start",
       "description": "Start Screen",
       "left": 0,
       "top": 0,
       "width": 480,
       "height": 320,
+      "createAtStart": true,
+      "deleteOnScreenUnload": false
+    },
+    {
+      "objID": "ccf8c655-1138-4791-daca-c90d6ee692d4",
+      "components": [
+        {
+          "objID": "6fbb4213-da13-450c-a124-c2ddd5ab161e",
+          "type": "LVGLScreenWidget",
+          "left": 0,
+          "top": 0,
+          "width": 800,
+          "height": 480,
+          "customInputs": [],
+          "customOutputs": [],
+          "style": {
+            "objID": "95d70ba0-7673-434b-a467-55fd667a9079",
+            "useStyle": "default",
+            "conditionalStyles": [],
+            "childStyles": []
+          },
+          "timeline": [],
+          "eventHandlers": [],
+          "leftUnit": "px",
+          "topUnit": "px",
+          "widthUnit": "px",
+          "heightUnit": "px",
+          "children": [
+            {
+              "objID": "e7f6989b-8a10-40a0-d318-dfa496c891b5",
+              "type": "LVGLLabelWidget",
+              "left": 171,
+              "top": 152,
+              "width": 138,
+              "height": 16,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "77841e31-8b16-4a92-ba55-e078456a0ed6",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "3cc9cb4a-1e74-488d-a25b-138925477a0d"
+              },
+              "groupIndex": 0,
+              "text": "Animation Needed",
+              "textType": "literal",
+              "longMode": "SCROLL_CIRCULAR",
+              "recolor": false
+            }
+          ],
+          "widgetFlags": "CLICKABLE",
+          "hiddenFlagType": "literal",
+          "clickableFlag": false,
+          "clickableFlagType": "literal",
+          "checkedStateType": "literal",
+          "disabledStateType": "literal",
+          "states": "",
+          "useStyle": "Dark_Default_Screen",
+          "localStyles": {
+            "objID": "aca828fb-4b49-4bb0-8e7b-2de5d4a4092b"
+          },
+          "groupIndex": 0
+        }
+      ],
+      "connectionLines": [],
+      "localVariables": [],
+      "userProperties": [],
+      "name": "Screen_Loading",
+      "description": "Loading Screen",
+      "left": 0,
+      "top": 0,
+      "width": 480,
+      "height": 320,
+      "isUsedAsUserWidget": false,
       "createAtStart": true,
       "deleteOnScreenUnload": false
     }
