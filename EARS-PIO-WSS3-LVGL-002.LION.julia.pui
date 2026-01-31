@@ -3,20 +3,7 @@
 
 [Open Files]
 Active File Display Mode=3
-Active File Index=1
-Open File Line0="847"
-Open File Line1="296"
-Open File Line2="628"
-Open File Pos0="1018"
-Open File Pos1="330"
-Open File Pos2="1080"
-Open File Window Pos0="0,1,-1,-1,-9,-38,128,128,902,427"
-Open File Window Pos1="2,3,-1,-1,-9,-38,96,96,877,402"
-Open File Window Pos2="0,1,-1,-1,-9,-38,32,32,800,343"
-Open File0="..\EARS-PIO-WSS3-LVGL-001\include\EARS_ws35tlcdPins.h"
-Open File1="..\EARS-PIO-WSS3-LVGL-001\src\main.cpp"
-Open File2="..\EARS-PIO-WSS3-LVGL-001\platformio.ini"
-Open File3="-"
+Open File0="-"
 Remember Files=1
 
 [Project Information]

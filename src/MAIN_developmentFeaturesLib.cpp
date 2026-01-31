@@ -3,8 +3,13 @@
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief Development features library implementation
  * @details Contains all development/debugging features that compile out in production
- * @version 0.1.0
- * @date 20260128
+ * @version 0.1.1
+ * @date 20260130
+ *
+ * CHANGES:
+ * - Fixed "Display Updates" line formatting (line 124 and 168)
+ * - Now shows "Display Updates: nnn" instead of "Display: nnn updates"
+ * - Prevents number from overwriting the word "updates"
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -39,15 +44,15 @@ volatile uint32_t dev_display_updates = 0;
 void DEV_print_boot_banner(void)
 {
     Serial.println("\n\n");
-    Serial.println("╔════════════════════════════════════════════════════════════╗");
+    Serial.println("╔══════════════════════════════════════════════════════════╗");
     Serial.println("║  EARS - Equipment & Ammunition Reporting System           ║");
-    Serial.println("╚════════════════════════════════════════════════════════════╝");
+    Serial.println("╚══════════════════════════════════════════════════════════╝");
     Serial.printf("  Version:    %s.%s.%s %s\n",
                   EARS_APP_VERSION_MAJOR, EARS_APP_VERSION_MINOR,
                   EARS_APP_VERSION_PATCH, EARS_STATUS);
     Serial.printf("  Compiler:   %s\n", EARS_XTENSA_COMPILER_VERSION);
     Serial.printf("  Platform:   %s\n", EARS_ESPRESSIF_PLATFORM_VERSION);
-    Serial.println("╚════════════════════════════════════════════════════════════╝");
+    Serial.println("╚══════════════════════════════════════════════════════════╝");
     Serial.println();
 }
 
@@ -121,7 +126,7 @@ void DEV_draw_screen(Arduino_GFX *gfx)
     gfx->setCursor(10, 210);
     gfx->print("Uptime:");
     gfx->setCursor(10, 240);
-    gfx->print("Display:");
+    gfx->print("Display Updates:"); // ← CHANGED: Added "Updates" to label
 
     // Footer
     gfx->setTextColor(EARS_RGB565_GRAY);
@@ -165,7 +170,7 @@ void DEV_update_screen(Arduino_GFX *gfx)
 
     // Display updates
     gfx->setCursor(120, 240);
-    gfx->printf("%lu updates", dev_display_updates);
+    gfx->printf("%lu", dev_display_updates); // ← CHANGED: Just the number now
 
     // Heartbeat indicator (flashing dot)
     uint16_t color = (dev_core0_heartbeat % 2) ? EARS_RGB565_GREEN : EARS_RGB565_DARKGRAY;

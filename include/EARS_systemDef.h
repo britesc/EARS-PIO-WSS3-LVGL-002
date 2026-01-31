@@ -2,28 +2,39 @@
  * @file EARS_systemDef.h
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief EARS Project System Header File.
- * @version 0.1.0
- * @date 20260121
+ * @version 0.2.0
+ * @date 20260130
  *
- *
+ * @details
+ * System-wide definitions. Updated to use constexpr for type safety
+ * while maintaining backward compatibility with existing code.
  */
 #pragma once
 #ifndef __EARS_SYSTEM_DEF_H__
 #define __EARS_SYSTEM_DEF_H__
 
 /**********************************************************************
- * System Definitions
+ * System Definitions (constexpr for type safety)
  **********************************************************************/
+namespace EARS_Internal
+{
+    constexpr const char *SYSTEM_NAME_STR = "EARS";
+    constexpr const char *DESCRIPTION_STR = "Equipment & Ammunition Reporting System";
+    constexpr const char *STATUS_STR = "Development";
+    constexpr const char *COPYRIGHT_STR = "Copyright JTB 2026 All Rights Reserved";
+}
 
-#define EARS_SYSTEM_NAME "EARS"
-#define EARS_DESCRIPTION "Equipment & Ammunition Reporting System"
-#define EARS_STATUS "Development"
-#define EARS_COPYRIGHT "Copyright JTB 2026 All Rights Reserved"
+// Legacy compatibility - existing code uses these
+#define EARS_SYSTEM_NAME EARS_Internal::SYSTEM_NAME_STR
+#define EARS_DESCRIPTION EARS_Internal::DESCRIPTION_STR
+#define EARS_STATUS EARS_Internal::STATUS_STR
+#define EARS_COPYRIGHT EARS_Internal::COPYRIGHT_STR
 
 /**********************************************************************
- * Debug Definitions
+ * Debug Definitions (preprocessor required)
  **********************************************************************/
 #define EARS_DEBUG_BAUD_RATE 115200
+
 #if EARS_DEBUG == 1
 #define DEBUG_PRINT(x) Serial.print(x)
 #define DEBUG_PRINTLN(x) Serial.println(x)
@@ -35,13 +46,27 @@
 #endif
 
 /**********************************************************************
- * NVS Definitions
+ * NVS Definitions (constexpr with backward compatibility)
  **********************************************************************/
-#define EARS_NAMESPACE "EARS"          // NVS Namespace
-#define EARS_VERSION_CODE "EARS_VC"    // Version Code (2 Hexadecimal Characters (0-9, A-F to Represent Version of NVS Data)
-#define EARS_ZAPCODE "EARS_ZC"         // 6 Character Code to Marry the Device to a User. It is 2 Uppercase Letters Followed by 4 Digits.
-#define EARS_PASSWORD_HASH "EARS_PW"   // A CRC32 hash of the Password created by the User.
-#define EARS_BACKLIGHT_VALUE "EARS_BL" // Backlight Brightness Value (0-100) as 1 Byte
-#define EARS_CRC32 "EARS_32"           // CRC32 of all NVS Data to Ensure Integrity
+namespace EARS_Internal
+{
+    namespace NVS
+    {
+        constexpr const char *NAMESPACE_STR = "EARS";
+        constexpr const char *VERSION_CODE_STR = "EARS_VC";
+        constexpr const char *ZAPCODE_STR = "EARS_ZC";
+        constexpr const char *PASSWORD_HASH_STR = "EARS_PW";
+        constexpr const char *BACKLIGHT_VALUE_STR = "EARS_BL";
+        constexpr const char *CRC32_STR = "EARS_32";
+    }
+}
+
+// Legacy compatibility - existing code uses these
+#define EARS_NAMESPACE EARS_Internal::NVS::NAMESPACE_STR
+#define EARS_VERSION_CODE EARS_Internal::NVS::VERSION_CODE_STR
+#define EARS_ZAPCODE EARS_Internal::NVS::ZAPCODE_STR
+#define EARS_PASSWORD_HASH EARS_Internal::NVS::PASSWORD_HASH_STR
+#define EARS_BACKLIGHT_VALUE EARS_Internal::NVS::BACKLIGHT_VALUE_STR
+#define EARS_CRC32 EARS_Internal::NVS::CRC32_STR
 
 #endif // __EARS_SYSTEM_DEF_H__

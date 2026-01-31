@@ -1,19 +1,22 @@
 /**
- * @file main.cpp - MILESTONE v0.4.0 - NVS Initialization
+ * @file main.cpp - MILESTONE v0.4.1 - NVS Keys Aligned
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief EARS Main Application - Production-Ready Architecture
  * @details Equipment & Ammunition Reporting System
  *          Dual-core ESP32-S3 implementation using FreeRTOS
  *
- * NEW IN v0.4.0:
- * - NVS (Non-Volatile Storage) initialization on Core 1
- * - NVS validation with comprehensive status reporting
- * - LED feedback for NVS initialization success/warning/error
- * - Foundation for SD Card and Backlight Manager
+ * NEW IN v0.4.1:
+ * - NVS library keys now use EARS_systemDef.h definitions
+ * - All NVS keys properly aligned with system standards
+ * - KEY_VERSION: "nvsVersion" → "EARS_VC"
+ * - KEY_ZAPNUMBER: "zapNumber" → "EARS_ZC"
+ * - KEY_PASSWORD_HASH: "pwdHash" → "EARS_PW"
+ * - KEY_NVS_CRC: "nvsCRC" → "EARS_32"
  *
  * COMPLETED STEPS:
- * - Step 1-4.3: Display, FreeRTOS, Libraries, Development Features
- * - Step 5: NVS Initialization ✓
+ * - Step 1-4.3: Display, FreeRTOS, Libraries, Development Features ✓
+ * - Step 5.0: NVS Initialization ✓
+ * - Step 5.1: NVS Keys Aligned with systemDef.h ✓
  *
  * DEVELOPMENT BUILD (EARS_DEBUG=1):
  * - Hardware LED debugging
@@ -28,7 +31,7 @@
  * - Minimal binary size
  * - Professional end-user experience
  *
- * @version 0.4.0
+ * @version 0.4.1
  * @date 20260130
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  *
@@ -36,7 +39,7 @@
  * DEVELOPMENT ROADMAP - NEXT STEPS:
  * ============================================================================
  *
- * ✅ COMPLETED (Steps 1-5):
+ * ✅ COMPLETED (Steps 1-5.1):
  *    - Display hardware working (ST7796, Arduino GFX 1.5.5)
  *    - FreeRTOS dual-core (Core0=UI @1Hz, Core1=BG @10Hz)
  *    - EARS colour definitions (RGB565)
@@ -46,6 +49,7 @@
  *    - MAIN_sysinfoLib (system information)
  *    - Clean architecture with compile-time dev feature removal
  *    - NVS initialization with validation and LED feedback
+ *    - NVS keys aligned with EARS_systemDef.h
  *
  * 📋 TODO - STEP 6: Initialize SD Card on Core 1
  *    Location: Core1_Background_Task() - run after NVS init
@@ -362,6 +366,12 @@ void Core1_Background_Task(void *parameter)
  * - Green double-blink: NVS valid and ready
  * - Yellow slow blinks: NVS needs first-time configuration
  * - Red fast blinks: NVS initialization failed
+ *
+ * NVS Keys (from EARS_systemDef.h):
+ * - EARS_VERSION_CODE "EARS_VC" - Version (2 hex digits)
+ * - EARS_ZAPCODE "EARS_ZC" - ZapNumber (2 letters + 4 digits)
+ * - EARS_PASSWORD_HASH "EARS_PW" - Password CRC32 hash
+ * - EARS_CRC32 "EARS_32" - Overall NVS CRC32
  */
 void initialise_nvs()
 {
@@ -517,5 +527,5 @@ void initialise_display()
 }
 
 // ============================================================================
-// END OF FILE - v0.4.0 NVS Initialization Complete
+// END OF FILE - v0.4.1 NVS Keys Aligned with EARS_systemDef.h
 // ============================================================================
