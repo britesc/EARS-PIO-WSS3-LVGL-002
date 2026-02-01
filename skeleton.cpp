@@ -1,44 +1,74 @@
 /**
- * @file main.cpp - MILESTONE v0.5.0 - NVS Integration Complete
+ * @file skeleton.cpp - FROZEN MILESTONE v0.6.0 - SD Card Integration Complete
  * @author Julian (51fiftyone51fiftyone@gmail.com)
- * @brief EARS Main Application - NVS Storage Ready
+ * @brief EARS Main Application - NVS + SD Card Storage Ready
  * @details Equipment & Ammunition Reporting System
  *          Dual-core ESP32-S3 implementation using FreeRTOS
  *
- * NEW IN v0.5.0 - STEP 5 COMPLETE:
- * - NVS (Non-Volatile Storage) fully integrated
- * - NVS state machine implemented (5 states)
- * - LED feedback for NVS status
- * - Complete NVS API (version, ZapNumber, password, backlight, CRC)
- * - constexpr system definitions for type safety
- * - All NVS keys properly mapped from EARS_systemDef.h
+ * ============================================================================
+ * FROZEN MILESTONE v0.6.0 - STEP 6A COMPLETE (20260131)
+ * ============================================================================
  *
+ * ✅ WHAT'S WORKING:
+ * - Display: Waveshare 3.5" ESP32-S3 LCD (480x320, ST7796 driver)
+ * - Backlight: GPIO 6 (no conflicts!)
+ * - NVS Storage: Version control, ZapNumber, Password, CRC validation
+ * - SD Card: 14.9GB SDHC detected via SD_MMC (pins 11,10,9)
+ * - Directories: /logs, /config, /images auto-created
+ * - FreeRTOS: Dual-core operation (Core0=UI, Core1=Background)
+ * - Development screen: Live stats, heartbeat, system info
+ *
+ * ✅ VERIFIED HARDWARE:
+ * - Display pins: MOSI=1, MISO=2, SCLK=5, DC=3, BL=6
+ * - SD_MMC pins: CLK=11, CMD=10, D0=9 (verified from Waveshare schematic)
+ * - LED pins: Red=40, Yellow=41, Green=42
+ * - No pin conflicts between display and SD card!
+ *
+ * ✅ KEY LESSONS LEARNED:
+ * - Waveshare changed pinout between revisions
+ * - SD_MMC requires build flag: -D SOC_SDMMC_HOST_SUPPORTED
+ * - Pin 6 (backlight) was wrongly documented as SD_SCK in old docs
+ * - SD_MMC works in 1-bit mode with just CLK, CMD, D0
+ *
+ * ============================================================================
+ * 🎯 NEXT STEP: STEP 6B or STEP 7
+ * ============================================================================
+ *
+ * OPTION A - STEP 6B: Design Loading Screen in EEZ Studio Flow (ESF)
+ * ────────────────────────────────────────────────────────────────────
+ * Purpose: Create splash/loading animation for startup
+ * Tool: EEZ Studio Flow 0.23.2 (0.24.0 has colour bug)
+ * Status: Design ONLY - test in ESF simulator, don't integrate yet
+ * Why wait: Need LVGL initialized first (STEP 7) before ESF code works
+ *
+ * What to design:
+ * - Splash screen with EARS logo/text
+ * - Progress bar showing: NVS init → SD init → Ready
+ * - State machine to show Core1 initialization progress
+ * - Export UI code but DON'T integrate yet
+ *
+ * OPTION B - STEP 7: Initialize LVGL on Core 0 (RECOMMENDED)
+ * ────────────────────────────────────────────────────────────────────
+ * Purpose: Start LVGL graphics engine for UI
+ * Location: Core0_UI_Task() - run once at startup
+ * Dependencies: LVGL 9.3.0, lv_conf.h (already configured)
+ *
+ * Key tasks:
+ * 1. Initialize LVGL display driver
+ * 2. Create display buffers in PSRAM
+ * 3. Set up LVGL tick handler
+ * 4. Test with simple LVGL label/button
+ * 5. Then integrate ESF generated code (STEP 6C)
+ *
+ * RECOMMENDATION: Do STEP 7 first, then STEP 6B, then STEP 6C
+ * This avoids designing ESF screens that can't be tested until LVGL works
+ *
+ * ============================================================================
  * PREVIOUS MILESTONES:
- * v0.3.3 - Clean architecture with development features library
- * v0.2.x - FreeRTOS dual-core implementation
- * v0.1.x - Display hardware working
- *
- * DEVELOPMENT BUILD (EARS_DEBUG=1):
- * - Hardware LED debugging
- * - Development screen with live stats
- * - NVS state displayed on screen
- * - Boot banner and diagnostics
- *
- * PRODUCTION BUILD (EARS_DEBUG=0):
- * - LVGL/EEZ UI only
- * - Minimal binary size
- * - Professional end-user experience
- *
- * @version 0.5.0
- * @date 20260130
- * @copyright Copyright (c) 2026 JTB All Rights Reserved
- *
- * ============================================================================
- * DEVELOPMENT ROADMAP:
  * ============================================================================
  *
- * ✅ COMPLETED - STEP 5: NVS Initialization
- *    - NVS library v1.7.0 complete
+ * v0.5.0 - STEP 5: NVS (Non-Volatile Storage)
+ *    - NVS library v1.8.0 complete
  *    - State machine: NOT_INITIALIZED → INITIALIZED_EMPTY →
  *                     NEEDS_ZAPNUMBER → NEEDS_PASSWORD → READY
  *    - LED patterns for each state
@@ -46,21 +76,51 @@
  *    - Data persists across firmware uploads
  *    - Complete API: version, ZapNumber, password, backlight, CRC validation
  *
- * 📋 TODO - STEP 6: Initialize SD Card on Core 1
- *    Location: Core1_Background_Task() - run after NVS init
- *    Purpose: Mount SD card for logging, config, images
- *    Dependencies: EARS_sdCardLib
+ * v0.6.0 - STEP 6A: SD Card Initialization (THIS MILESTONE)
+ *    - SD library v2.2.0 using SD_MMC (pins 11, 10, 9)
+ *    - State machine: NOT_INITIALIZED → INIT_FAILED / NO_CARD / READY
+ *    - LED patterns for each state
+ *    - Auto-creates /logs, /config, /images directories
+ *    - Ready for logger, config files, image storage
+ *    - Corrected Waveshare pin definitions from schematic
  *
- * 📋 TODO - STEP 7: Initialize LVGL on Core 0
- *    Location: Core0_UI_Task() - run once at startup
- *    Purpose: Start LVGL graphics engine for UI
- *    Dependencies: LVGL 9.3.0, lv_conf.h
- *
- * 📋 TODO - STEP 8: Integrate Touch Input on Core 0
- * 📋 TODO - STEP 9: Add EEZ Studio Generated UI
- * 📋 TODO - STEP 10: Enable Backlight Manager (uses NVS backlight value)
+ * v0.3.3 - Clean architecture with development features library
+ * v0.2.x - FreeRTOS dual-core implementation
+ * v0.1.x - Display hardware working
  *
  * ============================================================================
+ * DEVELOPMENT vs PRODUCTION BUILDS:
+ * ============================================================================
+ *
+ * DEVELOPMENT BUILD (EARS_DEBUG=1) - Current Configuration:
+ * - Hardware LED debugging (Red, Yellow, Green)
+ * - Development screen with live stats
+ * - NVS + SD card state displayed on screen
+ * - Boot banner and system diagnostics via Serial
+ * - Heartbeat visible on Green LED
+ *
+ * PRODUCTION BUILD (EARS_DEBUG=0) - Future:
+ * - LVGL/EEZ UI only
+ * - Minimal binary size
+ * - Professional end-user experience
+ * - No serial output, no LEDs
+ *
+ * ============================================================================
+ * CRITICAL BUILD CONFIGURATION:
+ * ============================================================================
+ *
+ * platformio.ini MUST include:
+ * - lib_ldf_mode = chain+  (NOT deep+)
+ * - lib_compat_mode = soft
+ * - Build flag: -D SOC_SDMMC_HOST_SUPPORTED (ESSENTIAL for SD_MMC!)
+ *
+ * Without SOC_SDMMC_HOST_SUPPORTED, you'll get: "FS.h: No such file"
+ *
+ * ============================================================================
+ *
+ * @version 0.6.0
+ * @date 20260131
+ * @copyright Copyright (c) 2026 JTB All Rights Reserved
  */
 
 // ============================================================================
@@ -83,6 +143,9 @@
 // STEP 5: NVS Library
 #include "EARS_nvsEepromLib.h"
 
+// STEP 6A: SD Card Library (SD_MMC mode)
+#include "EARS_sdCardLib.h"
+
 // Development tools (compile out in production)
 #if EARS_DEBUG == 1
 #include "MAIN_ledLib.h"
@@ -92,11 +155,15 @@
 // Display driver
 #include <Arduino_GFX_Library.h>
 
-// TODO STEP 7: Uncomment when ready for LVGL
+// ============================================================================
+// TODO STEP 7: Uncomment when initializing LVGL
+// ============================================================================
 // #include <lvgl.h>
 // #include "lv_conf.h"
 
-// TODO STEP 9: Uncomment when EEZ UI is ready
+// ============================================================================
+// TODO STEP 9: Uncomment when EEZ UI is ready (after STEP 7 + 6B + 6C)
+// ============================================================================
 // #include "ui/screens.h"
 // #include "ui/ui.h"
 
@@ -139,12 +206,18 @@ enum NVSInitState
 volatile NVSInitState nvs_state = NVS_NOT_INITIALIZED;
 
 // ============================================================================
+// SD CARD STATE MACHINE (STEP 6A)
+// ============================================================================
+volatile SDCardState sd_card_state = SD_NOT_INITIALIZED;
+
+// ============================================================================
 // FUNCTION PROTOTYPES
 // ============================================================================
 void Core0_UI_Task(void *parameter);
 void Core1_Background_Task(void *parameter);
 void initialise_display();
 void initialise_nvs();
+void initialise_sd();
 
 // ============================================================================
 // ARDUINO SETUP - Runs once on Core 1
@@ -250,7 +323,15 @@ void Core0_UI_Task(void *parameter)
     Serial.println("[CORE0] UI Task started");
 #endif
 
-    // TODO STEP 7: Initialize LVGL here
+    // ========================================================================
+    // 🎯 NEXT STEP 7: Initialize LVGL here
+    // ========================================================================
+    // 1. Create LVGL display buffers in PSRAM
+    // 2. Initialize LVGL display driver
+    // 3. Set up LVGL tick handler
+    // 4. Test with simple label: lv_label_create(lv_scr_act())
+    // 5. Replace DEV_update_screen() with lv_timer_handler()
+    // ========================================================================
 
     TickType_t xLastWakeTime = xTaskGetTickCount();
 
@@ -271,7 +352,11 @@ void Core0_UI_Task(void *parameter)
             xSemaphoreGive(xDisplayMutex);
         }
 #else
-        // TODO STEP 7: Production LVGL handler
+        // ====================================================================
+        // 🎯 STEP 7: Replace this with LVGL handler
+        // ====================================================================
+        // lv_timer_handler();
+        // ====================================================================
 #endif
 
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
@@ -290,7 +375,18 @@ void Core1_Background_Task(void *parameter)
     // STEP 5: Initialize NVS
     initialise_nvs();
 
-    // TODO STEP 6: Initialize SD card after NVS
+    // STEP 6A: Initialize SD card
+    initialise_sd();
+
+    // ========================================================================
+    // 🎯 STEP 8+: Add additional background tasks here
+    // ========================================================================
+    // Examples:
+    // - Logger initialization (needs SD card)
+    // - WiFi/BLE setup
+    // - Sensor polling
+    // - Data sync
+    // ========================================================================
 
     TickType_t xLastWakeTime = xTaskGetTickCount();
     const TickType_t xFrequency = pdMS_TO_TICKS(100); // 10Hz
@@ -307,7 +403,7 @@ void Core1_Background_Task(void *parameter)
         }
 #endif
 
-        // TODO STEP 6+: Background tasks here
+        // Background processing goes here
 
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }
@@ -511,6 +607,97 @@ void initialise_nvs()
     }
 }
 
+/**
+ * @brief Initialize SD Card (SD_MMC mode) - STEP 6A
+ *
+ * @details
+ * Initializes SD card using SD_MMC interface (1-bit SDIO mode)
+ * Correct pins verified from Waveshare schematic: CLK=11, CMD=10, D0=9
+ *
+ * Sets sd_card_state based on result:
+ * - SD_NOT_INITIALIZED → Hasn't been tried yet
+ * - SD_INIT_FAILED → Pin setup or begin() failed
+ * - SD_NO_CARD → No card detected
+ * - SD_CARD_READY → Card mounted and ready
+ *
+ * LED Patterns:
+ * - Red blink = SD init failed (critical for logging)
+ * - Yellow blink = No card detected (warning)
+ * - Green double-blink = SD ready!
+ *
+ * Auto-creates essential directories:
+ * - /logs - For system logging
+ * - /config - For configuration files
+ * - /images - For UI assets and screenshots
+ */
+void initialise_sd()
+{
+#if EARS_DEBUG == 1
+    Serial.println("[INIT] Initialising SD card...");
+#endif
+
+    // Try to initialize SD card
+    if (!using_sdcard().begin())
+    {
+        sd_card_state = using_sdcard().getState();
+
+        if (sd_card_state == SD_INIT_FAILED)
+        {
+#if EARS_DEBUG == 1
+            Serial.println("[ERROR] SD card initialization failed!");
+            MAIN_led_error_pattern(3);
+            MAIN_led_red_on();
+#endif
+            return;
+        }
+        else if (sd_card_state == SD_NO_CARD)
+        {
+#if EARS_DEBUG == 1
+            Serial.println("[WARNING] No SD card detected");
+            MAIN_led_warning_pattern(3);
+            MAIN_led_yellow_on();
+#endif
+            return;
+        }
+    }
+
+    // SD card ready!
+    sd_card_state = SD_CARD_READY;
+
+#if EARS_DEBUG == 1
+    Serial.println("[OK] SD card initialized successfully");
+    Serial.printf("[INFO] Card type: %s\n", using_sdcard().getCardType().c_str());
+    Serial.printf("[INFO] Card size: %llu MB\n", using_sdcard().getCardSizeMB());
+    Serial.printf("[INFO] Free space: %llu MB\n", using_sdcard().getFreeSpaceMB());
+
+    // List root directory
+    Serial.println("[INFO] Root directory contents:");
+    using_sdcard().listDirectory("/", 0);
+
+    // Create essential directories
+    Serial.println("[INFO] Creating essential directories...");
+    using_sdcard().createDirectory("/logs");
+    using_sdcard().createDirectory("/config");
+    using_sdcard().createDirectory("/images");
+
+    MAIN_led_success_pattern();
+#endif
+}
+
 // ============================================================================
-// END OF FILE - v0.5.0 STEP 5 COMPLETE - NVS READY
+// END OF FILE - FROZEN MILESTONE v0.6.0 - STEP 6A COMPLETE
+// ============================================================================
+//
+// 🎯 NEXT STEPS:
+//
+// OPTION A: STEP 6B - Design loading screen in EEZ Studio (design only)
+// OPTION B: STEP 7 - Initialize LVGL (recommended first)
+//
+// Both are valid next steps. STEP 7 is recommended because:
+// - You can test LVGL works before designing ESF screens
+// - ESF screens need LVGL to run anyway
+// - Easier to debug if LVGL is working first
+//
+// See header comments for detailed next step instructions!
+//
 // ============================================================================
