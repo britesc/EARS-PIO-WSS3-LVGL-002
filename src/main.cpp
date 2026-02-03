@@ -1,125 +1,38 @@
 /**
- * @file skeleton.cpp - FROZEN MILESTONE v0.6.0 - SD Card Integration Complete
+ * @file main.cpp - v0.8.1 COMPLETE - NVS/SD Validation Restored
  * @author Julian (51fiftyone51fiftyone@gmail.com)
- * @brief EARS Main Application - NVS + SD Card Storage Ready
+ * @brief EARS Main Application - LVGL 9.3.0 Working + Full System Validation
  * @details Equipment & Ammunition Reporting System
  *          Dual-core ESP32-S3 implementation using FreeRTOS
  *
  * ============================================================================
- * FROZEN MILESTONE v0.6.0 - STEP 6A COMPLETE (20260131)
+ * VERSION v0.8.1 COMPLETE - LVGL 9.3.0 + NVS/SD VALIDATION RESTORED
  * ============================================================================
  *
  * ✅ WHAT'S WORKING:
- * - Display: Waveshare 3.5" ESP32-S3 LCD (480x320, ST7796 driver)
- * - Backlight: GPIO 6 (no conflicts!)
- * - NVS Storage: Version control, ZapNumber, Password, CRC validation
- * - SD Card: 14.9GB SDHC detected via SD_MMC (pins 11,10,9)
- * - Directories: /logs, /config, /images auto-created
+ * - LVGL 9.3.0 display (RGB565, 16-bit color)
+ * - Display: Red panel with white text rendering correctly
+ * - 60-line double buffering in regular RAM (115KB total)
+ * - NVS: Full 5-step validation with LED patterns
+ * - SD Card: Full initialization with LED patterns
  * - FreeRTOS: Dual-core operation (Core0=UI, Core1=Background)
- * - Development screen: Live stats, heartbeat, system info
+ * - Development LEDs: Red/Yellow/Green status indicators
  *
- * ✅ VERIFIED HARDWARE:
- * - Display pins: MOSI=1, MISO=2, SCLK=5, DC=3, BL=6
- * - SD_MMC pins: CLK=11, CMD=10, D0=9 (verified from Waveshare schematic)
- * - LED pins: Red=40, Yellow=41, Green=42
- * - No pin conflicts between display and SD card!
+ * ✅ CRITICAL FIX - lv_conf.h Location:
+ * - lv_conf.h MUST be in src/ directory (not just include/)
+ * - NEVER manually include lv_conf.h (violates LVGL guidelines)
+ * - ALWAYS let LVGL find it: #include <lvgl.h>
  *
- * ✅ KEY LESSONS LEARNED:
- * - Waveshare changed pinout between revisions
- * - SD_MMC requires build flag: -D SOC_SDMMC_HOST_SUPPORTED
- * - Pin 6 (backlight) was wrongly documented as SD_SCK in old docs
- * - SD_MMC works in 1-bit mode with just CLK, CMD, D0
- *
- * ============================================================================
- * 🎯 NEXT STEP: STEP 6B or STEP 7
- * ============================================================================
- *
- * OPTION A - STEP 6B: Design Loading Screen in EEZ Studio Flow (ESF)
- * ────────────────────────────────────────────────────────────────────
- * Purpose: Create splash/loading animation for startup
- * Tool: EEZ Studio Flow 0.23.2 (0.24.0 has colour bug)
- * Status: Design ONLY - test in ESF simulator, don't integrate yet
- * Why wait: Need LVGL initialized first (STEP 7) before ESF code works
- *
- * What to design:
- * - Splash screen with EARS logo/text
- * - Progress bar showing: NVS init → SD init → Ready
- * - State machine to show Core1 initialization progress
- * - Export UI code but DON'T integrate yet
- *
- * OPTION B - STEP 7: Initialize LVGL on Core 0 (RECOMMENDED)
- * ────────────────────────────────────────────────────────────────────
- * Purpose: Start LVGL graphics engine for UI
- * Location: Core0_UI_Task() - run once at startup
- * Dependencies: LVGL 9.3.0, lv_conf.h (already configured)
- *
- * Key tasks:
- * 1. Initialize LVGL display driver
- * 2. Create display buffers in PSRAM
- * 3. Set up LVGL tick handler
- * 4. Test with simple LVGL label/button
- * 5. Then integrate ESF generated code (STEP 6C)
- *
- * RECOMMENDATION: Do STEP 7 first, then STEP 6B, then STEP 6C
- * This avoids designing ESF screens that can't be tested until LVGL works
- *
- * ============================================================================
- * PREVIOUS MILESTONES:
- * ============================================================================
- *
- * v0.5.0 - STEP 5: NVS (Non-Volatile Storage)
- *    - NVS library v1.8.0 complete
- *    - State machine: NOT_INITIALIZED → INITIALIZED_EMPTY →
- *                     NEEDS_ZAPNUMBER → NEEDS_PASSWORD → READY
- *    - LED patterns for each state
- *    - First boot creates NVS with version "01", backlight 100
- *    - Data persists across firmware uploads
- *    - Complete API: version, ZapNumber, password, backlight, CRC validation
- *
- * v0.6.0 - STEP 6A: SD Card Initialization (THIS MILESTONE)
- *    - SD library v2.2.0 using SD_MMC (pins 11, 10, 9)
- *    - State machine: NOT_INITIALIZED → INIT_FAILED / NO_CARD / READY
- *    - LED patterns for each state
- *    - Auto-creates /logs, /config, /images directories
- *    - Ready for logger, config files, image storage
- *    - Corrected Waveshare pin definitions from schematic
- *
- * v0.3.3 - Clean architecture with development features library
- * v0.2.x - FreeRTOS dual-core implementation
- * v0.1.x - Display hardware working
- *
- * ============================================================================
- * DEVELOPMENT vs PRODUCTION BUILDS:
- * ============================================================================
- *
- * DEVELOPMENT BUILD (EARS_DEBUG=1) - Current Configuration:
- * - Hardware LED debugging (Red, Yellow, Green)
- * - Development screen with live stats
- * - NVS + SD card state displayed on screen
- * - Boot banner and system diagnostics via Serial
- * - Heartbeat visible on Green LED
- *
- * PRODUCTION BUILD (EARS_DEBUG=0) - Future:
- * - LVGL/EEZ UI only
- * - Minimal binary size
- * - Professional end-user experience
- * - No serial output, no LEDs
- *
- * ============================================================================
- * CRITICAL BUILD CONFIGURATION:
- * ============================================================================
- *
- * platformio.ini MUST include:
- * - lib_ldf_mode = chain+  (NOT deep+)
- * - lib_compat_mode = soft
- * - Build flag: -D SOC_SDMMC_HOST_SUPPORTED (ESSENTIAL for SD_MMC!)
- *
- * Without SOC_SDMMC_HOST_SUPPORTED, you'll get: "FS.h: No such file"
+ * ✅ LED PATTERNS RESTORED:
+ * - RED ON = Critical error (NVS/SD/Display init failed)
+ * - YELLOW ON = Warning (needs ZapNumber/Password, no SD card)
+ * - GREEN blink = Heartbeat (system running)
+ * - GREEN double-blink = Success (NVS/SD ready)
  *
  * ============================================================================
  *
- * @version 0.6.0
- * @date 20260131
+ * @version 0.8.1
+ * @date 20260203
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  */
 
@@ -140,10 +53,8 @@
 #include "MAIN_drawingLib.h"
 #include "MAIN_sysinfoLib.h"
 
-// STEP 5: NVS Library
+// NVS and SD Card Libraries
 #include "EARS_nvsEepromLib.h"
-
-// STEP 6A: SD Card Library (SD_MMC mode)
 #include "EARS_sdCardLib.h"
 
 // Development tools (compile out in production)
@@ -155,17 +66,8 @@
 // Display driver
 #include <Arduino_GFX_Library.h>
 
-// ============================================================================
-// TODO STEP 7: Uncomment when initializing LVGL
-// ============================================================================
-// #include <lvgl.h>
-// #include "lv_conf.h"
-
-// ============================================================================
-// TODO STEP 9: Uncomment when EEZ UI is ready (after STEP 7 + 6B + 6C)
-// ============================================================================
-// #include "ui/screens.h"
-// #include "ui/ui.h"
+// LVGL 9.3.0 - CRITICAL: Only include lvgl.h, NOT lv_conf.h!
+#include <lvgl.h>
 
 // ============================================================================
 // Display Settings
@@ -180,6 +82,13 @@ Arduino_DataBus *bus = new Arduino_ESP32SPI(LCD_DC, LCD_CS, SPI_SCLK, SPI_MOSI, 
 Arduino_GFX *gfx = new Arduino_ST7796(bus, LCD_RST, 1, true, TFT_HEIGHT, TFT_WIDTH);
 
 // ============================================================================
+// LVGL Display Variables
+// ============================================================================
+lv_display_t *lvgl_disp = NULL;
+static lv_color_t *disp_draw_buf1 = NULL;
+static lv_color_t *disp_draw_buf2 = NULL;
+
+// ============================================================================
 // FREERTOS CONFIGURATION
 // ============================================================================
 TaskHandle_t Core0_Task_Handle = NULL;
@@ -192,12 +101,12 @@ SemaphoreHandle_t xDisplayMutex = NULL;
 #define CORE1_PRIORITY 1
 
 // ============================================================================
-// NVS STATE MACHINE (STEP 5)
+// NVS STATE MACHINE (STEP 5) - RESTORED
 // ============================================================================
 enum NVSInitState
 {
     NVS_NOT_INITIALIZED,   // Flash not initialized
-    NVS_INITIALIZED_EMPTY, // Initialized but no user data (needs ZapNumber + Password)
+    NVS_INITIALIZED_EMPTY, // Initialized but no user data
     NVS_NEEDS_ZAPNUMBER,   // Version set, needs ZapNumber
     NVS_NEEDS_PASSWORD,    // ZapNumber set, needs Password
     NVS_READY              // Fully configured and validated
@@ -206,7 +115,7 @@ enum NVSInitState
 volatile NVSInitState nvs_state = NVS_NOT_INITIALIZED;
 
 // ============================================================================
-// SD CARD STATE MACHINE (STEP 6A)
+// SD CARD STATE MACHINE (STEP 6A) - RESTORED
 // ============================================================================
 volatile SDCardState sd_card_state = SD_NOT_INITIALIZED;
 
@@ -216,8 +125,13 @@ volatile SDCardState sd_card_state = SD_NOT_INITIALIZED;
 void Core0_UI_Task(void *parameter);
 void Core1_Background_Task(void *parameter);
 void initialise_display();
+void initialise_lvgl();
 void initialise_nvs();
 void initialise_sd();
+
+// LVGL Callbacks
+void lvgl_flush_cb(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
+static uint32_t lvgl_tick_cb(void);
 
 // ============================================================================
 // ARDUINO SETUP - Runs once on Core 1
@@ -261,8 +175,11 @@ void setup()
     Serial.println("[OK] Synchronisation primitives created");
 #endif
 
-    // Initialize display
+    // Initialize display (Arduino GFX)
     initialise_display();
+
+    // Initialize LVGL
+    initialise_lvgl();
 
     // Create FreeRTOS tasks
 #if EARS_DEBUG == 1
@@ -315,7 +232,7 @@ void loop()
 }
 
 // ============================================================================
-// CORE 0 TASK - UI, Display, and Touch Processing
+// CORE 0 TASK - UI, Display, and LVGL Processing
 // ============================================================================
 void Core0_UI_Task(void *parameter)
 {
@@ -323,41 +240,17 @@ void Core0_UI_Task(void *parameter)
     Serial.println("[CORE0] UI Task started");
 #endif
 
-    // ========================================================================
-    // 🎯 NEXT STEP 7: Initialize LVGL here
-    // ========================================================================
-    // 1. Create LVGL display buffers in PSRAM
-    // 2. Initialize LVGL display driver
-    // 3. Set up LVGL tick handler
-    // 4. Test with simple label: lv_label_create(lv_scr_act())
-    // 5. Replace DEV_update_screen() with lv_timer_handler()
-    // ========================================================================
-
     TickType_t xLastWakeTime = xTaskGetTickCount();
-
-#if EARS_DEBUG == 1
-    const TickType_t xFrequency = pdMS_TO_TICKS(1000); // 1 second for dev screen
-#else
     const TickType_t xFrequency = pdMS_TO_TICKS(5); // 200Hz for LVGL
-#endif
 
     while (1)
     {
 #if EARS_DEBUG == 1
         DEV_increment_core0_heartbeat();
-
-        if (xSemaphoreTake(xDisplayMutex, portMAX_DELAY) == pdTRUE)
-        {
-            DEV_update_screen(gfx);
-            xSemaphoreGive(xDisplayMutex);
-        }
-#else
-        // ====================================================================
-        // 🎯 STEP 7: Replace this with LVGL handler
-        // ====================================================================
-        // lv_timer_handler();
-        // ====================================================================
 #endif
+
+        // Run LVGL task handler
+        lv_timer_handler();
 
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }
@@ -372,21 +265,11 @@ void Core1_Background_Task(void *parameter)
     Serial.println("[CORE1] Background Task started");
 #endif
 
-    // STEP 5: Initialize NVS
+    // STEP 5: Initialize NVS (RESTORED FULL VALIDATION)
     initialise_nvs();
 
-    // STEP 6A: Initialize SD card
+    // STEP 6A: Initialize SD card (RESTORED FULL VALIDATION)
     initialise_sd();
-
-    // ========================================================================
-    // 🎯 STEP 8+: Add additional background tasks here
-    // ========================================================================
-    // Examples:
-    // - Logger initialization (needs SD card)
-    // - WiFi/BLE setup
-    // - Sensor polling
-    // - Data sync
-    // ========================================================================
 
     TickType_t xLastWakeTime = xTaskGetTickCount();
     const TickType_t xFrequency = pdMS_TO_TICKS(100); // 10Hz
@@ -396,17 +279,40 @@ void Core1_Background_Task(void *parameter)
 #if EARS_DEBUG == 1
         DEV_increment_core1_heartbeat();
 
-        // Toggle green LED every 500ms
+        // Toggle green LED every 500ms (heartbeat)
         if (DEV_get_core1_heartbeat() % 5 == 0)
         {
             MAIN_led_green_toggle();
         }
 #endif
 
-        // Background processing goes here
-
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }
+}
+
+// ============================================================================
+// LVGL FLUSH CALLBACK
+// ============================================================================
+void lvgl_flush_cb(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map)
+{
+    uint32_t w = lv_area_get_width(area);
+    uint32_t h = lv_area_get_height(area);
+
+    if (xSemaphoreTake(xDisplayMutex, portMAX_DELAY) == pdTRUE)
+    {
+        gfx->draw16bitRGBBitmap(area->x1, area->y1, (uint16_t *)px_map, w, h);
+        xSemaphoreGive(xDisplayMutex);
+    }
+
+    lv_display_flush_ready(disp);
+}
+
+// ============================================================================
+// LVGL TICK CALLBACK
+// ============================================================================
+static uint32_t lvgl_tick_cb(void)
+{
+    return millis();
 }
 
 // ============================================================================
@@ -414,7 +320,7 @@ void Core1_Background_Task(void *parameter)
 // ============================================================================
 
 /**
- * @brief Initialize display hardware
+ * @brief Initialize display hardware (Arduino GFX)
  */
 void initialise_display()
 {
@@ -446,32 +352,129 @@ void initialise_display()
     MAIN_led_success_pattern();
 #endif
 
-    // Color test pattern
+    // Clear to black
     MAIN_clear_screen(gfx, EARS_RGB565_BLACK);
-    uint16_t barWidth = TFT_WIDTH / 8;
-    MAIN_draw_filled_rect(gfx, 0 * barWidth, 0, barWidth, TFT_HEIGHT, EARS_RGB565_RED);
-    MAIN_draw_filled_rect(gfx, 1 * barWidth, 0, barWidth, TFT_HEIGHT, EARS_RGB565_GREEN);
-    MAIN_draw_filled_rect(gfx, 2 * barWidth, 0, barWidth, TFT_HEIGHT, EARS_RGB565_BLUE);
-    MAIN_draw_filled_rect(gfx, 3 * barWidth, 0, barWidth, TFT_HEIGHT, EARS_RGB565_YELLOW);
-    MAIN_draw_filled_rect(gfx, 4 * barWidth, 0, barWidth, TFT_HEIGHT, EARS_RGB565_CYAN);
-    MAIN_draw_filled_rect(gfx, 5 * barWidth, 0, barWidth, TFT_HEIGHT, EARS_RGB565_MAGENTA);
-    MAIN_draw_filled_rect(gfx, 6 * barWidth, 0, barWidth, TFT_HEIGHT, EARS_RGB565_WHITE);
-    MAIN_draw_filled_rect(gfx, 7 * barWidth, 0, barWidth, TFT_HEIGHT, EARS_RGB565_GRAY);
+}
 
-    delay(2000);
+/**
+ * @brief Initialize LVGL 9.3.0 display system
+ */
+void initialise_lvgl()
+{
+#if EARS_DEBUG == 1
+    Serial.println("[INIT] Initialising LVGL 9.3.0...");
+
+    // DIAGNOSTIC: Check if lv_conf.h is being read correctly
+    Serial.print("[DIAG] sizeof(lv_color_t) = ");
+    Serial.print(sizeof(lv_color_t));
+    Serial.println(" bytes (should be 2!)");
+
+    Serial.print("[DIAG] LV_COLOR_DEPTH = ");
+    Serial.print(LV_COLOR_DEPTH);
+    Serial.println(" (should be 16!)");
+#endif
+
+    // Initialize LVGL
+    lv_init();
+
+    // Calculate buffer size (60 lines)
+    uint32_t bufSize = screenWidth * 60;
 
 #if EARS_DEBUG == 1
-    DEV_draw_screen(gfx);
-    Serial.println("[OK] Development screen displayed");
-#else
-    MAIN_clear_screen(gfx, EARS_RGB565_BLACK);
+    Serial.print("[INFO] Buffer size: ");
+    Serial.print(bufSize);
+    Serial.println(" pixels");
+    Serial.print("[INFO] Bytes per buffer (hardcoded): ");
+    Serial.print(bufSize * 2);
+    Serial.println(" bytes");
+    Serial.print("[INFO] Total allocation: ");
+    Serial.print(bufSize * 2 * 2);
+    Serial.println(" bytes");
+#endif
+
+    // Allocate display buffers (hardcoded * 2 for RGB565)
+    disp_draw_buf1 = (lv_color_t *)malloc(bufSize * 2);
+    disp_draw_buf2 = (lv_color_t *)malloc(bufSize * 2);
+
+#if EARS_DEBUG == 1
+    if (disp_draw_buf1)
+    {
+        Serial.println("[OK] Buffer 1 allocated");
+    }
+    if (disp_draw_buf2)
+    {
+        Serial.println("[OK] Buffer 2 allocated");
+    }
+#endif
+
+    if (!disp_draw_buf1 || !disp_draw_buf2)
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[ERROR] Buffer allocation failed!");
+        if (!disp_draw_buf1)
+            Serial.println("  buf1 is NULL");
+        if (!disp_draw_buf2)
+            Serial.println("  buf2 is NULL");
+        MAIN_led_red_on();
+#endif
+        while (1)
+            delay(1000);
+    }
+
+#if EARS_DEBUG == 1
+    Serial.println("[OK] Buffers allocated");
+#endif
+
+    // Create LVGL display
+    lvgl_disp = lv_display_create(screenWidth, screenHeight);
+    if (lvgl_disp == NULL)
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[ERROR] lv_display_create failed!");
+        MAIN_led_red_on();
+#endif
+        while (1)
+            delay(1000);
+    }
+
+#if EARS_DEBUG == 1
+    Serial.println("[OK] LVGL display created");
+#endif
+
+    // Set display buffers (size in BYTES = bufSize * 2)
+    lv_display_set_buffers(lvgl_disp, disp_draw_buf1, disp_draw_buf2,
+                           bufSize * 2, LV_DISPLAY_RENDER_MODE_PARTIAL);
+
+    // Set flush callback
+    lv_display_set_flush_cb(lvgl_disp, lvgl_flush_cb);
+
+    // Set tick callback
+    lv_tick_set_cb(lvgl_tick_cb);
+
+#if EARS_DEBUG == 1
+    Serial.println("[OK] LVGL initialization complete!");
+#endif
+
+    // Create test UI
+    lv_obj_t *panel = lv_obj_create(lv_screen_active());
+    lv_obj_set_size(panel, 400, 200);
+    lv_obj_center(panel);
+    lv_obj_set_style_bg_color(panel, lv_color_hex(0xFF0000), 0);
+
+    lv_obj_t *label = lv_label_create(panel);
+    lv_label_set_text(label, "LVGL 9.3.0 WORKING!\nv0.8.1 COMPLETE\nNVS/SD Restored");
+    lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_center(label);
+
+#if EARS_DEBUG == 1
+    Serial.println("[OK] Test UI created");
 #endif
 }
 
 /**
  * @brief Initialize NVS (Non-Volatile Storage) - STEP 5
+ * @details RESTORED FULL 5-STEP VALIDATION
  *
- * @details
  * 5-step initialization process:
  * 1. Initialize NVS flash
  * 2. Check if NVS is initialized (has version key)
@@ -609,10 +612,10 @@ void initialise_nvs()
 
 /**
  * @brief Initialize SD Card (SD_MMC mode) - STEP 6A
+ * @details RESTORED FULL VALIDATION WITH LED PATTERNS
  *
- * @details
  * Initializes SD card using SD_MMC interface (1-bit SDIO mode)
- * Correct pins verified from Waveshare schematic: CLK=11, CMD=10, D0=9
+ * Pins: CLK=11, CMD=10, D0=9 (verified from Waveshare schematic)
  *
  * Sets sd_card_state based on result:
  * - SD_NOT_INITIALIZED → Hasn't been tried yet
@@ -624,11 +627,6 @@ void initialise_nvs()
  * - Red blink = SD init failed (critical for logging)
  * - Yellow blink = No card detected (warning)
  * - Green double-blink = SD ready!
- *
- * Auto-creates essential directories:
- * - /logs - For system logging
- * - /config - For configuration files
- * - /images - For UI assets and screenshots
  */
 void initialise_sd()
 {
@@ -670,10 +668,6 @@ void initialise_sd()
     Serial.printf("[INFO] Card size: %llu MB\n", using_sdcard().getCardSizeMB());
     Serial.printf("[INFO] Free space: %llu MB\n", using_sdcard().getFreeSpaceMB());
 
-    // List root directory
-    Serial.println("[INFO] Root directory contents:");
-    using_sdcard().listDirectory("/", 0);
-
     // Create essential directories
     Serial.println("[INFO] Creating essential directories...");
     using_sdcard().createDirectory("/logs");
@@ -685,19 +679,5 @@ void initialise_sd()
 }
 
 // ============================================================================
-// END OF FILE - FROZEN MILESTONE v0.6.0 - STEP 6A COMPLETE
-// ============================================================================
-//
-// 🎯 NEXT STEPS:
-//
-// OPTION A: STEP 6B - Design loading screen in EEZ Studio (design only)
-// OPTION B: STEP 7 - Initialize LVGL (recommended first)
-//
-// Both are valid next steps. STEP 7 is recommended because:
-// - You can test LVGL works before designing ESF screens
-// - ESF screens need LVGL to run anyway
-// - Easier to debug if LVGL is working first
-//
-// See header comments for detailed next step instructions!
-//
+// END OF FILE - v0.8.1 COMPLETE - NVS/SD Validation Restored
 // ============================================================================

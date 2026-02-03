@@ -16,10 +16,10 @@
 #include <stdint.h>
 
 #define EARS_APP_VERSION_MAJOR "4"
-#define EARS_APP_VERSION_MINOR "6"
-#define EARS_APP_VERSION_PATCH "24"
+#define EARS_APP_VERSION_MINOR "7"
+#define EARS_APP_VERSION_PATCH "71"
 
-#define EARS_APP_BUILD_TIMESTAMP 20260201115351
+#define EARS_APP_BUILD_TIMESTAMP 20260203165631
 
 /**
  * @brief Convert string to integer at compile time

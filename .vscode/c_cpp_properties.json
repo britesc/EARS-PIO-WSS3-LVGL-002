@@ -224,7 +224,6 @@
                 "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/EARS_errorsLib",
                 "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/EARS_loggerLib",
                 "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/EARS_screenSaverLib",
-                "D:/Dev/EARS-PIO-WSS3-LVGL-002/.pio/libdeps/development/Unity/src",
                 "C:/Users/julia/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                 "C:/Users/julia/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",
                 "C:/Users/julia/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",
@@ -474,7 +473,6 @@
                     "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/EARS_errorsLib",
                     "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/EARS_loggerLib",
                     "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/EARS_screenSaverLib",
-                    "D:/Dev/EARS-PIO-WSS3-LVGL-002/.pio/libdeps/development/Unity/src",
                     "C:/Users/julia/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                     "C:/Users/julia/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",
                     "C:/Users/julia/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",
@@ -512,13 +510,8 @@
                 "ARDUINO_USB_MODE=1",
                 "ARDUINO_RUNNING_CORE=1",
                 "ARDUINO_EVENT_RUNNING_CORE=1",
-                "CORE_DEBUG_LEVEL=0",
-                "BOARD_HAS_PSRAM",
                 "ARDUINO_USB_CDC_ON_BOOT=1",
                 "ARDUINO_USB_MODE=1",
-                "LV_MEM_CUSTOM=1",
-                "LV_USE_DRAW_SW=1",
-                "LV_USE_DRAW_SW_COMPLEX=1",
                 "ARDUINO_LOOP_STACK_SIZE=16384",
                 "SOC_SDMMC_HOST_SUPPORTED",
                 "EARS_DEBUG=1",
@@ -544,7 +537,6 @@
             "cppStandard": "gnu++11",
             "compilerPath": "C:/Users/julia/.platformio/packages/toolchain-xtensa-esp32s3/bin/xtensa-esp32s3-elf-gcc.exe",
             "compilerArgs": [
-                "-mfix-esp32-psram-cache-issue",
                 "-mlongcalls",
                 ""
             ]
