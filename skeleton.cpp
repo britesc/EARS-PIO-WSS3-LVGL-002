@@ -36,6 +36,39 @@
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  */
 
+// ===========================================================================
+// NEXT STEP INSTRUCTIONS FROM JULIAN
+//
+// 1. Debloat
+//  - All code that can be placed in seperate modules/libraries should be moved
+//    out of main.cpp to reduce complexity here.
+//  - For example the 2 Core tasks can be placed in their own files. This will
+//    also help with readability.
+//  - The NVS and SD card initialisation code can also be placed in their own
+//    files/modules.
+//  - The LVGL initialisation code can also be placed in its own file/module.
+//  - The display initialisation code can also be placed in its own file/module.
+//  - The various callback functions can also be placed in their own files/modules.
+//  - The various helper functions (e.g. screen clearing) can also be placed in
+//    their own files/modules.
+//  - The development/debug code can also be placed in its own file/module.
+//  - The system info code can also be placed in its own file/module.
+//  - The LED control code can also be placed in its own file/module.
+//
+//  - Once the code is broken down into smaller modules/files, it will be easier
+//    to manage and maintain.
+//  - Each file should be prefixed with the project name (e.g. EARS_) to avoid
+//    naming conflicts.
+//
+//  - Once that is done the missing Step 6B for the backlight PWM control can be
+//    implemented. DigitalWrite can be replaced with PWM control for brightness
+//    adjustment.
+//
+//  - It should be done in stages so that it can be fully tested at each step.
+//
+//  Thank you.
+// ===========================================================================
+
 // ============================================================================
 // INCLUDES
 // ============================================================================
