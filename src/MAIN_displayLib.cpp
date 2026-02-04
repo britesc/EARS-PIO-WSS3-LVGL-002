@@ -3,8 +3,8 @@
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief Display initialisation and management for EARS
  * @details Handles Arduino GFX library initialisation for Waveshare 3.5" LCD
- * @version 0.1.0
- * @date 20260124
+ * @version 0.2.0
+ * @date 20260203
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -13,7 +13,13 @@
  * Includes
  *****************************************************************************/
 #include "MAIN_displayLib.h"
+#include "MAIN_drawingLib.h" // ← Need this for MAIN_clear_screen()
 #include "EARS_systemDef.h"
+
+// Only include LED lib if debug mode enabled
+#if EARS_DEBUG == 1
+#include "MAIN_ledLib.h"
+#endif
 
 /******************************************************************************
  * Display Initialisation
@@ -28,34 +34,50 @@ bool MAIN_initialise_display(Arduino_GFX *gfx)
 {
     DEBUG_PRINTLN("[INIT] Initialising display...");
 
-    // Step 1: Initialise the backlight manager
-    if (!using_backlightmanager().begin(GFX_BL, 0, 5000, 8))
-    {
-        DEBUG_PRINTLN("[ERROR] Backlight manager initialisation failed!");
-        return false;
-    }
-    DEBUG_PRINTLN("[OK] Backlight manager initialised");
+    // Step 1: Backlight OFF during initialisation (prevents flicker/garbage)
+    pinMode(GFX_BL, OUTPUT);
+    digitalWrite(GFX_BL, LOW);
+    DEBUG_PRINTLN("[OK] Backlight OFF (init phase)");
 
-    // Step 2: Initialise the display hardware
+    // Step 2: Small delay to ensure display power stable
+    delay(100);
+
+    // Step 3: Initialise the display hardware
     if (!gfx->begin())
     {
         DEBUG_PRINTLN("[ERROR] Display initialisation failed!");
+#if EARS_DEBUG == 1
+        MAIN_led_error_pattern(10);
+        MAIN_led_red_on();
+#endif
         return false;
     }
+
     DEBUG_PRINTLN("[OK] Display hardware initialised");
 
-    // Step 3: Set display rotation (1 = landscape, USB port on left)
+    // Step 4: Set display rotation (1 = landscape, USB port on left)
     gfx->setRotation(1);
     DEBUG_PRINTLN("[OK] Display rotation set to landscape");
 
-    // Step 4: Fill screen with black to clear any garbage
-    gfx->fillScreen(EARS_RGB565_BLACK);
-    DEBUG_PRINTLN("[OK] Screen cleared to black");
+    // Step 5: CRITICAL - Fill screen BLACK multiple times to clear ST7796 framebuffer
+    DEBUG_PRINTLN("[INFO] Clearing display framebuffer...");
+    for (int i = 0; i < 3; i++)
+    {
+        MAIN_clear_screen(gfx, EARS_RGB565_BLACK);
+        delay(10); // Small delay between clears
+    }
+    DEBUG_PRINTLN("[OK] Display framebuffer cleared");
 
-    // Note: Backlight brightness is already set by the manager
-    // It will be 100% on first boot, then saved preference on subsequent boots
+    // Step 6: Turn backlight ON
+    digitalWrite(GFX_BL, HIGH);
+    DEBUG_PRINTLN("[OK] Backlight ON");
 
     DEBUG_PRINTLN("[OK] Display initialisation complete");
+
+#if EARS_DEBUG == 1
+    MAIN_led_success_pattern();
+#endif
+
     return true;
 }
 
@@ -68,7 +90,7 @@ void MAIN_display_test_pattern(Arduino_GFX *gfx)
     DEBUG_PRINTLN("[TEST] Drawing test pattern...");
 
     // Clear screen
-    gfx->fillScreen(EARS_RGB565_BLACK);
+    MAIN_clear_screen(gfx, EARS_RGB565_BLACK);
 
     // Draw colour bars (vertical stripes)
     uint16_t barWidth = TFT_WIDTH / 8;

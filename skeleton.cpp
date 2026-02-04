@@ -1,73 +1,36 @@
 /**
- * @file main.cpp - v0.8.1 COMPLETE - NVS/SD Validation Restored
+ * @file main.cpp - v0.8.2 DEBLOAT STEP 1 - Display Library Integration
  * @author Julian (51fiftyone51fiftyone_at_gmail.com)
- * @brief EARS Main Application - LVGL 9.3.0 Working + Full System Validation
+ * @brief EARS Main Application - LVGL 9.3.0 Working + Display Lib
  * @details Equipment & Ammunition Reporting System
  *          Dual-core ESP32-S3 implementation using FreeRTOS
  *
  * ============================================================================
- * VERSION v0.8.1 COMPLETE - LVGL 9.3.0 + NVS/SD VALIDATION RESTORED
+ * VERSION v0.8.2 DEBLOAT STEP 1 - DISPLAY LIBRARY INTEGRATION
  * ============================================================================
  *
- * ✅ WHAT'S WORKING:
+ * âœ… CHANGES IN THIS VERSION:
+ * - Removed local initialise_display() function
+ * - Now uses MAIN_displayLib for display initialisation
+ * - Added #include "MAIN_displayLib.h"
+ * - Changed call from initialise_display() to MAIN_initialise_display(gfx)
+ *
+ * âœ… WHAT'S WORKING:
  * - LVGL 9.3.0 display (RGB565, 16-bit color)
  * - Display: Red panel with white text rendering correctly
  * - 60-line double buffering in regular RAM (115KB total)
  * - NVS: Full 5-step validation with LED patterns
- * - SD Card: Full initialization with LED patterns
+ * - SD Card: Full initialisation with LED patterns
  * - FreeRTOS: Dual-core operation (Core0=UI, Core1=Background)
  * - Development LEDs: Red/Yellow/Green status indicators
- *
- * ✅ CRITICAL FIX - lv_conf.h Location:
- * - lv_conf.h MUST be in src/ directory (not just include/)
- * - NEVER manually include lv_conf.h (violates LVGL guidelines)
- * - ALWAYS let LVGL find it: #include <lvgl.h>
- *
- * ✅ LED PATTERNS RESTORED:
- * - RED ON = Critical error (NVS/SD/Display init failed)
- * - YELLOW ON = Warning (needs ZapNumber/Password, no SD card)
- * - GREEN blink = Heartbeat (system running)
- * - GREEN double-blink = Success (NVS/SD ready)
+ * - Display initialisation now modularised
  *
  * ============================================================================
  *
- * @version 0.8.1
+ * @version 0.8.2
  * @date 20260203
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  */
-
-// ===========================================================================
-// NEXT STEP INSTRUCTIONS FROM JULIAN
-//
-// 1. Debloat
-//  - All code that can be placed in seperate modules/libraries should be moved
-//    out of main.cpp to reduce complexity here.
-//  - For example the 2 Core tasks can be placed in their own files. This will
-//    also help with readability.
-//  - The NVS and SD card initialisation code can also be placed in their own
-//    files/modules.
-//  - The LVGL initialisation code can also be placed in its own file/module.
-//  - The display initialisation code can also be placed in its own file/module.
-//  - The various callback functions can also be placed in their own files/modules.
-//  - The various helper functions (e.g. screen clearing) can also be placed in
-//    their own files/modules.
-//  - The development/debug code can also be placed in its own file/module.
-//  - The system info code can also be placed in its own file/module.
-//  - The LED control code can also be placed in its own file/module.
-//
-//  - Once the code is broken down into smaller modules/files, it will be easier
-//    to manage and maintain.
-//  - Each file should be prefixed with the project name (e.g. EARS_) to avoid
-//    naming conflicts.
-//
-//  - Once that is done the missing Step 6B for the backlight PWM control can be
-//    implemented. DigitalWrite can be replaced with PWM control for brightness
-//    adjustment.
-//
-//  - It should be done in stages so that it can be fully tested at each step.
-//
-//  Thank you.
-// ===========================================================================
 
 // ============================================================================
 // INCLUDES
@@ -84,6 +47,7 @@
 #include "EARS_ws35tlcdPins.h"
 #include "EARS_rgb565ColoursDef.h"
 #include "MAIN_drawingLib.h"
+#include "MAIN_displayLib.h" // ← STEP 1: Added display library
 #include "MAIN_sysinfoLib.h"
 
 // NVS and SD Card Libraries
@@ -134,12 +98,12 @@ SemaphoreHandle_t xDisplayMutex = NULL;
 #define CORE1_PRIORITY 1
 
 // ============================================================================
-// NVS STATE MACHINE (STEP 5) - RESTORED
+// NVS STATE MACHINE (STEP 5)
 // ============================================================================
 enum NVSInitState
 {
-    NVS_NOT_INITIALIZED,   // Flash not initialized
-    NVS_INITIALIZED_EMPTY, // Initialized but no user data
+    NVS_NOT_INITIALIZED,   // Flash not initialised
+    NVS_INITIALIZED_EMPTY, // Initialised but no user data
     NVS_NEEDS_ZAPNUMBER,   // Version set, needs ZapNumber
     NVS_NEEDS_PASSWORD,    // ZapNumber set, needs Password
     NVS_READY              // Fully configured and validated
@@ -148,7 +112,7 @@ enum NVSInitState
 volatile NVSInitState nvs_state = NVS_NOT_INITIALIZED;
 
 // ============================================================================
-// SD CARD STATE MACHINE (STEP 6A) - RESTORED
+// SD CARD STATE MACHINE (STEP 6A)
 // ============================================================================
 volatile SDCardState sd_card_state = SD_NOT_INITIALIZED;
 
@@ -157,10 +121,10 @@ volatile SDCardState sd_card_state = SD_NOT_INITIALIZED;
 // ============================================================================
 void Core0_UI_Task(void *parameter);
 void Core1_Background_Task(void *parameter);
-void initialise_display();
 void initialise_lvgl();
 void initialise_nvs();
 void initialise_sd();
+void clear_lvgl_buffers(); // Helper to clear display buffers
 
 // LVGL Callbacks
 void lvgl_flush_cb(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
@@ -184,10 +148,10 @@ void setup()
     Serial.println("[INIT] Initialising development LEDs...");
     MAIN_led_init();
     MAIN_led_test_sequence(200);
-    Serial.println("[OK] LEDs initialized");
+    Serial.println("[OK] LEDs initialised");
 #endif
 
-    // Create synchronization primitives
+    // Create synchronisation primitives
 #if EARS_DEBUG == 1
     Serial.println("[INIT] Creating synchronisation primitives...");
 #endif
@@ -208,8 +172,16 @@ void setup()
     Serial.println("[OK] Synchronisation primitives created");
 #endif
 
-    // Initialize display (Arduino GFX)
-    initialise_display();
+    // STEP 1: Initialize display using library (Arduino GFX)
+    if (!MAIN_initialise_display(gfx)) // ← STEP 1: Using library function now
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[ERROR] Display initialisation failed!");
+        MAIN_led_red_on();
+#endif
+        while (1)
+            delay(1000);
+    }
 
     // Initialize LVGL
     initialise_lvgl();
@@ -298,10 +270,10 @@ void Core1_Background_Task(void *parameter)
     Serial.println("[CORE1] Background Task started");
 #endif
 
-    // STEP 5: Initialize NVS (RESTORED FULL VALIDATION)
+    // STEP 5: Initialize NVS
     initialise_nvs();
 
-    // STEP 6A: Initialize SD card (RESTORED FULL VALIDATION)
+    // STEP 6A: Initialize SD card
     initialise_sd();
 
     TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -352,41 +324,25 @@ static uint32_t lvgl_tick_cb(void)
 // INITIALISATION FUNCTIONS
 // ============================================================================
 
+// STEP 1: Display initialisation moved to MAIN_displayLib
+// Old initialise_display() function REMOVED (was lines 446-491)
+
 /**
- * @brief Initialize display hardware (Arduino GFX)
+ * @brief Force clear LVGL display buffers (prevents old content showing)
  */
-void initialise_display()
+void clear_lvgl_buffers()
 {
-#if EARS_DEBUG == 1
-    Serial.println("[INIT] Initialising display...");
-#endif
-
-    // Direct backlight control
-    pinMode(GFX_BL, OUTPUT);
-    digitalWrite(GFX_BL, HIGH);
-
-#if EARS_DEBUG == 1
-    Serial.println("[OK] Backlight ON");
-#endif
-
-    if (!gfx->begin())
+    if (disp_draw_buf1 != NULL)
     {
-#if EARS_DEBUG == 1
-        Serial.println("[ERROR] Display init failed!");
-        MAIN_led_error_pattern(10);
-        MAIN_led_red_on();
-#endif
-        while (1)
-            delay(1000);
+        memset(disp_draw_buf1, 0x00, screenWidth * 60 * 2);
     }
-
+    if (disp_draw_buf2 != NULL)
+    {
+        memset(disp_draw_buf2, 0x00, screenWidth * 60 * 2);
+    }
 #if EARS_DEBUG == 1
-    Serial.println("[OK] Display initialized");
-    MAIN_led_success_pattern();
+    Serial.println("[OK] LVGL buffers cleared");
 #endif
-
-    // Clear to black
-    MAIN_clear_screen(gfx, EARS_RGB565_BLACK);
 }
 
 /**
@@ -458,6 +414,9 @@ void initialise_lvgl()
     Serial.println("[OK] Buffers allocated");
 #endif
 
+    // CRITICAL: Clear buffers immediately to prevent old content
+    clear_lvgl_buffers();
+
     // Create LVGL display
     lvgl_disp = lv_display_create(screenWidth, screenHeight);
     if (lvgl_disp == NULL)
@@ -485,7 +444,7 @@ void initialise_lvgl()
     lv_tick_set_cb(lvgl_tick_cb);
 
 #if EARS_DEBUG == 1
-    Serial.println("[OK] LVGL initialization complete!");
+    Serial.println("[OK] LVGL initialisation complete!");
 #endif
 
     // Create test UI
@@ -495,7 +454,7 @@ void initialise_lvgl()
     lv_obj_set_style_bg_color(panel, lv_color_hex(0xFF0000), 0);
 
     lv_obj_t *label = lv_label_create(panel);
-    lv_label_set_text(label, "LVGL 9.3.0 WORKING!\nv0.8.1 COMPLETE\nNVS/SD Restored");
+    lv_label_set_text(label, "LVGL 9.3.0 WORKING!\nv0.8.2 STEP 1\nDisplay Lib Active");
     lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), 0);
     lv_obj_center(label);
 
@@ -506,17 +465,17 @@ void initialise_lvgl()
 
 /**
  * @brief Initialize NVS (Non-Volatile Storage) - STEP 5
- * @details RESTORED FULL 5-STEP VALIDATION
+ * @details Full 5-step validation
  *
- * 5-step initialization process:
+ * 5-step initialisation process:
  * 1. Initialize NVS flash
- * 2. Check if NVS is initialized (has version key)
+ * 2. Check if NVS is initialised (has version key)
  * 3. Validate ZapNumber exists and is valid format
  * 4. Check if password exists
  * 5. Run full CRC validation
  *
  * Sets nvs_state and LED patterns based on result:
- * - Red ON = Flash initialization failed (critical)
+ * - Red ON = Flash initialisation failed (critical)
  * - Yellow ON = Needs configuration (ZapNumber or Password missing)
  * - Green double-blink = Fully configured and validated
  */
@@ -530,7 +489,7 @@ void initialise_nvs()
     if (!using_nvseeprom().begin())
     {
 #if EARS_DEBUG == 1
-        Serial.println("[ERROR] NVS flash initialization failed!");
+        Serial.println("[ERROR] NVS flash initialisation failed!");
         MAIN_led_error_pattern(10);
         MAIN_led_red_on();
 #endif
@@ -539,20 +498,20 @@ void initialise_nvs()
     }
 
 #if EARS_DEBUG == 1
-    Serial.println("[OK] NVS flash initialized");
+    Serial.println("[OK] NVS flash initialised");
 #endif
 
-    // Step 2: Check if NVS is initialized (first boot?)
+    // Step 2: Check if NVS is initialised (first boot?)
     if (!using_nvseeprom().isInitialized())
     {
 #if EARS_DEBUG == 1
-        Serial.println("[INFO] First boot detected - initializing NVS...");
+        Serial.println("[INFO] First boot detected - initialising NVS...");
 #endif
 
         if (using_nvseeprom().initializeNVS())
         {
 #if EARS_DEBUG == 1
-            Serial.println("[OK] NVS initialized with defaults (Version=01, Backlight=100)");
+            Serial.println("[OK] NVS initialised with defaults (Version=01, Backlight=100)");
             MAIN_led_warning_pattern(3);
             MAIN_led_yellow_on();
 #endif
@@ -562,7 +521,7 @@ void initialise_nvs()
         else
         {
 #if EARS_DEBUG == 1
-            Serial.println("[ERROR] Failed to initialize NVS!");
+            Serial.println("[ERROR] Failed to initialise NVS!");
             MAIN_led_error_pattern(5);
             MAIN_led_red_on();
 #endif
@@ -645,9 +604,9 @@ void initialise_nvs()
 
 /**
  * @brief Initialize SD Card (SD_MMC mode) - STEP 6A
- * @details RESTORED FULL VALIDATION WITH LED PATTERNS
+ * @details Full validation with LED patterns
  *
- * Initializes SD card using SD_MMC interface (1-bit SDIO mode)
+ * Initialises SD card using SD_MMC interface (1-bit SDIO mode)
  * Pins: CLK=11, CMD=10, D0=9 (verified from Waveshare schematic)
  *
  * Sets sd_card_state based on result:
@@ -667,7 +626,7 @@ void initialise_sd()
     Serial.println("[INIT] Initialising SD card...");
 #endif
 
-    // Try to initialize SD card
+    // Try to initialise SD card
     if (!using_sdcard().begin())
     {
         sd_card_state = using_sdcard().getState();
@@ -675,7 +634,7 @@ void initialise_sd()
         if (sd_card_state == SD_INIT_FAILED)
         {
 #if EARS_DEBUG == 1
-            Serial.println("[ERROR] SD card initialization failed!");
+            Serial.println("[ERROR] SD card initialisation failed!");
             MAIN_led_error_pattern(3);
             MAIN_led_red_on();
 #endif
@@ -696,7 +655,7 @@ void initialise_sd()
     sd_card_state = SD_CARD_READY;
 
 #if EARS_DEBUG == 1
-    Serial.println("[OK] SD card initialized successfully");
+    Serial.println("[OK] SD card initialised successfully");
     Serial.printf("[INFO] Card type: %s\n", using_sdcard().getCardType().c_str());
     Serial.printf("[INFO] Card size: %llu MB\n", using_sdcard().getCardSizeMB());
     Serial.printf("[INFO] Free space: %llu MB\n", using_sdcard().getFreeSpaceMB());
@@ -712,5 +671,5 @@ void initialise_sd()
 }
 
 // ============================================================================
-// END OF FILE - v0.8.1 COMPLETE - NVS/SD Validation Restored
+// END OF FILE - v0.8.2 STEP 1 - Display Library Integration Complete
 // ============================================================================
