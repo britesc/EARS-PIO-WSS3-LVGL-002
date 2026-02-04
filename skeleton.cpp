@@ -1,23 +1,25 @@
 /**
- * @file main.cpp - v0.8.3 DEBLOAT STEP 2 - LVGL Library Integration
+ * @file main.cpp - v0.8.4 DEBLOAT STEP 3 - Separated Core Task Libraries
  * @author Julian (51fiftyone51fiftyone_at_gmail.com)
- * @brief EARS Main Application - LVGL 9.3.0 Working + LVGL Lib
+ * @brief EARS Main Application - LVGL 9.3.0 Working + Separated Core Tasks
  * @details Equipment & Ammunition Reporting System
  *          Dual-core ESP32-S3 implementation using FreeRTOS
  *
  * ============================================================================
- * VERSION v0.8.3 DEBLOAT STEP 2 - LVGL LIBRARY INTEGRATION
+ * VERSION v0.8.4 DEBLOAT STEP 3 - SEPARATED CORE TASK LIBRARIES
  * ============================================================================
  *
- * âœ… CHANGES IN THIS VERSION:
- * - Removed local LVGL initialization code (~180 lines)
- * - Now uses EARS_lvglLib for LVGL management
- * - Added #include "EARS_lvglLib.h"
- * - Removed LVGL global variables (now internal to library)
- * - Removed LVGL callback functions (now in library)
- * - Changed call from initialise_lvgl() to EARS_initialise_lvgl()
+ * ✅ CHANGES IN THIS VERSION:
+ * - Removed Core0_UI_Task() function (~20 lines)
+ * - Removed Core1_Background_Task() function (~30 lines)
+ * - Removed CORE0/CORE1 configuration defines (~4 lines)
+ * - Now uses MAIN_core0TasksLib for Core 0 UI task
+ * - Now uses MAIN_core1TasksLib for Core 1 background task
+ * - Added #include "MAIN_core0TasksLib.h"
+ * - Added #include "MAIN_core1TasksLib.h"
+ * - Simplified task creation to library calls
  *
- * âœ… WHAT'S WORKING:
+ * ✅ WHAT'S WORKING:
  * - LVGL 9.3.0 display (RGB565, 16-bit color)
  * - Display: Red panel with white text rendering correctly
  * - 60-line double buffering in regular RAM (115KB total)
@@ -27,11 +29,12 @@
  * - Development LEDs: Red/Yellow/Green status indicators
  * - Display initialization modularized (Step 1)
  * - LVGL initialization modularized (Step 2)
+ * - Core task management modularized (Step 3) - SEPARATED LIBRARIES!
  *
  * ============================================================================
  *
- * @version 0.8.3
- * @date 20260203
+ * @version 0.8.4
+ * @date 20260204
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  */
 
@@ -50,8 +53,10 @@
 #include "EARS_ws35tlcdPins.h"
 #include "EARS_rgb565ColoursDef.h"
 #include "MAIN_drawingLib.h"
-#include "MAIN_displayLib.h" // STEP 1: Display library
-#include "MAIN_lvglLib.h"    // STEP 2: LVGL library
+#include "MAIN_displayLib.h"    // STEP 1: Display library
+#include "MAIN_lvglLib.h"       // STEP 2: LVGL library
+#include "MAIN_core0TasksLib.h" // STEP 3a: Core 0 UI task
+#include "MAIN_core1TasksLib.h" // STEP 3b: Core 1 background task
 #include "MAIN_sysinfoLib.h"
 
 // NVS and SD Card Libraries
@@ -86,10 +91,7 @@ TaskHandle_t Core0_Task_Handle = NULL;
 TaskHandle_t Core1_Task_Handle = NULL;
 SemaphoreHandle_t xDisplayMutex = NULL;
 
-#define CORE0_STACK_SIZE 8192
-#define CORE1_STACK_SIZE 4096
-#define CORE0_PRIORITY 2
-#define CORE1_PRIORITY 1
+// NOTE: Stack sizes and priorities now defined in MAIN_core0TasksLib.h and MAIN_core1TasksLib.h
 
 // ============================================================================
 // NVS STATE MACHINE (STEP 5)
@@ -113,8 +115,6 @@ volatile SDCardState sd_card_state = SD_NOT_INITIALIZED;
 // ============================================================================
 // FUNCTION PROTOTYPES
 // ============================================================================
-void Core0_UI_Task(void *parameter);
-void Core1_Background_Task(void *parameter);
 void initialise_nvs();
 void initialise_sd();
 
@@ -183,19 +183,30 @@ void setup()
     }
 
     // Create test UI
-    MAIN_create_test_ui("LVGL 9.3.0 WORKING!\nv0.8.3 STEP 2\nLVGL Lib Active");
+    MAIN_create_test_ui("LVGL 9.3.0 WORKING!\nv0.8.4 STEP 3\nCore Tasks Separated!");
 
-    // Create FreeRTOS tasks
+    // STEP 3: Create FreeRTOS tasks using separated libraries
 #if EARS_DEBUG == 1
     Serial.println("[INIT] Creating FreeRTOS tasks...");
 #endif
 
-    xTaskCreatePinnedToCore(Core0_UI_Task, "Core0_UI", CORE0_STACK_SIZE,
-                            NULL, CORE0_PRIORITY, &Core0_Task_Handle, 0);
-    if (Core0_Task_Handle == NULL)
+    // Create Core 0 UI Task
+    if (!MAIN_create_core0_task(&Core0_Task_Handle))
     {
 #if EARS_DEBUG == 1
-        Serial.println("[ERROR] Failed to create Core 0 task!");
+        Serial.println("[ERROR] Core 0 task creation failed!");
+        MAIN_led_error_pattern(5);
+        MAIN_led_red_on();
+#endif
+        while (1)
+            delay(1000);
+    }
+
+    // Create Core 1 Background Task
+    if (!MAIN_create_core1_task(&Core1_Task_Handle))
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[ERROR] Core 1 task creation failed!");
         MAIN_led_error_pattern(5);
         MAIN_led_red_on();
 #endif
@@ -204,25 +215,7 @@ void setup()
     }
 
 #if EARS_DEBUG == 1
-    Serial.println("[OK] Core 0 UI task created");
-#endif
-
-    xTaskCreatePinnedToCore(Core1_Background_Task, "Core1_Background",
-                            CORE1_STACK_SIZE, NULL, CORE1_PRIORITY,
-                            &Core1_Task_Handle, 1);
-    if (Core1_Task_Handle == NULL)
-    {
-#if EARS_DEBUG == 1
-        Serial.println("[ERROR] Failed to create Core 1 task!");
-        MAIN_led_error_pattern(5);
-        MAIN_led_red_on();
-#endif
-        while (1)
-            delay(1000);
-    }
-
-#if EARS_DEBUG == 1
-    Serial.println("[OK] Core 1 background task created");
+    Serial.println("[OK] All tasks created");
     Serial.println("[INIT] System initialization complete\n");
 #endif
 }
@@ -236,71 +229,12 @@ void loop()
 }
 
 // ============================================================================
-// CORE 0 TASK - UI, Display, and LVGL Processing
-// ============================================================================
-void Core0_UI_Task(void *parameter)
-{
-#if EARS_DEBUG == 1
-    Serial.println("[CORE0] UI Task started");
-#endif
-
-    TickType_t xLastWakeTime = xTaskGetTickCount();
-    const TickType_t xFrequency = pdMS_TO_TICKS(5); // 200Hz for LVGL
-
-    while (1)
-    {
-#if EARS_DEBUG == 1
-        DEV_increment_core0_heartbeat();
-#endif
-
-        // Run LVGL task handler
-        lv_timer_handler();
-
-        vTaskDelayUntil(&xLastWakeTime, xFrequency);
-    }
-}
-
-// ============================================================================
-// CORE 1 TASK - Background Processing
-// ============================================================================
-void Core1_Background_Task(void *parameter)
-{
-#if EARS_DEBUG == 1
-    Serial.println("[CORE1] Background Task started");
-#endif
-
-    // STEP 5: Initialize NVS
-    initialise_nvs();
-
-    // STEP 6A: Initialize SD card
-    initialise_sd();
-
-    TickType_t xLastWakeTime = xTaskGetTickCount();
-    const TickType_t xFrequency = pdMS_TO_TICKS(100); // 10Hz
-
-    while (1)
-    {
-#if EARS_DEBUG == 1
-        DEV_increment_core1_heartbeat();
-
-        // Toggle green LED every 500ms (heartbeat)
-        if (DEV_get_core1_heartbeat() % 5 == 0)
-        {
-            MAIN_led_green_toggle();
-        }
-#endif
-
-        vTaskDelayUntil(&xLastWakeTime, xFrequency);
-    }
-}
-
-// ============================================================================
 // INITIALIZATION FUNCTIONS
 // ============================================================================
 
 // STEP 1: Display initialization moved to MAIN_displayLib
 // STEP 2: LVGL initialization moved to MAIN_lvglLib
-// All LVGL-related code (~180 lines) has been removed
+// STEP 3: Core task management moved to MAIN_core0TasksLib and MAIN_core1TasksLib
 
 /**
  * @brief Initialize NVS (Non-Volatile Storage) - STEP 5
@@ -510,5 +444,5 @@ void initialise_sd()
 }
 
 // ============================================================================
-// END OF FILE - v0.8.3 STEP 2 - LVGL Library Integration Complete
+// END OF FILE - v0.8.4 STEP 3 - Separated Core Task Libraries Complete
 // ============================================================================
