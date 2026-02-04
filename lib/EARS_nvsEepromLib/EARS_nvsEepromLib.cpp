@@ -759,6 +759,111 @@ bool EARS_nvsEeprom::factoryReset()
     return result;
 }
 
+/******************************************************************************
+ * High-Level Initialization Orchestration (DEBLOAT Step 4)
+ *****************************************************************************/
+
+/**
+ * @brief Perform complete NVS initialization sequence
+ * @return NVSValidationResult Detailed result of initialization
+ *
+ * @details
+ * This function orchestrates the complete 5-step NVS initialization:
+ * 1. Initialize NVS flash
+ * 2. Check if NVS is initialized (first boot detection)
+ * 3. Validate ZapNumber exists and is valid format
+ * 4. Check if password exists
+ * 5. Run full CRC validation
+ *
+ * This function was extracted from main.cpp during debloat Step 4.
+ * It encapsulates all NVS initialization logic in one place.
+ *
+ * @note The caller should interpret the result to set LED patterns
+ *       and update application state accordingly.
+ */
+NVSValidationResult EARS_nvsEeprom::performFullInitialization()
+{
+    NVSValidationResult result;
+    result.expectedVersion = CURRENT_VERSION;
+
+    // ========================================================================
+    // STEP 1: Initialize NVS flash
+    // ========================================================================
+    if (!begin())
+    {
+        result.status = NVSStatus::INITIALIZATION_FAILED;
+        return result;
+    }
+
+    // ========================================================================
+    // STEP 2: Check if NVS is initialized (first boot?)
+    // ========================================================================
+    if (!isInitialized())
+    {
+        // First boot detected - initialize with defaults
+        if (initializeNVS())
+        {
+            // Successfully initialized with defaults
+            // Status: Needs configuration (ZapNumber and Password)
+            result.status = NVSStatus::MISSING_ZAPNUMBER;
+            result.currentVersion = CURRENT_VERSION;
+            result.zapNumberValid = false;
+            result.passwordHashValid = false;
+            return result;
+        }
+        else
+        {
+            // Failed to initialize
+            result.status = NVSStatus::INITIALIZATION_FAILED;
+            return result;
+        }
+    }
+
+    // ========================================================================
+    // STEP 3: Check ZapNumber
+    // ========================================================================
+    String zapNumber = getZapNumber();
+    if (zapNumber.length() == 0 || !isValidZapNumber(zapNumber))
+    {
+        result.status = NVSStatus::MISSING_ZAPNUMBER;
+        result.zapNumberValid = false;
+        result.currentVersion = getNVSVersionInt();
+        return result;
+    }
+
+    // ZapNumber is valid - store it in result
+    result.zapNumberValid = true;
+    zapNumber.toCharArray(result.zapNumber, 7);
+
+    // ========================================================================
+    // STEP 4: Check password
+    // ========================================================================
+    if (!hasPassword())
+    {
+        result.status = NVSStatus::MISSING_PASSWORD;
+        result.passwordHashValid = false;
+        result.currentVersion = getNVSVersionInt();
+        return result;
+    }
+
+    result.passwordHashValid = true;
+
+    // ========================================================================
+    // STEP 5: Full validation (including CRC check)
+    // ========================================================================
+    result = validateNVS();
+
+    // If validation passed or was upgraded, we're ready
+    if (result.status == NVSStatus::VALID || result.status == NVSStatus::UPGRADED)
+    {
+        // Successfully validated
+        return result;
+    }
+
+    // Validation failed (CRC error, version error, etc.)
+    return result;
+}
+
 /**
  * @brief Get reference to global NVS EEPROM instance (Singleton pattern)
  *

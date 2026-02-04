@@ -145,6 +145,9 @@ public:
     bool isInitialized();
     bool factoryReset();
 
+    // High-level initialization orchestration - DEBLOAT Step 4
+    NVSValidationResult performFullInitialization();
+
 private:
     uint32_t calculateCRC32(const uint8_t *data, size_t length);
     bool upgradeNVS(uint16_t fromVersion, uint16_t toVersion);
