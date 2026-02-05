@@ -1,39 +1,37 @@
 /**
- * @file main.cpp - v0.8.4 DEBLOAT STEP 3 - Separated Core Task Libraries
+ * @file main.cpp - v0.8.5 DEBLOAT STEP 4 - NVS Library Enhancement
  * @author Julian (51fiftyone51fiftyone_at_gmail.com)
- * @brief EARS Main Application - LVGL 9.3.0 Working + Separated Core Tasks
+ * @brief EARS Main Application - LVGL 9.3.0 + Enhanced NVS Library
  * @details Equipment & Ammunition Reporting System
  *          Dual-core ESP32-S3 implementation using FreeRTOS
  *
  * ============================================================================
- * VERSION v0.8.4 DEBLOAT STEP 3 - SEPARATED CORE TASK LIBRARIES
+ * VERSION v0.8.5 DEBLOAT STEP 4 - NVS LIBRARY ENHANCEMENT
  * ============================================================================
  *
  * ✅ CHANGES IN THIS VERSION:
- * - Removed Core0_UI_Task() function (~20 lines)
- * - Removed Core1_Background_Task() function (~30 lines)
- * - Removed CORE0/CORE1 configuration defines (~4 lines)
- * - Now uses MAIN_core0TasksLib for Core 0 UI task
- * - Now uses MAIN_core1TasksLib for Core 1 background task
- * - Added #include "MAIN_core0TasksLib.h"
- * - Added #include "MAIN_core1TasksLib.h"
- * - Simplified task creation to library calls
+ * - Removed initialise_nvs() function (~120 lines)
+ * - Enhanced EARS_nvsEepromLib with performFullInitialization()
+ * - Simplified NVS init to single library call + interpretation
+ * - Moved 5-step initialization logic into library
+ * - LED patterns and state machine remain in main.cpp
  *
  * ✅ WHAT'S WORKING:
  * - LVGL 9.3.0 display (RGB565, 16-bit color)
  * - Display: Red panel with white text rendering correctly
  * - 60-line double buffering in regular RAM (115KB total)
- * - NVS: Full 5-step validation with LED patterns
+ * - NVS: Full 5-step validation via library (enhanced!)
  * - SD Card: Full initialization with LED patterns
  * - FreeRTOS: Dual-core operation (Core0=UI, Core1=Background)
  * - Development LEDs: Red/Yellow/Green status indicators
  * - Display initialization modularized (Step 1)
  * - LVGL initialization modularized (Step 2)
- * - Core task management modularized (Step 3) - SEPARATED LIBRARIES!
+ * - Core task management modularized (Step 3)
+ * - NVS initialization modularized (Step 4)
  *
  * ============================================================================
  *
- * @version 0.8.4
+ * @version 0.8.5
  * @date 20260204
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  */
@@ -60,7 +58,7 @@
 #include "MAIN_sysinfoLib.h"
 
 // NVS and SD Card Libraries
-#include "EARS_nvsEepromLib.h"
+#include "EARS_nvsEepromLib.h" // STEP 4: Enhanced with performFullInitialization()
 #include "EARS_sdCardLib.h"
 
 // Development tools (compile out in production)
@@ -183,7 +181,7 @@ void setup()
     }
 
     // Create test UI
-    MAIN_create_test_ui("LVGL 9.3.0 WORKING!\nv0.8.4 STEP 3\nCore Tasks Separated!");
+    MAIN_create_test_ui("LVGL 9.3.0 WORKING!\nv0.8.5 STEP 4\nNVS Library Enhanced!");
 
     // STEP 3: Create FreeRTOS tasks using separated libraries
 #if EARS_DEBUG == 1
@@ -235,22 +233,20 @@ void loop()
 // STEP 1: Display initialization moved to MAIN_displayLib
 // STEP 2: LVGL initialization moved to MAIN_lvglLib
 // STEP 3: Core task management moved to MAIN_core0TasksLib and MAIN_core1TasksLib
+// STEP 4: NVS initialization logic moved to EARS_nvsEepromLib
 
 /**
- * @brief Initialize NVS (Non-Volatile Storage) - STEP 5
- * @details Full 5-step validation
+ * @brief Initialize NVS (Non-Volatile Storage) - STEP 4 ENHANCED
+ * @details Uses library function for initialization, interprets result for LED patterns
  *
- * 5-step initialization process:
- * 1. Initialize NVS flash
- * 2. Check if NVS is initialized (has version key)
- * 3. Validate ZapNumber exists and is valid format
- * 4. Check if password exists
- * 5. Run full CRC validation
+ * The heavy lifting (5-step initialization) is now done by:
+ * EARS_nvsEepromLib::performFullInitialization()
  *
- * Sets nvs_state and LED patterns based on result:
- * - Red ON = Flash initialization failed (critical)
- * - Yellow ON = Needs configuration (ZapNumber or Password missing)
- * - Green double-blink = Fully configured and validated
+ * This function just:
+ * 1. Calls the library function
+ * 2. Interprets the result
+ * 3. Sets LED patterns
+ * 4. Updates application state
  */
 void initialise_nvs()
 {
@@ -258,120 +254,98 @@ void initialise_nvs()
     Serial.println("[INIT] Initializing NVS...");
 #endif
 
-    // Step 1: Initialize NVS flash
-    if (!using_nvseeprom().begin())
+    // Call library function to perform full initialization
+    NVSValidationResult result = using_nvseeprom().performFullInitialization();
+
+    // Interpret result and set LED patterns + state
+    switch (result.status)
     {
+    case NVSStatus::INITIALIZATION_FAILED:
 #if EARS_DEBUG == 1
         Serial.println("[ERROR] NVS flash initialization failed!");
         MAIN_led_error_pattern(10);
         MAIN_led_red_on();
 #endif
         nvs_state = NVS_NOT_INITIALIZED;
-        return;
-    }
+        break;
 
-#if EARS_DEBUG == 1
-    Serial.println("[OK] NVS flash initialized");
-#endif
-
-    // Step 2: Check if NVS is initialized (first boot?)
-    if (!using_nvseeprom().isInitialized())
-    {
-#if EARS_DEBUG == 1
-        Serial.println("[INFO] First boot detected - initializing NVS...");
-#endif
-
-        if (using_nvseeprom().initializeNVS())
+    case NVSStatus::MISSING_ZAPNUMBER:
+        if (result.currentVersion == result.expectedVersion && !result.zapNumberValid && !result.passwordHashValid)
         {
+            // First boot - initialized with defaults
 #if EARS_DEBUG == 1
-            Serial.println("[OK] NVS initialized with defaults (Version=01, Backlight=100)");
+            Serial.println("[INFO] First boot detected - NVS initialized with defaults");
             MAIN_led_warning_pattern(3);
             MAIN_led_yellow_on();
 #endif
             nvs_state = NVS_INITIALIZED_EMPTY;
-            return;
         }
         else
         {
+            // ZapNumber missing or invalid
 #if EARS_DEBUG == 1
-            Serial.println("[ERROR] Failed to initialize NVS!");
-            MAIN_led_error_pattern(5);
-            MAIN_led_red_on();
+            Serial.println("[INFO] NVS needs ZapNumber");
+            MAIN_led_warning_pattern(3);
+            MAIN_led_yellow_on();
 #endif
-            nvs_state = NVS_NOT_INITIALIZED;
-            return;
+            nvs_state = NVS_NEEDS_ZAPNUMBER;
         }
-    }
+        break;
 
-    // Step 3: Check ZapNumber
-    String zapNumber = using_nvseeprom().getZapNumber();
-    if (zapNumber.length() == 0 || !using_nvseeprom().isValidZapNumber(zapNumber))
-    {
+    case NVSStatus::MISSING_PASSWORD:
 #if EARS_DEBUG == 1
-        Serial.println("[INFO] NVS needs ZapNumber");
-        MAIN_led_warning_pattern(3);
-        MAIN_led_yellow_on();
-#endif
-        nvs_state = NVS_NEEDS_ZAPNUMBER;
-        return;
-    }
-
-#if EARS_DEBUG == 1
-    Serial.printf("[OK] ZapNumber valid: %s\n", zapNumber.c_str());
-#endif
-
-    // Step 4: Check password
-    if (!using_nvseeprom().hasPassword())
-    {
-#if EARS_DEBUG == 1
+        Serial.printf("[OK] ZapNumber valid: %s\n", result.zapNumber);
         Serial.println("[INFO] NVS needs Password");
         MAIN_led_warning_pattern(3);
         MAIN_led_yellow_on();
 #endif
         nvs_state = NVS_NEEDS_PASSWORD;
-        return;
-    }
+        break;
 
-#if EARS_DEBUG == 1
-    Serial.println("[OK] Password hash exists");
-#endif
-
-    // Step 5: Full validation (including CRC check)
-    NVSValidationResult result = using_nvseeprom().validateNVS();
-
-    if (result.status == NVSStatus::VALID || result.status == NVSStatus::UPGRADED)
-    {
+    case NVSStatus::VALID:
 #if EARS_DEBUG == 1
         Serial.println("[OK] NVS fully validated and ready");
-        if (result.status == NVSStatus::UPGRADED)
-        {
-            Serial.printf("[INFO] NVS upgraded from v%d to v%d\n",
-                          result.currentVersion, result.expectedVersion);
-        }
         MAIN_led_success_pattern();
 #endif
         nvs_state = NVS_READY;
-    }
-    else
-    {
+        break;
+
+    case NVSStatus::UPGRADED:
 #if EARS_DEBUG == 1
-        Serial.printf("[ERROR] NVS validation failed: ");
-        switch (result.status)
-        {
-        case NVSStatus::INVALID_VERSION:
-            Serial.println("Invalid version");
-            break;
-        case NVSStatus::CRC_FAILED:
-            Serial.println("CRC check failed - possible tampering");
-            break;
-        default:
-            Serial.println("Unknown error");
-            break;
-        }
+        Serial.printf("[INFO] NVS upgraded from v%d to v%d\n",
+                      result.currentVersion, result.expectedVersion);
+        Serial.println("[OK] NVS fully validated and ready");
+        MAIN_led_success_pattern();
+#endif
+        nvs_state = NVS_READY;
+        break;
+
+    case NVSStatus::INVALID_VERSION:
+#if EARS_DEBUG == 1
+        Serial.println("[ERROR] NVS validation failed: Invalid version");
         MAIN_led_error_pattern(5);
         MAIN_led_yellow_on();
 #endif
         nvs_state = NVS_INITIALIZED_EMPTY;
+        break;
+
+    case NVSStatus::CRC_FAILED:
+#if EARS_DEBUG == 1
+        Serial.println("[ERROR] NVS validation failed: CRC check failed - possible tampering");
+        MAIN_led_error_pattern(5);
+        MAIN_led_yellow_on();
+#endif
+        nvs_state = NVS_INITIALIZED_EMPTY;
+        break;
+
+    default:
+#if EARS_DEBUG == 1
+        Serial.println("[ERROR] NVS validation failed: Unknown error");
+        MAIN_led_error_pattern(5);
+        MAIN_led_yellow_on();
+#endif
+        nvs_state = NVS_INITIALIZED_EMPTY;
+        break;
     }
 }
 
@@ -444,5 +418,5 @@ void initialise_sd()
 }
 
 // ============================================================================
-// END OF FILE - v0.8.4 STEP 3 - Separated Core Task Libraries Complete
+// END OF FILE - v0.8.5 STEP 4 - NVS Library Enhancement Complete
 // ============================================================================

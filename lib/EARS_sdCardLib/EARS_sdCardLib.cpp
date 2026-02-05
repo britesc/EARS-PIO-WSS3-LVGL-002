@@ -2,8 +2,8 @@
  * @file EARS_sdCardLib.cpp
  * @author JTB & Claude Sonnet 4.2
  * @brief SD Card library implementation for ESP32-S3 using SD_MMC
- * @version 2.2.0
- * @date 20260131
+ * @version 2.3.0
+ * @date 20260204
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -325,6 +325,91 @@ bool EARS_sdCard::appendFile(const char *path, const String &content)
     Serial.print("[SD] Append failed: ");
     Serial.println(path);
     return false;
+}
+
+/******************************************************************************
+ * High-Level Initialization Orchestration (DEBLOAT Step 5)
+ *****************************************************************************/
+
+/**
+ * @brief Perform complete SD card initialization sequence
+ * @return SDCardInitResult Detailed result of initialization
+ *
+ * @details
+ * This function orchestrates the complete SD card initialization:
+ * 1. Initialize SD_MMC interface via begin()
+ * 2. Check initialization result (success, failed, no card)
+ * 3. If successful, retrieve card information
+ * 4. Create essential directories (/logs, /config, /images)
+ * 5. Return detailed status for caller interpretation
+ *
+ * This function was extracted from main.cpp during debloat Step 5.
+ * It encapsulates all SD card initialization logic in one place.
+ *
+ * @note The caller should interpret the result to set LED patterns
+ *       and update application state accordingly.
+ */
+SDCardInitResult EARS_sdCard::performFullInitialization()
+{
+    SDCardInitResult result;
+
+    // ========================================================================
+    // STEP 1: Initialize SD card hardware
+    // ========================================================================
+    Serial.println("[INIT] Initializing SD card...");
+
+    if (!begin())
+    {
+        // begin() failed - check why
+        result.state = getState();
+
+        if (result.state == SD_INIT_FAILED)
+        {
+            Serial.println("[ERROR] SD card initialization failed!");
+        }
+        else if (result.state == SD_NO_CARD)
+        {
+            Serial.println("[WARNING] No SD card detected");
+        }
+
+        return result;
+    }
+
+    // ========================================================================
+    // STEP 2: Card successfully initialized - gather information
+    // ========================================================================
+    result.state = SD_CARD_READY;
+    result.cardType = getCardType();
+    result.cardSizeMB = getCardSizeMB();
+    result.freeMB = getFreeSpaceMB();
+    result.usedMB = getUsedSpaceMB();
+
+    Serial.println("[OK] SD card initialized successfully");
+    Serial.printf("[INFO] Card type: %s\n", result.cardType.c_str());
+    Serial.printf("[INFO] Card size: %llu MB\n", result.cardSizeMB);
+    Serial.printf("[INFO] Free space: %llu MB\n", result.freeMB);
+
+    // ========================================================================
+    // STEP 3: Create essential directories
+    // ========================================================================
+    Serial.println("[INFO] Creating essential directories...");
+
+    bool logsOk = createDirectory("/logs");
+    bool configOk = createDirectory("/config");
+    bool imagesOk = createDirectory("/images");
+
+    result.directoriesCreated = (logsOk && configOk && imagesOk);
+
+    if (result.directoriesCreated)
+    {
+        Serial.println("[OK] Essential directories ready");
+    }
+    else
+    {
+        Serial.println("[WARNING] Some directories could not be created");
+    }
+
+    return result;
 }
 
 EARS_sdCard &using_sdcard()

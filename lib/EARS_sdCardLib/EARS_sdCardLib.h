@@ -2,8 +2,8 @@
  * @file EARS_sdCardLib.h
  * @author JTB & Claude Sonnet 4.2
  * @brief SD Card library for ESP32-S3 using SD_MMC (SDIO 1-bit mode)
- * @version 2.2.0
- * @date 20260131
+ * @version 2.3.0
+ * @date 20260204
  *
  * @details
  * This library uses SD_MMC for SD card access (SDIO interface)
@@ -49,6 +49,35 @@ enum SDCardState
 };
 
 /******************************************************************************
+ * SD Card Initialization Result Structure (DEBLOAT Step 5)
+ *****************************************************************************/
+/**
+ * @struct SDCardInitResult
+ * @brief Structure to hold SD card initialization results
+ *
+ * @details
+ * Used by performFullInitialization() to return detailed initialization
+ * status to the caller. Contains card state, type, capacity, and
+ * directory creation status.
+ */
+struct SDCardInitResult
+{
+    SDCardState state;       // Current SD card state
+    String cardType;         // Card type (MMC, SDSC, SDHC)
+    uint64_t cardSizeMB;     // Total card size in MB
+    uint64_t freeMB;         // Free space in MB
+    uint64_t usedMB;         // Used space in MB
+    bool directoriesCreated; // Essential directories created successfully
+
+    SDCardInitResult() : state(SD_NOT_INITIALIZED),
+                         cardType(""),
+                         cardSizeMB(0),
+                         freeMB(0),
+                         usedMB(0),
+                         directoriesCreated(false) {}
+};
+
+/******************************************************************************
  * EARS_sdCard Class
  *****************************************************************************/
 class EARS_sdCard
@@ -81,6 +110,25 @@ public:
     String readFile(const char *path);
     bool writeFile(const char *path, const String &content);
     bool appendFile(const char *path, const String &content);
+
+    /**
+     * @brief Perform complete SD card initialization sequence (DEBLOAT Step 5)
+     * @return SDCardInitResult Detailed result of initialization
+     *
+     * @details
+     * This function orchestrates the complete SD card initialization:
+     * 1. Initialize SD_MMC interface via begin()
+     * 2. Retrieve card information (type, size, free space)
+     * 3. Create essential directories (/logs, /config, /images)
+     * 4. Return detailed status for caller interpretation
+     *
+     * This function was extracted from main.cpp during debloat Step 5.
+     * It encapsulates all SD card initialization logic in one place.
+     *
+     * @note The caller should interpret the result to set LED patterns
+     *       and update application state accordingly.
+     */
+    SDCardInitResult performFullInitialization();
 
 private:
     SDCardState _state;

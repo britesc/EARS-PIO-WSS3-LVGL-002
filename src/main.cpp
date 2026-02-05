@@ -1,19 +1,19 @@
 /**
- * @file main.cpp - v0.8.5 DEBLOAT STEP 4 - NVS Library Enhancement
+ * @file main.cpp - v0.8.6 DEBLOAT STEP 5 - SD Card Library Enhancement
  * @author Julian (51fiftyone51fiftyone_at_gmail.com)
- * @brief EARS Main Application - LVGL 9.3.0 + Enhanced NVS Library
+ * @brief EARS Main Application - LVGL 9.3.0 + Enhanced SD Card Library
  * @details Equipment & Ammunition Reporting System
  *          Dual-core ESP32-S3 implementation using FreeRTOS
  *
  * ============================================================================
- * VERSION v0.8.5 DEBLOAT STEP 4 - NVS LIBRARY ENHANCEMENT
+ * VERSION v0.8.6 DEBLOAT STEP 5 - SD CARD LIBRARY ENHANCEMENT
  * ============================================================================
  *
  * ✅ CHANGES IN THIS VERSION:
- * - Removed initialise_nvs() function (~120 lines)
- * - Enhanced EARS_nvsEepromLib with performFullInitialization()
- * - Simplified NVS init to single library call + interpretation
- * - Moved 5-step initialization logic into library
+ * - Removed SD card init logic from initialise_sd() (~50 lines)
+ * - Enhanced EARS_sdCardLib with performFullInitialization()
+ * - Simplified SD init to single library call + interpretation
+ * - Moved directory creation logic into library
  * - LED patterns and state machine remain in main.cpp
  *
  * ✅ WHAT'S WORKING:
@@ -21,17 +21,18 @@
  * - Display: Red panel with white text rendering correctly
  * - 60-line double buffering in regular RAM (115KB total)
  * - NVS: Full 5-step validation via library (enhanced!)
- * - SD Card: Full initialization with LED patterns
+ * - SD Card: Full initialization via library (enhanced!)
  * - FreeRTOS: Dual-core operation (Core0=UI, Core1=Background)
  * - Development LEDs: Red/Yellow/Green status indicators
  * - Display initialization modularized (Step 1)
  * - LVGL initialization modularized (Step 2)
  * - Core task management modularized (Step 3)
  * - NVS initialization modularized (Step 4)
+ * - SD card initialization modularized (Step 5)
  *
  * ============================================================================
  *
- * @version 0.8.5
+ * @version 0.8.6
  * @date 20260204
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  */
@@ -59,7 +60,7 @@
 
 // NVS and SD Card Libraries
 #include "EARS_nvsEepromLib.h" // STEP 4: Enhanced with performFullInitialization()
-#include "EARS_sdCardLib.h"
+#include "EARS_sdCardLib.h"    // STEP 5: Enhanced with performFullInitialization()
 
 // Development tools (compile out in production)
 #if EARS_DEBUG == 1
@@ -92,7 +93,7 @@ SemaphoreHandle_t xDisplayMutex = NULL;
 // NOTE: Stack sizes and priorities now defined in MAIN_core0TasksLib.h and MAIN_core1TasksLib.h
 
 // ============================================================================
-// NVS STATE MACHINE (STEP 5)
+// NVS STATE MACHINE (STEP 4)
 // ============================================================================
 enum NVSInitState
 {
@@ -106,7 +107,7 @@ enum NVSInitState
 volatile NVSInitState nvs_state = NVS_NOT_INITIALIZED;
 
 // ============================================================================
-// SD CARD STATE MACHINE (STEP 6A)
+// SD CARD STATE MACHINE (STEP 5)
 // ============================================================================
 volatile SDCardState sd_card_state = SD_NOT_INITIALIZED;
 
@@ -181,7 +182,7 @@ void setup()
     }
 
     // Create test UI
-    MAIN_create_test_ui("LVGL 9.3.0 WORKING!\nv0.8.5 STEP 4\nNVS Library Enhanced!");
+    MAIN_create_test_ui("LVGL 9.3.0 WORKING!\nv0.8.6 STEP 5\nSD Card Library Enhanced!");
 
     // STEP 3: Create FreeRTOS tasks using separated libraries
 #if EARS_DEBUG == 1
@@ -234,6 +235,7 @@ void loop()
 // STEP 2: LVGL initialization moved to MAIN_lvglLib
 // STEP 3: Core task management moved to MAIN_core0TasksLib and MAIN_core1TasksLib
 // STEP 4: NVS initialization logic moved to EARS_nvsEepromLib
+// STEP 5: SD card initialization logic moved to EARS_sdCardLib
 
 /**
  * @brief Initialize NVS (Non-Volatile Storage) - STEP 4 ENHANCED
@@ -350,73 +352,54 @@ void initialise_nvs()
 }
 
 /**
- * @brief Initialize SD Card (SD_MMC mode) - STEP 6A
- * @details Full validation with LED patterns
+ * @brief Initialize SD Card (SD_MMC mode) - STEP 5 ENHANCED
+ * @details Uses library function for initialization, interprets result for LED patterns
  *
- * Initializes SD card using SD_MMC interface (1-bit SDIO mode)
- * Pins: CLK=11, CMD=10, D0=9 (verified from Waveshare schematic)
+ * The heavy lifting (SD init + directory creation) is now done by:
+ * EARS_sdCardLib::performFullInitialization()
  *
- * Sets sd_card_state based on result:
- * - SD_NOT_INITIALIZED → Hasn't been tried yet
- * - SD_INIT_FAILED → Pin setup or begin() failed
- * - SD_NO_CARD → No card detected
- * - SD_CARD_READY → Card mounted and ready
- *
- * LED Patterns:
- * - Red blink = SD init failed (critical for logging)
- * - Yellow blink = No card detected (warning)
- * - Green double-blink = SD ready!
+ * This function just:
+ * 1. Calls the library function
+ * 2. Interprets the result
+ * 3. Sets LED patterns
+ * 4. Updates application state
  */
 void initialise_sd()
 {
-#if EARS_DEBUG == 1
-    Serial.println("[INIT] Initializing SD card...");
-#endif
+    // Call library function to perform full initialization
+    SDCardInitResult result = using_sdcard().performFullInitialization();
 
-    // Try to initialize SD card
-    if (!using_sdcard().begin())
+    // Interpret result and set LED patterns + state
+    sd_card_state = result.state;
+
+    switch (result.state)
     {
-        sd_card_state = using_sdcard().getState();
+    case SD_INIT_FAILED:
+#if EARS_DEBUG == 1
+        MAIN_led_error_pattern(3);
+        MAIN_led_red_on();
+#endif
+        break;
 
-        if (sd_card_state == SD_INIT_FAILED)
-        {
+    case SD_NO_CARD:
 #if EARS_DEBUG == 1
-            Serial.println("[ERROR] SD card initialization failed!");
-            MAIN_led_error_pattern(3);
-            MAIN_led_red_on();
+        MAIN_led_warning_pattern(3);
+        MAIN_led_yellow_on();
 #endif
-            return;
-        }
-        else if (sd_card_state == SD_NO_CARD)
-        {
+        break;
+
+    case SD_CARD_READY:
 #if EARS_DEBUG == 1
-            Serial.println("[WARNING] No SD card detected");
-            MAIN_led_warning_pattern(3);
-            MAIN_led_yellow_on();
+        MAIN_led_success_pattern();
 #endif
-            return;
-        }
+        break;
+
+    default:
+        // Should never reach here
+        break;
     }
-
-    // SD card ready!
-    sd_card_state = SD_CARD_READY;
-
-#if EARS_DEBUG == 1
-    Serial.println("[OK] SD card initialized successfully");
-    Serial.printf("[INFO] Card type: %s\n", using_sdcard().getCardType().c_str());
-    Serial.printf("[INFO] Card size: %llu MB\n", using_sdcard().getCardSizeMB());
-    Serial.printf("[INFO] Free space: %llu MB\n", using_sdcard().getFreeSpaceMB());
-
-    // Create essential directories
-    Serial.println("[INFO] Creating essential directories...");
-    using_sdcard().createDirectory("/logs");
-    using_sdcard().createDirectory("/config");
-    using_sdcard().createDirectory("/images");
-
-    MAIN_led_success_pattern();
-#endif
 }
 
 // ============================================================================
-// END OF FILE - v0.8.5 STEP 4 - NVS Library Enhancement Complete
+// END OF FILE - v0.8.6 STEP 5 - SD Card Library Enhancement Complete
 // ============================================================================
