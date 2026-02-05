@@ -3,8 +3,8 @@
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief Display initialisation and management for EARS
  * @details Handles Arduino GFX library initialisation for Waveshare 3.5" LCD
- * @version 0.2.0
- * @date 20260203
+ * @version 0.3.0
+ * @date 20260204
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -13,8 +13,9 @@
  * Includes
  *****************************************************************************/
 #include "MAIN_displayLib.h"
-#include "MAIN_drawingLib.h" // ← Need this for MAIN_clear_screen()
+#include "MAIN_drawingLib.h"
 #include "EARS_systemDef.h"
+#include "EARS_backLightManagerLib.h" // STEP 6: PWM backlight control
 
 // Only include LED lib if debug mode enabled
 #if EARS_DEBUG == 1
@@ -26,7 +27,7 @@
  *****************************************************************************/
 
 /**
- * @brief Initialise the display hardware
+ * @brief Initialise the display hardware with PWM backlight control
  * @param gfx Pointer to Arduino_GFX object
  * @return true if successful, false if failed
  */
@@ -34,15 +35,38 @@ bool MAIN_initialise_display(Arduino_GFX *gfx)
 {
     DEBUG_PRINTLN("[INIT] Initialising display...");
 
-    // Step 1: Backlight OFF during initialisation (prevents flicker/garbage)
-    pinMode(GFX_BL, OUTPUT);
-    digitalWrite(GFX_BL, LOW);
-    DEBUG_PRINTLN("[OK] Backlight OFF (init phase)");
+    // ========================================================================
+    // STEP 1: Initialize PWM backlight manager (STEP 6 - PWM MIGRATION)
+    // ========================================================================
+    DEBUG_PRINTLN("[INIT] Initialising PWM backlight manager...");
 
-    // Step 2: Small delay to ensure display power stable
+    // Initialize backlight manager with:
+    // - Pin: GFX_BL (GPIO 6)
+    // - PWM Channel: 0
+    // - PWM Frequency: 5000 Hz
+    // - PWM Resolution: 8-bit (0-255)
+    if (!using_backlightmanager().begin(GFX_BL, 0, 5000, 8))
+    {
+        DEBUG_PRINTLN("[ERROR] Backlight manager initialization failed!");
+#if EARS_DEBUG == 1
+        MAIN_led_error_pattern(10);
+        MAIN_led_red_on();
+#endif
+        return false;
+    }
+
+    // Turn backlight OFF during display initialization (prevents flicker)
+    using_backlightmanager().setBrightness(0);
+    DEBUG_PRINTLN("[OK] Backlight manager initialized (brightness: 0%)");
+
+    // ========================================================================
+    // STEP 2: Small delay to ensure display power stable
+    // ========================================================================
     delay(100);
 
-    // Step 3: Initialise the display hardware
+    // ========================================================================
+    // STEP 3: Initialise the display hardware
+    // ========================================================================
     if (!gfx->begin())
     {
         DEBUG_PRINTLN("[ERROR] Display initialisation failed!");
@@ -55,22 +79,54 @@ bool MAIN_initialise_display(Arduino_GFX *gfx)
 
     DEBUG_PRINTLN("[OK] Display hardware initialised");
 
-    // Step 4: Set display rotation (1 = landscape, USB port on left)
+    // ========================================================================
+    // STEP 4: Set display rotation (1 = landscape, USB port on left)
+    // ========================================================================
     gfx->setRotation(1);
     DEBUG_PRINTLN("[OK] Display rotation set to landscape");
 
-    // Step 5: CRITICAL - Fill screen BLACK multiple times to clear ST7796 framebuffer
+    // ========================================================================
+    // STEP 5: CRITICAL - Fill screen BLACK multiple times to clear framebuffer
+    // ========================================================================
     DEBUG_PRINTLN("[INFO] Clearing display framebuffer...");
     for (int i = 0; i < 3; i++)
     {
         MAIN_clear_screen(gfx, EARS_RGB565_BLACK);
-        delay(10); // Small delay between clears
+        delay(10);
     }
     DEBUG_PRINTLN("[OK] Display framebuffer cleared");
 
-    // Step 6: Turn backlight ON
-    digitalWrite(GFX_BL, HIGH);
-    DEBUG_PRINTLN("[OK] Backlight ON");
+    // ========================================================================
+    // STEP 6: Fade backlight ON smoothly (STEP 6 - PWM MIGRATION)
+    // ========================================================================
+    DEBUG_PRINTLN("[INFO] Fading backlight on...");
+
+    // Check if this is initial device configuration
+    if (using_backlightmanager().isInitialConfig())
+    {
+        // First boot - use 100% brightness
+        DEBUG_PRINTLN("[INFO] Initial config detected - using 100% brightness");
+        using_backlightmanager().fadeToBrightness(100, 500);
+        using_backlightmanager().completeInitialConfig();
+    }
+    else
+    {
+        // Load saved brightness from NVS
+        if (using_backlightmanager().loadBrightness())
+        {
+            uint8_t brightness = using_backlightmanager().getBrightness();
+            DEBUG_PRINTF("[INFO] Loaded brightness: %d%%\n", brightness);
+            using_backlightmanager().fadeToBrightness(brightness, 500);
+        }
+        else
+        {
+            // Default to 75% if load fails
+            DEBUG_PRINTLN("[INFO] Using default brightness: 75%");
+            using_backlightmanager().fadeToBrightness(75, 500);
+        }
+    }
+
+    DEBUG_PRINTLN("[OK] Backlight faded on");
 
     DEBUG_PRINTLN("[OK] Display initialisation complete");
 

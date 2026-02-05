@@ -3,8 +3,8 @@
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief Display initialisation and management for EARS
  * @details Handles Arduino GFX library initialisation for Waveshare 3.5" LCD
- * @version 0.1.0
- * @date 20260124
+ * @version 0.3.0
+ * @date 20260204
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -27,7 +27,7 @@
  *****************************************************************************/
 
 /**
- * @brief Initialise the display hardware and backlight
+ * @brief Initialise the display hardware with PWM backlight control
  * @param gfx Pointer to Arduino_GFX object
  * @return true if successful, false if failed
  */
