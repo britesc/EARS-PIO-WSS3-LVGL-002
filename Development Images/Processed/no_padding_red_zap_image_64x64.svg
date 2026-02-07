@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--?xml version="1.0" encoding="UTF-8"?-->
+
+<svg
+   width="64"
+   height="64"
+   viewBox="0 0 64 64"
+   version="1.1"
+   id="svg2"
+   sodipodi:docname="no_padding_red_zap_image_64x64.svg"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="namedview2"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#505050"
+     showgrid="false"
+     inkscape:zoom="12.078125"
+     inkscape:cx="31.917206"
+     inkscape:cy="25.293661"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <!-- TRUE_BLACK background -->
+  <rect
+     x="0"
+     y="0"
+     width="64"
+     height="64"
+     fill="#0A0B0B"
+     id="rect1" />
+  <!-- Dark Red rounded border -->
+  <rect
+     x="1.8060268"
+     y="1.9716157"
+     width="60.235287"
+     height="60.235291"
+     rx="9.4117651"
+     ry="9.4117641"
+     fill="none"
+     stroke="#7a1e1e"
+     stroke-width="3.76471"
+     id="rect2" />
+  <path
+     d="m 14.818069,34.385843 h 12.629419 l -6.025651,20.309665 c -0.21834,0.620689 0.144616,1.311513 0.725912,1.589511 0.21834,0.137632 0.43668,0.137632 0.652188,0.137632 0.43668,0 0.870514,-0.207794 1.162621,-0.483057 L 50.313893,24.988737 c 0.362957,-0.415589 0.43668,-0.966087 0.144617,-1.451894 -0.21834,-0.483057 -0.799665,-0.82847 -1.307223,-0.761042 L 34.996001,23.121226 39.640677,9.3746552 c 0.144616,-0.4155888 0,-0.8986601 -0.21834,-1.2440861 C 39.133105,7.7851431 38.696425,7.5773487 38.259716,7.5773487 H 23.741474 c -0.581296,0 -1.16262,0.3454259 -1.378071,0.8986602 L 13.433958,32.585359 c -0.144617,0.415588 -0.07372,0.89866 0.218339,1.244086 0.289233,0.345425 0.725913,0.55322 1.162621,0.55322 z m 10.018313,-24.10935 h 11.470137 l -4.718428,13.746571 c -0.144617,0.415589 0,0.898661 0.218339,1.244086 0.289233,0.345426 0.725913,0.553221 1.23347,0.553221 l 13.066418,-0.275263 -19.88854,23.418498 4.644676,-15.544168 c 0.144617,-0.415589 0,-0.89866 -0.21834,-1.244086 -0.289232,-0.345426 -0.725912,-0.553221 -1.16262,-0.553221 H 16.922488 l 7.91099,-21.345942 z"
+     id="path1"
+     inkscape:highlight-color="#7a1e1e"
+     style="fill:#7a1e1e;fill-opacity:1;stroke:none;stroke-width:0.708165" />
+</svg>

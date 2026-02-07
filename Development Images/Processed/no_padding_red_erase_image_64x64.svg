@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--?xml version="1.0" encoding="UTF-8"?-->
+
+<svg
+   width="64"
+   height="64"
+   viewBox="0 0 64 64"
+   version="1.1"
+   id="svg2"
+   sodipodi:docname="no_padding_red_zap_image_64x64.svg"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="namedview2"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#505050"
+     showgrid="false"
+     inkscape:zoom="12.078125"
+     inkscape:cx="41.769728"
+     inkscape:cy="31.917206"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <!-- TRUE_BLACK background -->
+  <rect
+     x="0"
+     y="0"
+     width="64"
+     height="64"
+     fill="#0A0B0B"
+     id="rect1" />
+  <!-- Dark Red rounded border -->
+  <rect
+     x="1.8060268"
+     y="1.9716157"
+     width="60.235287"
+     height="60.235291"
+     rx="9.4117651"
+     ry="9.4117641"
+     fill="none"
+     stroke="#7a1e1e"
+     stroke-width="3.76471"
+     id="rect2" />
+  <path
+     d="m 53.380521,28.744587 c 0.05697,-2.504032 -0.766295,-4.845686 -2.313105,-6.609243 L 42.390809,12.24293 C 40.82409,10.456676 38.847095,9.4400799 36.818908,9.38163 h -0.219344 c -2.107968,0 -4.09065,0.932122 -5.586195,2.637229 L 12.856523,32.719928 c -1.566719,1.786254 -2.458372,4.040275 -2.509639,6.352662 -0.05697,2.504033 0.766296,4.845686 2.313107,6.609243 l 6.993354,7.973295 c 0.823249,0.938607 1.925655,1.46474 3.090776,1.46474 h 29.044537 c 0.817561,0 1.509765,-0.656053 1.575324,-1.497249 0.04272,-0.480669 -0.09401,-0.938607 -0.373171,-1.289389 -0.27632,-0.350765 -0.672281,-0.54888 -1.079654,-0.54888 H 36.223548 L 50.85958,35.097449 c 1.566719,-1.786255 2.458372,-4.040275 2.509637,-6.352662 z M 32.106864,51.774505 H 22.14532 l -7.417923,-8.457356 c -0.925781,-1.055507 -1.458498,-2.520246 -1.458498,-4.014251 0,-1.497249 0.518453,-2.942533 1.458498,-4.014252 L 25.426941,23.089831 41.344992,41.238395 32.103947,51.774339 Z M 49.005026,32.508493 43.4103,38.88718 27.492248,20.738617 33.086975,14.359931 c 0.940075,-1.071803 2.187747,-1.662871 3.520888,-1.662871 1.333141,0 2.580886,0.591101 3.520888,1.662871 l 8.876422,10.120227 c 0.940074,1.071802 1.458498,2.494304 1.458498,4.014251 0,1.519945 -0.532695,2.958744 -1.458498,4.014251 z"
+     id="path1"
+     style="fill:#7a1e1e;fill-opacity:1;stroke-width:0.778667" />
+</svg>
