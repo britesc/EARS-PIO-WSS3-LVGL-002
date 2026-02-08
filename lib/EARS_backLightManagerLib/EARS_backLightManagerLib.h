@@ -4,7 +4,7 @@
  * @brief Manages LCD backlight with PWM control, NVS storage, and screen saver integration
  * @version 1.8.0
  * @date 2026018
- * 
+ *
  * Features:
  * - Analog PWM brightness control (0-100%)
  * - NVS storage for user preferences
@@ -26,12 +26,59 @@
 #include <Arduino.h>
 #include <Preferences.h>
 
-class EARS_backLightManager {
+/******************************************************************************
+ * Library Version Information
+ *****************************************************************************/
+#define BACKLIGHT_LIB_NAME "EARS_BackLightManager"
+#define BACKLIGHT_LIB_VERSION_MAJOR 1
+#define BACKLIGHT_LIB_VERSION_MINOR 8
+#define BACKLIGHT_LIB_VERSION_PATCH 0
+#define BACKLIGHT_LIB_VERSION_DATE "2026-02-08"
+#define BACKLIGHT_LIB_VERSION_FULL "1.8.0"
+
+class EARS_backLightManager
+{
 public:
     /**
      * @brief Construct a new Backlight Manager
      */
     EARS_backLightManager();
+
+    /**
+     * @brief Get library name
+     * @return const char* Library name
+     */
+    static const char *getLibraryName();
+
+    /**
+     * @brief Get full version string
+     * @return const char* Version string (e.g., "1.8.0")
+     */
+    static const char *getVersionFull();
+
+    /**
+     * @brief Get major version number
+     * @return uint8_t Major version
+     */
+    static uint8_t getVersionMajor();
+
+    /**
+     * @brief Get minor version number
+     * @return uint8_t Minor version
+     */
+    static uint8_t getVersionMinor();
+
+    /**
+     * @brief Get patch version number
+     * @return uint8_t Patch version
+     */
+    static uint8_t getVersionPatch();
+
+    /**
+     * @brief Get version date
+     * @return const char* Version date (YYYY-MM-DD)
+     */
+    static const char *getVersionDate();
 
     /**
      * @brief Initialize the backlight manager
@@ -41,7 +88,7 @@ public:
      * @param pwmResolution PWM resolution in bits (default 8)
      * @return true if initialization successful
      */
-    bool begin(uint8_t pin, uint8_t pwmChannel = 0, 
+    bool begin(uint8_t pin, uint8_t pwmChannel = 0,
                uint32_t pwmFrequency = 5000, uint8_t pwmResolution = 8);
 
     /**
@@ -117,18 +164,18 @@ private:
     uint8_t _pwmChannel;
     uint8_t _pwmResolution;
     uint32_t _maxDutyCycle;
-    
+
     uint8_t _currentBrightness;
-    uint8_t _savedBrightness;  // Brightness before screen saver
+    uint8_t _savedBrightness; // Brightness before screen saver
     bool _screenSaverActive;
     bool _initialized;
 
     Preferences _preferences;
 
     // NVS keys
-    static constexpr const char* NVS_NAMESPACE = "backlight";
-    static constexpr const char* NVS_BRIGHTNESS_KEY = "brightness";
-    static constexpr const char* NVS_INIT_FLAG_KEY = "init_done";
+    static constexpr const char *NVS_NAMESPACE = "backlight";
+    static constexpr const char *NVS_BRIGHTNESS_KEY = "brightness";
+    static constexpr const char *NVS_INIT_FLAG_KEY = "init_done";
 
     // Default values
     static constexpr uint8_t DEFAULT_BRIGHTNESS = 75;
@@ -143,7 +190,7 @@ private:
 };
 
 // Global instance access function
-EARS_backLightManager& using_backlightmanager();
+EARS_backLightManager &using_backlightmanager();
 
 #endif // __EARS_BACKLIGHT_MANAGER_LIB_H__
 
