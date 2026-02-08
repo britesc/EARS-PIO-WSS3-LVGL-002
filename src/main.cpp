@@ -1,46 +1,23 @@
 /**
- * @file main.cpp - v0.9.0 DEBLOAT STEP 6 COMPLETE - PWM Backlight + Final Cleanup
- * @author Julian (51fiftyone51fiftyone_at_gmail.com)
- * @brief EARS Main Application - LVGL 9.3.0 + Fully Modular Architecture
+ * @file main.cpp - v0.11.0 TOUCH CONTROLLER INTEGRATION
+ * @author JTB
+ * @brief EARS Main Application - LVGL 9.3.0 + Touch + Fully Modular Architecture
  * @details Equipment & Ammunition Reporting System
  *          Dual-core ESP32-S3 implementation using FreeRTOS
  *
  * ============================================================================
- * VERSION v0.9.0 DEBLOAT STEP 6 COMPLETE - PWM BACKLIGHT + FINAL CLEANUP
+ * VERSION v0.11.0 - 20260207
+ * NEW FEATURES:
+ * - FT6236U/FT3267 touch controller integration (STEP 7)
+ * - I2C pins corrected: SDA=8, SCL=7 (verified via I2C scanner)
+ * - LVGL touch input device driver
+ * - Touch library based on Waveshare TouchDrvFT6X36
+ * - EARS_touchLib modular library following established EARS pattern
+ * - performFullInitialization() method matching NVS/SD pattern
  * ============================================================================
  *
- * ✅ CHANGES IN THIS VERSION:
- * - Migrated backlight from digital HIGH/LOW to PWM control
- * - Integrated EARS_backLightManagerLib into display initialization
- * - Smooth fade transitions on startup
- * - NVS-backed brightness persistence (100% first boot, 75% default)
- * - Final code cleanup and polish
- *
- * ✅ WHAT'S WORKING:
- * - LVGL 9.3.0 display (RGB565, 16-bit color)
- * - Display: Red panel with white text rendering correctly
- * - 60-line double buffering in regular RAM (115KB total)
- * - PWM backlight control with smooth fading
- * - NVS: Full 5-step validation via library
- * - SD Card: Full initialization via library
- * - FreeRTOS: Dual-core operation (Core0=UI, Core1=Background)
- * - Development LEDs: Red/Yellow/Green status indicators
- * - Display initialization modularized (Step 1) + PWM (Step 6)
- * - LVGL initialization modularized (Step 2)
- * - Core task management modularized (Step 3)
- * - NVS initialization modularized (Step 4)
- * - SD card initialization modularized (Step 5)
- * - Backlight management modularized (Step 6)
- *
- * 📊 CODE REDUCTION ACHIEVED:
- * - Original: ~676 lines
- * - Current: ~310 lines
- * - Removed: 366 lines (54% reduction!)
- *
- * ============================================================================
- *
- * @version 0.9.0
- * @date 20260204
+ * @version 0.11.0
+ * @date 20260207
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  */
 
@@ -56,7 +33,7 @@
 #include "EARS_versionDef.h"
 #include "EARS_systemDef.h"
 #include "EARS_toolsVersionDef.h"
-#include "EARS_ws35tlcdPins.h"
+#include "EARS_ws35tlcdPins.h" // Updated with correct touch pins
 #include "EARS_rgb565ColoursDef.h"
 #include "MAIN_drawingLib.h"
 #include "MAIN_displayLib.h"    // STEP 1 + STEP 6: Display + PWM backlight
@@ -67,6 +44,7 @@
 #include "EARS_nvsEepromLib.h"        // STEP 4: Enhanced NVS
 #include "EARS_sdCardLib.h"           // STEP 5: Enhanced SD Card
 #include "EARS_backLightManagerLib.h" // STEP 6: PWM backlight manager
+#include "EARS_touchLib.h"            // STEP 7: Touch controller - NEW!
 
 // Development tools (compile out in production)
 #if EARS_DEBUG == 1
@@ -97,6 +75,12 @@ TaskHandle_t Core1_Task_Handle = NULL;
 SemaphoreHandle_t xDisplayMutex = NULL;
 
 // ============================================================================
+// TOUCH CONTROLLER STATE MACHINE
+// ============================================================================
+volatile TouchState touch_state = TOUCH_NOT_INITIALIZED;
+volatile bool touch_initialized = false;
+
+// ============================================================================
 // NVS STATE MACHINE
 // ============================================================================
 enum NVSInitState
@@ -120,6 +104,7 @@ volatile SDCardState sd_card_state = SD_NOT_INITIALIZED;
 // ============================================================================
 void initialise_nvs();
 void initialise_sd();
+void initialise_touch();
 
 // ============================================================================
 // ARDUINO SETUP - Runs once on Core 1
@@ -185,8 +170,18 @@ void setup()
             delay(1000);
     }
 
-    // Create test UI
-    MAIN_create_test_ui("DEBLOAT COMPLETE!\nv0.9.0 STEP 6\nPWM Backlight Active!");
+    // STEP 7: Initialize Touch Controller - NEW!
+    initialise_touch();
+
+    // STEP 4: Initialize NVS (BEFORE creating tasks)
+    initialise_nvs();
+
+    // STEP 5: Initialize SD Card (BEFORE creating tasks)
+    initialise_sd();
+
+    // Create test UI with touch indicator
+    const char *status_msg = touch_initialized ? "v0.11.0 TOUCH ACTIVE!\nTap screen to test" : "v0.11.0\nTouch init failed";
+    MAIN_create_test_ui(status_msg);
 
     // STEP 3: Create FreeRTOS tasks
 #if EARS_DEBUG == 1
@@ -234,11 +229,65 @@ void loop()
 // ============================================================================
 
 /**
+ * @brief Initialize Touch Controller
+ * @details Uses EARS_touchLib::performFullInitialization()
+ */
+void initialise_touch()
+{
+    // Guard against duplicate initialization
+    if (touch_state != TOUCH_NOT_INITIALIZED)
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[TOUCH] Already initialized, skipping");
+#endif
+        return;
+    }
+
+    TouchInitResult result = using_touch().performFullInitialization(TOUCH_SDA, TOUCH_SCL);
+    touch_state = result.state;
+
+    switch (result.state)
+    {
+    case TOUCH_INIT_FAILED:
+#if EARS_DEBUG == 1
+        Serial.println("[WARNING] Touch initialization failed");
+        Serial.println("          System will continue without touch input");
+        MAIN_led_warning_pattern(3);
+#endif
+        touch_initialized = false;
+        break;
+
+    case TOUCH_READY:
+#if EARS_DEBUG == 1
+        Serial.printf("[OK] Touch ready: %s\n", result.modelName.c_str());
+        Serial.printf("     I2C: 0x%02X @ SDA=%d, SCL=%d\n",
+                      result.i2cAddress, result.sdaPin, result.sclPin);
+        Serial.printf("     Max Touch Points: %d\n", result.maxTouchPoints);
+        MAIN_led_success_pattern();
+#endif
+        touch_initialized = true;
+        break;
+
+    default:
+        break;
+    }
+}
+
+/**
  * @brief Initialize NVS (Non-Volatile Storage)
  * @details Uses EARS_nvsEepromLib::performFullInitialization()
  */
 void initialise_nvs()
 {
+    // Guard against duplicate initialization
+    if (nvs_state != NVS_NOT_INITIALIZED)
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[NVS] Already initialized, skipping");
+#endif
+        return;
+    }
+
 #if EARS_DEBUG == 1
     Serial.println("[INIT] Initializing NVS...");
 #endif
@@ -325,6 +374,15 @@ void initialise_nvs()
  */
 void initialise_sd()
 {
+    // Guard against duplicate initialization
+    if (sd_card_state != SD_NOT_INITIALIZED)
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[SD] Already initialized, skipping");
+#endif
+        return;
+    }
+
     SDCardInitResult result = using_sdcard().performFullInitialization();
     sd_card_state = result.state;
 
@@ -356,5 +414,5 @@ void initialise_sd()
 }
 
 // ============================================================================
-// END OF FILE - v0.9.0 STEP 6 COMPLETE - DEBLOAT EXERCISE FINISHED! 🎉
+// END OF FILE - v0.11.0 TOUCH CONTROLLER INTEGRATED! 🎉
 // ============================================================================

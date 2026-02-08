@@ -2,9 +2,14 @@
  * @file EARS_ws35tlcdPins.h
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief Defines pin assignments for the Waveshare 3.5" ESP32-S3 LCD display.
- * @details Pin definitions verified from Waveshare wiki schematic
- * @version 0.2
- * @date 20260131
+ * @details Pin definitions verified from Waveshare wiki schematic and I2C scanner
+ * @version 0.3
+ * @date 20260207
+ *
+ * CHANGE LOG:
+ * v0.3 - CORRECTED Touch I2C pins from scanner results:
+ *        Was: SDA=38, SCL=39 (INCORRECT)
+ *        Now: SDA=8, SCL=7 (VERIFIED via I2C scanner)
  */
 #pragma once
 #ifndef __EARS_WS35TLCD_PINS_H_
@@ -28,11 +33,12 @@
 #define SDMMC_D0 9   // SD Data 0 (was wrongly defined as 8)
 // Note: SD_CS (EXIO3) not used in SD_MMC mode
 
-// Touch Screen Pins (I2C) - if needed later
-#define TOUCH_SDA 38
-#define TOUCH_SCL 39
-#define TOUCH_INT 18
-#define TOUCH_RST -1
+// Touch Screen Pins (I2C) - CORRECTED via I2C scanner 2026-02-07
+// Chip detected: FT6236U/FT3267 (Chip ID: 0x64) at address 0x38
+#define TOUCH_SDA 8  // I2C Data (CORRECTED from 38)
+#define TOUCH_SCL 7  // I2C Clock (CORRECTED from 39)
+#define TOUCH_INT 18 // Touch interrupt pin
+#define TOUCH_RST -1 // Touch reset (controlled via TCA9554 GPIO expander)
 
 // Display Specifications
 #define TFT_WIDTH 480
