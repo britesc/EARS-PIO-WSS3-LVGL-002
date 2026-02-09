@@ -286,8 +286,18 @@ void EARS_touch::lvgl_touch_read(lv_indev_t *indev, lv_indev_data_t *data)
     if (touchCount > 0)
     {
         data->state = LV_INDEV_STATE_PRESSED;
-        data->point.x = x[0];
-        data->point.y = y[0];
+
+        // Standard rotation 1 (90° clockwise) transformation
+        // Touch panel reports in portrait: X=[0-319], Y=[0-479]
+        // Display is landscape: width=480, height=320
+        // Transform: new_x = old_y, new_y = 319 - old_x
+        data->point.x = y[0];
+        data->point.y = 319 - x[0];
+
+#if EARS_DEBUG == 1
+        Serial.printf("[TOUCH DEBUG] Touch X=%d Y=%d → Display X=%d Y=%d\n",
+                      x[0], y[0], data->point.x, data->point.y);
+#endif
     }
     else
     {
