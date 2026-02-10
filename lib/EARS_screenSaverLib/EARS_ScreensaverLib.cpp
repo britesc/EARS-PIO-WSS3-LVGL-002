@@ -2,8 +2,8 @@
  * @file EARS_screenSaverLib.cpp
  * @author JTB & Claude Sonnet 4.2
  * @brief Screensaver library implementation header file
- * @version 1.5.0
- * @date 20260116
+ * @version 2.0.0
+ * @date 20260210
  * 
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -204,14 +204,34 @@ void EARS_screenSaver::updateAnimation() {
     // TODO: Implement animation
 }
 
-/**
- * @brief Get reference to global screensaver instance (Singleton pattern)
- * 
- * This function implements the singleton pattern to ensure only one
- * screensaver instance exists throughout the application lifecycle.
- * 
- * @return EARS_screenSaver& Reference to the global screensaver instance
- */
+/******************************************************************************
+ * Library Version Information Getters
+ *****************************************************************************/
+
+// Get library name
+const char* EARS_screenSaver::getLibraryName() {
+    return EARS_ScreenSaver::LIB_NAME;
+}
+
+// Get encoded version as integer
+uint32_t EARS_screenSaver::getVersionEncoded() {
+    return VERS_ENCODE(EARS_ScreenSaver::VERSION_MAJOR, 
+                       EARS_ScreenSaver::VERSION_MINOR, 
+                       EARS_ScreenSaver::VERSION_PATCH);
+}
+
+// Get version date
+const char* EARS_screenSaver::getVersionDate() {
+    return EARS_ScreenSaver::VERSION_DATE;
+}
+
+// Format version as string
+void EARS_screenSaver::getVersionString(char* buffer) {
+    uint32_t encoded = getVersionEncoded();
+    VERS_FORMAT(encoded, buffer);
+}
+
+
 EARS_screenSaver& using_screensaver() {
     static EARS_screenSaver instance;
     return instance;

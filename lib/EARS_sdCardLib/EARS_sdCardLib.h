@@ -2,8 +2,8 @@
  * @file EARS_sdCardLib.h
  * @author JTB & Claude Sonnet 4.2
  * @brief SD Card library for ESP32-S3 using SD_MMC (SDIO 1-bit mode)
- * @version 2.3.0
- * @date 20260204
+ * @version 3.0.0
+ * @date 20260210
  *
  * @details
  * This library uses SD_MMC for SD card access (SDIO interface)
@@ -28,7 +28,21 @@
  * Includes
  *****************************************************************************/
 #include <Arduino.h>
+#include "EARS_versionDef.h"
 #include <SD_MMC.h>
+
+/******************************************************************************
+ * Library Version Information
+ *****************************************************************************/
+namespace EARS_SDCard
+{
+    constexpr const char* LIB_NAME = "EARS_sdCard";
+    constexpr const char* VERSION_MAJOR = "3";
+    constexpr const char* VERSION_MINOR = "0";
+    constexpr const char* VERSION_PATCH = "0";
+    constexpr const char* VERSION_DATE = "2026-02-10";
+}
+
 
 /******************************************************************************
  * SD Card Pin Definitions (SD_MMC mode - verified from schematic)
@@ -85,6 +99,12 @@ class EARS_sdCard
 public:
     EARS_sdCard();
     ~EARS_sdCard();
+
+    // Version information getters
+    static const char* getLibraryName();
+    static uint32_t getVersionEncoded();
+    static const char* getVersionDate();
+    static void getVersionString(char* buffer);
 
     /**
      * @brief Initialize the SD card (SD_MMC 1-bit mode)

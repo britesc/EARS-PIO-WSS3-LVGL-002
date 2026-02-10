@@ -1,8 +1,7 @@
 [Folders]
 .+AFw-="1"
 .+AFw- - lib="1"
-.+AFw- - lib - EARS+AF8-backLightManagerLib="1"
-.+AFw- - lib - EARS+AF8-errorsLib="1"
+.+AFw- - lib - EARS+AF8-screenSaverLib="1"
 .+AFw- - src="1"
 
 [Open Files]
@@ -12,4 +11,5 @@ Remember Files=1
 
 [Project Information]
 Project Start="EA07010003001500100036001600000066"
+Working Time="15058"
 

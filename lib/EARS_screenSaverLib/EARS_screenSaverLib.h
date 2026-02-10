@@ -2,8 +2,8 @@
  * @file EARS_screenSaverLib.h
  * @author JTB & Claude Sonnet 4.2
  * @brief Screensaver library implementation header file
- * @version 1.5.0
- * @date 20260116
+ * @version 2.0.0
+ * @date 20260210
  * 
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -13,7 +13,23 @@
 #define __EARS_SCREENSAVER_LIB_H__
 
 #include <Arduino.h>
+#include "EARS_versionDef.h"
 #include <lvgl.h>
+
+
+/******************************************************************************
+ * Library Version Information
+ *****************************************************************************/
+namespace EARS_ScreenSaver
+{
+    constexpr const char* LIB_NAME = "EARS_screenSaver";
+    constexpr const char* VERSION_MAJOR = "2";
+    constexpr const char* VERSION_MINOR = "0";
+    constexpr const char* VERSION_PATCH = "0";
+    constexpr const char* VERSION_DATE = "2026-02-10";
+}
+
+
 
 /**
  * @brief Screensaver modes
@@ -61,6 +77,13 @@ class EARS_screenSaver {
 public:
     EARS_screenSaver();
     
+
+    // Version information getters
+    static const char* getLibraryName();
+    static uint32_t getVersionEncoded();
+    static const char* getVersionDate();
+    static void getVersionString(char* buffer);
+
     /**
      * @brief Initialization
      * @param display

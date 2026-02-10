@@ -2,8 +2,8 @@
  * @file EARS_nvsEepromLib.h
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief NVS EEPROM wrapper class header
- * @version 1.7.0
- * @date 20260130
+ * @version 2.0.0
+ * @date 20260210
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -16,10 +16,24 @@
  * Includes Information
  *****************************************************************************/
 #include <Preferences.h>
+#include "EARS_versionDef.h"
 #include <Arduino.h>
 #include <nvs.h>
 #include <nvs_flash.h>
 #include "EARS_systemDef.h"
+
+/******************************************************************************
+ * Library Version Information
+ *****************************************************************************/
+namespace EARS_NVSEeprom
+{
+    constexpr const char* LIB_NAME = "EARS_nvsEeprom";
+    constexpr const char* VERSION_MAJOR = "2";
+    constexpr const char* VERSION_MINOR = "0";
+    constexpr const char* VERSION_PATCH = "0";
+    constexpr const char* VERSION_DATE = "2026-02-10";
+}
+
 
 /******************************************************************************
  * Validation Status Enum
@@ -100,6 +114,12 @@ public:
     // Constructor and Destructor
     EARS_nvsEeprom();
     ~EARS_nvsEeprom();
+
+    // Version information getters
+    static const char* getLibraryName();
+    static uint32_t getVersionEncoded();
+    static const char* getVersionDate();
+    static void getVersionString(char* buffer);
 
     // Initialize NVS - call this in setup()
     bool begin();

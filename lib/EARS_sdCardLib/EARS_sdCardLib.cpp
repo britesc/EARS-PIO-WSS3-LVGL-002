@@ -2,8 +2,8 @@
  * @file EARS_sdCardLib.cpp
  * @author JTB & Claude Sonnet 4.2
  * @brief SD Card library implementation for ESP32-S3 using SD_MMC
- * @version 2.3.0
- * @date 20260204
+ * @version 3.0.0
+ * @date 20260210
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -71,7 +71,7 @@ bool EARS_sdCard::begin()
     Serial.println(" MB");
 
     _state = SD_CARD_READY;
-    Serial.println("[SD] ✅ SD card ready!");
+    Serial.println("[SD] âœ… SD card ready!");
 
     return true;
 }
@@ -410,6 +410,33 @@ SDCardInitResult EARS_sdCard::performFullInitialization()
     }
 
     return result;
+}
+
+/******************************************************************************
+ * Library Version Information Getters
+ *****************************************************************************/
+
+// Get library name
+const char* EARS_sdCard::getLibraryName() {
+    return EARS_SDCard::LIB_NAME;
+}
+
+// Get encoded version as integer
+uint32_t EARS_sdCard::getVersionEncoded() {
+    return VERS_ENCODE(EARS_SDCard::VERSION_MAJOR, 
+                       EARS_SDCard::VERSION_MINOR, 
+                       EARS_SDCard::VERSION_PATCH);
+}
+
+// Get version date
+const char* EARS_sdCard::getVersionDate() {
+    return EARS_SDCard::VERSION_DATE;
+}
+
+// Format version as string
+void EARS_sdCard::getVersionString(char* buffer) {
+    uint32_t encoded = getVersionEncoded();
+    VERS_FORMAT(encoded, buffer);
 }
 
 EARS_sdCard &using_sdcard()

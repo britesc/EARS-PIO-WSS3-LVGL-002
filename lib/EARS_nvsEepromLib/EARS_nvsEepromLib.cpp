@@ -2,8 +2,8 @@
  * @file EARS_nvsEepromLib.cpp
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief NVS EEPROM wrapper class header
- * @version 1.8.0
- * @date 20260116
+ * @version 2.0.0
+ * @date 20260210
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -542,7 +542,7 @@ bool EARS_nvsEeprom::setNVSVersion(uint16_t version)
         return false;
     }
 
-    // Convert to 2-digit hex string (e.g., 1 → "01", 15 → "0F", 255 → "FF")
+    // Convert to 2-digit hex string (e.g., 1 â†’ "01", 15 â†’ "0F", 255 â†’ "FF")
     char hexStr[3];
     sprintf(hexStr, "%02X", version);
 
@@ -862,6 +862,37 @@ NVSValidationResult EARS_nvsEeprom::performFullInitialization()
 
     // Validation failed (CRC error, version error, etc.)
     return result;
+}
+
+/******************************************************************************
+ * Library Version Information Getters
+ *****************************************************************************/
+
+// Get library name
+const char *EARS_nvsEeprom::getLibraryName()
+{
+    return EARS_NVSEeprom::LIB_NAME;
+}
+
+// Get encoded version as integer
+uint32_t EARS_nvsEeprom::getVersionEncoded()
+{
+    return VERS_ENCODE(EARS_NVSEeprom::VERSION_MAJOR,
+                       EARS_NVSEeprom::VERSION_MINOR,
+                       EARS_NVSEeprom::VERSION_PATCH);
+}
+
+// Get version date
+const char *EARS_nvsEeprom::getVersionDate()
+{
+    return EARS_NVSEeprom::VERSION_DATE;
+}
+
+// Format version as string
+void EARS_nvsEeprom::getVersionString(char *buffer)
+{
+    uint32_t encoded = getVersionEncoded();
+    VERS_FORMAT(encoded, buffer);
 }
 
 /**
