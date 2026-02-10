@@ -3,8 +3,8 @@
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief ESP32-S3 system information library implementation
  * @details Provides functions to query chip info, memory, flash, and runtime stats
- * @version 0.1.0
- * @date 20260128
+ * @version 1.0.0
+ * @date 20260210
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -422,9 +422,9 @@ void MAIN_sysinfo_print_flash(void)
 void MAIN_sysinfo_print_all(void)
 {
     DEBUG_PRINTLN("\n");
-    DEBUG_PRINTLN("╔════════════════════════════════════════╗");
-    DEBUG_PRINTLN("║      SYSTEM INFORMATION REPORT         ║");
-    DEBUG_PRINTLN("╚════════════════════════════════════════╝");
+    DEBUG_PRINTLN("â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—");
+    DEBUG_PRINTLN("â•‘      SYSTEM INFORMATION REPORT         â•‘");
+    DEBUG_PRINTLN("â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•");
     DEBUG_PRINTLN();
 
     MAIN_sysinfo_print_chip();
@@ -481,6 +481,35 @@ String MAIN_sysinfo_format_percent(float value)
     snprintf(buffer, sizeof(buffer), "%.1f%%", value);
     return String(buffer);
 }
+
+
+/******************************************************************************
+ * Library Version Information Getters
+ *****************************************************************************/
+
+// Get library name
+const char* MAIN_SysInfo_getLibraryName() {
+    return MAIN_SysInfo::LIB_NAME;
+}
+
+// Get encoded version as integer
+uint32_t MAIN_SysInfo_getVersionEncoded() {
+    return VERS_ENCODE(MAIN_SysInfo::VERSION_MAJOR, 
+                       MAIN_SysInfo::VERSION_MINOR, 
+                       MAIN_SysInfo::VERSION_PATCH);
+}
+
+// Get version date
+const char* MAIN_SysInfo_getVersionDate() {
+    return MAIN_SysInfo::VERSION_DATE;
+}
+
+// Format version as string
+void MAIN_SysInfo_getVersionString(char* buffer) {
+    uint32_t encoded = MAIN_SysInfo_getVersionEncoded();
+    VERS_FORMAT(encoded, buffer);
+}
+
 
 /******************************************************************************
  * End of MAIN_sysinfoLib.cpp

@@ -3,8 +3,8 @@
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief ESP32-S3 system information library for EARS
  * @details Provides functions to query chip info, memory, flash, and runtime stats
- * @version 0.1.0
- * @date 20260128
+ * @version 1.0.0
+ * @date 20260210
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -17,6 +17,26 @@
  * Includes
  *****************************************************************************/
 #include <Arduino.h>
+#include "EARS_versionDef.h"
+
+/******************************************************************************
+ * Library Version Information
+ *****************************************************************************/
+namespace MAIN_SysInfo
+{
+    constexpr const char* LIB_NAME = "MAIN_SysInfo";
+    constexpr const char* VERSION_MAJOR = "1";
+    constexpr const char* VERSION_MINOR = "0";
+    constexpr const char* VERSION_PATCH = "0";
+    constexpr const char* VERSION_DATE = "2026-02-10";
+}
+
+
+// Version information getters
+const char* MAIN_SysInfo_getLibraryName();
+uint32_t MAIN_SysInfo_getVersionEncoded();
+const char* MAIN_SysInfo_getVersionDate();
+void MAIN_SysInfo_getVersionString(char* buffer);
 
 /******************************************************************************
  * Core Identification Functions
