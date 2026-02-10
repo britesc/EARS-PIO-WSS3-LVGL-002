@@ -2,8 +2,8 @@
  * @file EARS_touchLib.cpp
  * @author JTB & Claude Sonnet 4.5
  * @brief Touch controller library implementation for FT6236U/FT3267
- * @version 1.0.0
- * @date 20260207
+ * @version 2.0.0
+ * @date 20260210
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -349,6 +349,37 @@ void EARS_touch::writeRegister(uint8_t reg, uint8_t value)
     _wire->write(reg);
     _wire->write(value);
     _wire->endTransmission();
+}
+
+/******************************************************************************
+ * Library Version Information Getters
+ *****************************************************************************/
+
+// Get library name
+const char *EARS_touch::getLibraryName()
+{
+    return EARS_Touch::LIB_NAME;
+}
+
+// Get encoded version as integer
+uint32_t EARS_touch::getVersionEncoded()
+{
+    return VERS_ENCODE(EARS_Touch::VERSION_MAJOR,
+                       EARS_Touch::VERSION_MINOR,
+                       EARS_Touch::VERSION_PATCH);
+}
+
+// Get version date
+const char *EARS_touch::getVersionDate()
+{
+    return EARS_Touch::VERSION_DATE;
+}
+
+// Format version as string
+void EARS_touch::getVersionString(char *buffer)
+{
+    uint32_t encoded = getVersionEncoded();
+    VERS_FORMAT(encoded, buffer);
 }
 
 /**

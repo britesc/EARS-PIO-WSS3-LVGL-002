@@ -2,8 +2,8 @@
  * @file EARS_touchLib.h
  * @author JTB & Claude Sonnet 4.5
  * @brief Touch controller library for FT6236U/FT3267 chip
- * @version 1.0.0
- * @date 20260207
+ * @version 2.0.0
+ * @date 20260210
  *
  * @details
  * Touch controller library for Waveshare ESP32-S3 Touch LCD 3.5"
@@ -30,6 +30,19 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <lvgl.h>
+#include "EARS_versionDef.h"
+
+/******************************************************************************
+ * Library Version Information
+ *****************************************************************************/
+namespace EARS_Touch
+{
+    constexpr const char *LIB_NAME = "EARS_Touch";
+    constexpr const char *VERSION_MAJOR = "2";
+    constexpr const char *VERSION_MINOR = "0";
+    constexpr const char *VERSION_PATCH = "0";
+    constexpr const char *VERSION_DATE = "2026-02-10";
+}
 
 /******************************************************************************
  * FT6X36 Register Addresses
@@ -154,6 +167,12 @@ class EARS_touch
 public:
     EARS_touch();
     ~EARS_touch();
+
+    // Version information getters
+    static const char *getLibraryName();
+    static uint32_t getVersionEncoded();
+    static const char *getVersionDate();
+    static void getVersionString(char *buffer);
 
     /**
      * @brief Initialize touch controller
