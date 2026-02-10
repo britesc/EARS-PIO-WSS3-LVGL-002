@@ -1,10 +1,19 @@
 [Folders]
-.+AFw-=1
-.+AFw- - src=1
+.+AFw-="1"
+.+AFw- - src="1"
 
 [Open Files]
 Active File Display Mode=3
-Open File0="-"
+Active File Index=0
+Open File Line0="0"
+Open File Line1="471"
+Open File Pos0="0"
+Open File Pos1="0"
+Open File Window Pos0="2,3,-1,-1,-9,-38,0,0,867,314"
+Open File Window Pos1="0,1,-1,-1,-9,-38,32,32,922,350"
+Open File0="..\..\Users\julia\Downloads\New Libraries for EARS\EARS_backLightManagerLib.cpp"
+Open File1="..\..\Users\julia\Downloads\New Libraries for EARS\EARS_backLightManagerLib.h"
+Open File2="-"
 Remember Files=1
 
 [Project Information]

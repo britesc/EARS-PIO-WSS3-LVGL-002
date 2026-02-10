@@ -1,9 +1,9 @@
 /**
- * @file EARS_backLightManagerLib.h
- * @author Julian (51fiftyone51fiftyone@gmail.com)
+ * @file EARS_backLightManagerLib.cpp
+ * @author Julian (51fiftyone51fiftyone_at_gmail.com)
  * @brief Manages LCD backlight with PWM control, NVS storage, and screen saver integration
- * @version 1.8.0
- * @date 20260118
+ * @version 2.0.0
+ * @date 20260210
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -273,37 +273,28 @@ uint32_t EARS_backLightManager::percentageToDutyCycle(uint8_t percentage) const
 // Get library name
 const char *EARS_backLightManager::getLibraryName()
 {
-    return BACKLIGHT_LIB_NAME;
+    return EARS_BackLight::LIB_NAME;
 }
 
-// Get full version string
-const char *EARS_backLightManager::getVersionFull()
+// Get encoded version as integer
+uint32_t EARS_backLightManager::getVersionEncoded()
 {
-    return BACKLIGHT_LIB_VERSION_FULL;
-}
-
-// Get major version number
-uint8_t EARS_backLightManager::getVersionMajor()
-{
-    return BACKLIGHT_LIB_VERSION_MAJOR;
-}
-
-// Get minor version number
-uint8_t EARS_backLightManager::getVersionMinor()
-{
-    return BACKLIGHT_LIB_VERSION_MINOR;
-}
-
-// Get patch version number
-uint8_t EARS_backLightManager::getVersionPatch()
-{
-    return BACKLIGHT_LIB_VERSION_PATCH;
+    return VERS_ENCODE(EARS_BackLight::VERSION_MAJOR,
+                       EARS_BackLight::VERSION_MINOR,
+                       EARS_BackLight::VERSION_PATCH);
 }
 
 // Get version date
 const char *EARS_backLightManager::getVersionDate()
 {
-    return BACKLIGHT_LIB_VERSION_DATE;
+    return EARS_BackLight::VERSION_DATE;
+}
+
+// Format version as string
+void EARS_backLightManager::getVersionString(char *buffer)
+{
+    uint32_t encoded = getVersionEncoded();
+    VERS_FORMAT(encoded, buffer);
 }
 
 /**
