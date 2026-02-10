@@ -44,7 +44,8 @@
 #include "EARS_nvsEepromLib.h"        // STEP 4: Enhanced NVS
 #include "EARS_sdCardLib.h"           // STEP 5: Enhanced SD Card
 #include "EARS_backLightManagerLib.h" // STEP 6: PWM backlight manager
-#include "EARS_touchLib.h"            // STEP 7: Touch controller - NEW!
+#include "EARS_touchLib.h"            // STEP 7: Touch controller
+//  #include "EARS_touchDemoUI.h"         // STEP 7: Touch demo UI - NEW!
 
 // Development tools (compile out in production)
 #if EARS_DEBUG == 1
@@ -105,6 +106,7 @@ volatile SDCardState sd_card_state = SD_NOT_INITIALIZED;
 void initialise_nvs();
 void initialise_sd();
 void initialise_touch();
+//  void create_touch_demo_ui(); // Touch demo UI
 
 // ============================================================================
 // ARDUINO SETUP - Runs once on Core 1
@@ -179,9 +181,8 @@ void setup()
     // STEP 5: Initialize SD Card (BEFORE creating tasks)
     initialise_sd();
 
-    // Create test UI with touch indicator
-    const char *status_msg = touch_initialized ? "v0.11.0 TOUCH ACTIVE!\nTap screen to test" : "v0.11.0\nTouch init failed";
-    MAIN_create_test_ui(status_msg);
+    // // Create touch demo UI (replaces simple test UI)
+    // create_touch_demo_ui();
 
     // STEP 3: Create FreeRTOS tasks
 #if EARS_DEBUG == 1
@@ -223,6 +224,10 @@ void loop()
 {
     delay(1000);
 }
+
+// ============================================================================
+// Could these be moved to a their appropraite fils? main.cpp is getting crowded with all the new features! Thank you.
+// ============================================================================
 
 // ============================================================================
 // INITIALIZATION FUNCTIONS

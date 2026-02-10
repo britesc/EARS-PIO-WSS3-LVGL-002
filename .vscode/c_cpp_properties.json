@@ -9,7 +9,6 @@
             "name": "PlatformIO",
             "includePath": [
                 "D:/Dev/EARS-PIO-WSS3-LVGL-002/src",
-                "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/EARS_touchDemoUI",
                 "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/EARS_touchLib",
                 "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/EARS_sdCardLib",
                 "C:/Users/julia/.platformio/packages/framework-arduinoespressif32/libraries/SD_MMC/src",
@@ -260,7 +259,6 @@
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
                     "D:/Dev/EARS-PIO-WSS3-LVGL-002/src",
-                    "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/EARS_touchDemoUI",
                     "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/EARS_touchLib",
                     "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/EARS_sdCardLib",
                     "C:/Users/julia/.platformio/packages/framework-arduinoespressif32/libraries/SD_MMC/src",
