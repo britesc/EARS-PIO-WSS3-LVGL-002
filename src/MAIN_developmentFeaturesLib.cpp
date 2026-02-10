@@ -3,13 +3,8 @@
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief Development features library implementation
  * @details Contains all development/debugging features that compile out in production
- * @version 0.1.1
- * @date 20260130
- *
- * CHANGES:
- * - Fixed "Display Updates" line formatting (line 124 and 168)
- * - Now shows "Display Updates: nnn" instead of "Display: nnn updates"
- * - Prevents number from overwriting the word "updates"
+ * @version 0.1.0
+ * @date 20260128
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -44,15 +39,15 @@ volatile uint32_t dev_display_updates = 0;
 void DEV_print_boot_banner(void)
 {
     Serial.println("\n\n");
-    Serial.println("╔══════════════════════════════════════════════════════════╗");
-    Serial.println("║  EARS - Equipment & Ammunition Reporting System           ║");
-    Serial.println("╚══════════════════════════════════════════════════════════╝");
+    Serial.println("â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—");
+    Serial.println("â•‘  EARS - Equipment & Ammunition Reporting System           â•‘");
+    Serial.println("â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•");
     Serial.printf("  Version:    %s.%s.%s %s\n",
                   EARS_APP_VERSION_MAJOR, EARS_APP_VERSION_MINOR,
                   EARS_APP_VERSION_PATCH, EARS_STATUS);
     Serial.printf("  Compiler:   %s\n", EARS_XTENSA_COMPILER_VERSION);
     Serial.printf("  Platform:   %s\n", EARS_ESPRESSIF_PLATFORM_VERSION);
-    Serial.println("╚══════════════════════════════════════════════════════════╝");
+    Serial.println("â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•");
     Serial.println();
 }
 
@@ -126,7 +121,7 @@ void DEV_draw_screen(Arduino_GFX *gfx)
     gfx->setCursor(10, 210);
     gfx->print("Uptime:");
     gfx->setCursor(10, 240);
-    gfx->print("Display Updates:"); // ← CHANGED: Added "Updates" to label
+    gfx->print("Display:");
 
     // Footer
     gfx->setTextColor(EARS_RGB565_GRAY);
@@ -170,7 +165,7 @@ void DEV_update_screen(Arduino_GFX *gfx)
 
     // Display updates
     gfx->setCursor(120, 240);
-    gfx->printf("%lu", dev_display_updates); // ← CHANGED: Just the number now
+    gfx->printf("%lu updates", dev_display_updates);
 
     // Heartbeat indicator (flashing dot)
     uint16_t color = (dev_core0_heartbeat % 2) ? EARS_RGB565_GREEN : EARS_RGB565_DARKGRAY;
@@ -234,6 +229,35 @@ uint32_t DEV_get_display_updates(void)
 {
     return dev_display_updates;
 }
+
+
+/******************************************************************************
+ * Library Version Information Getters
+ *****************************************************************************/
+
+// Get library name
+const char* MAIN_DevelopmentFeatures_getLibraryName() {
+    return MAIN_DevFeatures::LIB_NAME;
+}
+
+// Get encoded version as integer
+uint32_t MAIN_DevelopmentFeatures_getVersionEncoded() {
+    return VERS_ENCODE(MAIN_DevFeatures::VERSION_MAJOR, 
+                       MAIN_DevFeatures::VERSION_MINOR, 
+                       MAIN_DevFeatures::VERSION_PATCH);
+}
+
+// Get version date
+const char* MAIN_DevelopmentFeatures_getVersionDate() {
+    return MAIN_DevFeatures::VERSION_DATE;
+}
+
+// Format version as string
+void MAIN_DevelopmentFeatures_getVersionString(char* buffer) {
+    uint32_t encoded = MAIN_DevelopmentFeatures_getVersionEncoded();
+    VERS_FORMAT(encoded, buffer);
+}
+
 
 /******************************************************************************
  * End of MAIN_developmentFeaturesLib.cpp

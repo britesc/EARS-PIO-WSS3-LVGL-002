@@ -3,8 +3,8 @@
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief Development features library for EARS
  * @details Contains all development/debugging features that compile out in production
- * @version 0.1.0
- * @date 20260128
+ * @version 1.0.0
+ * @date 20260210
  *
  * PURPOSE:
  * - Development screen display
@@ -26,7 +26,27 @@
  * Includes
  *****************************************************************************/
 #include <Arduino.h>
+#include "EARS_versionDef.h"
 #include <Arduino_GFX_Library.h>
+
+/******************************************************************************
+ * Library Version Information
+ *****************************************************************************/
+namespace MAIN_DevFeatures
+{
+    constexpr const char* LIB_NAME = "MAIN_DevelopmentFeatures";
+    constexpr const char* VERSION_MAJOR = "1";
+    constexpr const char* VERSION_MINOR = "0";
+    constexpr const char* VERSION_PATCH = "0";
+    constexpr const char* VERSION_DATE = "2026-02-10";
+}
+
+
+// Version information getters
+const char* MAIN_DevelopmentFeatures_getLibraryName();
+uint32_t MAIN_DevelopmentFeatures_getVersionEncoded();
+const char* MAIN_DevelopmentFeatures_getVersionDate();
+void MAIN_DevelopmentFeatures_getVersionString(char* buffer);
 
 /******************************************************************************
  * Development Mode Variables
