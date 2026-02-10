@@ -3,8 +3,8 @@
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief LED indicator management library implementation
  * @details Provides hardware debugging LEDs for visual system status
- * @version 0.1.0
- * @date 20260128
+ * @version 1.0.0
+ * @date 20260210
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -296,6 +296,34 @@ void MAIN_led_success_pattern(void)
     delay(100);
     MAIN_led_green_off();
 }
+
+/******************************************************************************
+ * Library Version Information Getters
+ *****************************************************************************/
+
+// Get library name
+const char* MAIN_LED_getLibraryName() {
+    return MAIN_LED::LIB_NAME;
+}
+
+// Get encoded version as integer
+uint32_t MAIN_LED_getVersionEncoded() {
+    return VERS_ENCODE(MAIN_LED::VERSION_MAJOR, 
+                       MAIN_LED::VERSION_MINOR, 
+                       MAIN_LED::VERSION_PATCH);
+}
+
+// Get version date
+const char* MAIN_LED_getVersionDate() {
+    return MAIN_LED::VERSION_DATE;
+}
+
+// Format version as string
+void MAIN_LED_getVersionString(char* buffer) {
+    uint32_t encoded = MAIN_LED_getVersionEncoded();
+    VERS_FORMAT(encoded, buffer);
+}
+
 
 /******************************************************************************
  * End of MAIN_ledLib.cpp

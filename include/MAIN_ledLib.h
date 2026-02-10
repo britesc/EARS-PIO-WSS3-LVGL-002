@@ -3,8 +3,8 @@
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief LED indicator management library for EARS development breadboard
  * @details Provides hardware debugging LEDs for visual system status
- * @version 0.1.0
- * @date 20260128
+ * @version 1.0.0
+ * @date 20260210
  *
  * Hardware Configuration:
  * - Red LED (GPIO40):    Critical errors
@@ -12,7 +12,7 @@
  * - Green LED (GPIO42):  Heartbeat/Status OK
  * - Common GND via Pin 29
  *
- * Each LED uses a 220Ω current-limiting resistor
+ * Each LED uses a 220Ohm current-limiting resistor
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -25,6 +25,26 @@
  * Includes
  *****************************************************************************/
 #include <Arduino.h>
+#include "EARS_versionDef.h"
+
+/******************************************************************************
+ * Library Version Information
+ *****************************************************************************/
+namespace MAIN_LED
+{
+    constexpr const char* LIB_NAME = "MAIN_LED";
+    constexpr const char* VERSION_MAJOR = "1";
+    constexpr const char* VERSION_MINOR = "0";
+    constexpr const char* VERSION_PATCH = "0";
+    constexpr const char* VERSION_DATE = "2026-02-10";
+}
+
+
+// Version information getters
+const char* MAIN_LED_getLibraryName();
+uint32_t MAIN_LED_getVersionEncoded();
+const char* MAIN_LED_getVersionDate();
+void MAIN_LED_getVersionString(char* buffer);
 
 /******************************************************************************
  * GPIO Pin Definitions
