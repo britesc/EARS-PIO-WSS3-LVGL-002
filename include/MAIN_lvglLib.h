@@ -3,8 +3,8 @@
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief LVGL 9.3.0 initialization and management for EARS (extracted from main.cpp)
  * @details Handles LVGL display setup, buffers, and callbacks
- * @version 0.1.0
- * @date 20260204
+ * @version 1.0.0
+ * @date 20260210
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -17,10 +17,30 @@
  * Includes
  *****************************************************************************/
 #include <Arduino.h>
+#include "EARS_versionDef.h"
 #include <Arduino_GFX_Library.h>
 #include <lvgl.h>
 #include <freertos/semphr.h>
 #include "EARS_ws35tlcdPins.h"
+
+/******************************************************************************
+ * Library Version Information
+ *****************************************************************************/
+namespace MAIN_LVGL
+{
+    constexpr const char* LIB_NAME = "MAIN_LVGL";
+    constexpr const char* VERSION_MAJOR = "1";
+    constexpr const char* VERSION_MINOR = "0";
+    constexpr const char* VERSION_PATCH = "0";
+    constexpr const char* VERSION_DATE = "2026-02-10";
+}
+
+
+// Version information getters
+const char* MAIN_LVGL_getLibraryName();
+uint32_t MAIN_LVGL_getVersionEncoded();
+const char* MAIN_LVGL_getVersionDate();
+void MAIN_LVGL_getVersionString(char* buffer);
 
 /******************************************************************************
  * LVGL Configuration

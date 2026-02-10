@@ -3,8 +3,8 @@
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief LVGL 9.3.0 initialization and management (extracted from main.cpp)
  * @details Handles LVGL display setup, buffers, and callbacks
- * @version 0.1.0
- * @date 20260204
+ * @version 1.0.0
+ * @date 20260210
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -249,6 +249,35 @@ void MAIN_create_test_ui(const char *message)
 
     DEBUG_PRINTLN("[OK] Test UI created");
 }
+
+
+/******************************************************************************
+ * Library Version Information Getters
+ *****************************************************************************/
+
+// Get library name
+const char* MAIN_LVGL_getLibraryName() {
+    return MAIN_LVGL::LIB_NAME;
+}
+
+// Get encoded version as integer
+uint32_t MAIN_LVGL_getVersionEncoded() {
+    return VERS_ENCODE(MAIN_LVGL::VERSION_MAJOR, 
+                       MAIN_LVGL::VERSION_MINOR, 
+                       MAIN_LVGL::VERSION_PATCH);
+}
+
+// Get version date
+const char* MAIN_LVGL_getVersionDate() {
+    return MAIN_LVGL::VERSION_DATE;
+}
+
+// Format version as string
+void MAIN_LVGL_getVersionString(char* buffer) {
+    uint32_t encoded = MAIN_LVGL_getVersionEncoded();
+    VERS_FORMAT(encoded, buffer);
+}
+
 
 /******************************************************************************
  * End of MAIN_lvglLib.cpp
