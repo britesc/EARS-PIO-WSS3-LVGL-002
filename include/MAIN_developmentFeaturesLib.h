@@ -38,7 +38,7 @@ namespace MAIN_DevFeatures
     constexpr const char* VERSION_MAJOR = "1";
     constexpr const char* VERSION_MINOR = "0";
     constexpr const char* VERSION_PATCH = "0";
-    constexpr const char* VERSION_DATE = "2026-02-10";
+    constexpr const char* VERSION_DATE = "2026-02-02";
 }
 
 
