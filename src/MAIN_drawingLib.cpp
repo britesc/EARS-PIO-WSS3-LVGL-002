@@ -3,8 +3,8 @@
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief Drawing functions for EARS - rectangles, shapes, etc.
  * @details Functions callable from main code and EEZ Studio Flow
- * @version 0.1.0
- * @date 20260124
+ * @version 1.0.0
+ * @date 20260210
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -157,6 +157,34 @@ void MAIN_clear_screen(Arduino_GFX *gfx, uint16_t colour)
 
     DEBUG_PRINTF("[DRAW] Screen cleared to colour 0x%04X\n", colour);
 }
+
+/******************************************************************************
+ * Library Version Information Getters
+ *****************************************************************************/
+
+// Get library name
+const char* MAIN_Drawing_getLibraryName() {
+    return MAIN_Drawing::LIB_NAME;
+}
+
+// Get encoded version as integer
+uint32_t MAIN_Drawing_getVersionEncoded() {
+    return VERS_ENCODE(MAIN_Drawing::VERSION_MAJOR, 
+                       MAIN_Drawing::VERSION_MINOR, 
+                       MAIN_Drawing::VERSION_PATCH);
+}
+
+// Get version date
+const char* MAIN_Drawing_getVersionDate() {
+    return MAIN_Drawing::VERSION_DATE;
+}
+
+// Format version as string
+void MAIN_Drawing_getVersionString(char* buffer) {
+    uint32_t encoded = MAIN_Drawing_getVersionEncoded();
+    VERS_FORMAT(encoded, buffer);
+}
+
 
 /******************************************************************************
  * End of MAIN_drawingLib.cpp

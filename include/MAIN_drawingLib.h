@@ -3,8 +3,8 @@
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief Drawing functions for EARS - rectangles, shapes, etc.
  * @details Functions callable from main code and EEZ Studio Flow
- * @version 0.1.0
- * @date 20260124
+ * @version 1.0.0
+ * @date 20260210
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -17,8 +17,28 @@
  * Includes
  *****************************************************************************/
 #include <Arduino.h>
+#include "EARS_versionDef.h"
 #include <Arduino_GFX_Library.h>
 #include "EARS_rgb565ColoursDef.h"
+
+/******************************************************************************
+ * Library Version Information
+ *****************************************************************************/
+namespace MAIN_Drawing
+{
+    constexpr const char* LIB_NAME = "MAIN_Drawing";
+    constexpr const char* VERSION_MAJOR = "1";
+    constexpr const char* VERSION_MINOR = "0";
+    constexpr const char* VERSION_PATCH = "0";
+    constexpr const char* VERSION_DATE = "2026-02-10";
+}
+
+
+// Version information getters
+const char* MAIN_Drawing_getLibraryName();
+uint32_t MAIN_Drawing_getVersionEncoded();
+const char* MAIN_Drawing_getVersionDate();
+void MAIN_Drawing_getVersionString(char* buffer);
 
 /******************************************************************************
  * Function Prototypes
