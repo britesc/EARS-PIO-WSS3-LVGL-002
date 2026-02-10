@@ -2,8 +2,8 @@
  * @file EARS_loggerLib.cpp
  * @author JTB & Claude Sonnet 4.2
  * @brief Enhanced logging system with hierarchical levels and unified config
- * @version 2.7.0
- * @date 20260116
+ * @version 3.0.0
+ * @date 20260210
  * 
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -565,6 +565,34 @@ bool EARS_logger::performRotation() {
  */
 bool EARS_logger::rotateLog() {
     return performRotation();
+}
+
+
+/******************************************************************************
+ * Library Version Information Getters
+ *****************************************************************************/
+
+// Get library name
+const char* EARS_Logger::getLibraryName() {
+    return EARS_Logger::LIB_NAME;
+}
+
+// Get encoded version as integer
+uint32_t EARS_Logger::getVersionEncoded() {
+    return VERS_ENCODE(EARS_Logger::VERSION_MAJOR, 
+                       EARS_Logger::VERSION_MINOR, 
+                       EARS_Logger::VERSION_PATCH);
+}
+
+// Get version date
+const char* EARS_Logger::getVersionDate() {
+    return EARS_Logger::VERSION_DATE;
+}
+
+// Format version as string
+void EARS_Logger::getVersionString(char* buffer) {
+    uint32_t encoded = getVersionEncoded();
+    VERS_FORMAT(encoded, buffer);
 }
 
 /*****************************************************************************

@@ -4,8 +4,8 @@
  * This library allows setting, retrieving, and logging errors and warnings.
  * It loads error messages from a JSON file on a TF card and logs occurrences to a history file.
  * @author Julian
- * @date 20260112
- * @version 1.6.0
+ * @date 20260210
+ * @version 2.0.0
  */
 
 #include "EARS_errorsLib.h"
@@ -252,6 +252,34 @@ String EARS_errors::levelToString(ErrorLevel level) {
         case ERROR: return "ERROR";
         default:    return "UNKNOWN";
     }
+}
+
+
+/******************************************************************************
+ * Library Version Information Getters
+ *****************************************************************************/
+
+// Get library name
+const char* EARS_Errors::getLibraryName() {
+    return EARS_Errors::LIB_NAME;
+}
+
+// Get encoded version as integer
+uint32_t EARS_Errors::getVersionEncoded() {
+    return VERS_ENCODE(EARS_Errors::VERSION_MAJOR, 
+                       EARS_Errors::VERSION_MINOR, 
+                       EARS_Errors::VERSION_PATCH);
+}
+
+// Get version date
+const char* EARS_Errors::getVersionDate() {
+    return EARS_Errors::VERSION_DATE;
+}
+
+// Format version as string
+void EARS_Errors::getVersionString(char* buffer) {
+    uint32_t encoded = getVersionEncoded();
+    VERS_FORMAT(encoded, buffer);
 }
 
 /************************************************************************

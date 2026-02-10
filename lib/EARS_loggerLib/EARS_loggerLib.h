@@ -2,8 +2,8 @@
  * @file EARS_loggerLib.h
  * @author JTB & Claude Sonnet 4.2
  * @brief Enhanced logging system with hierarchical levels and unified config
- * @version 2.7.0
- * @date 20260116
+ * @version 3.0.0
+ * @date 20260210
  * 
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -16,9 +16,24 @@
  * Includes Information
  *****************************************************************************/
 #include <Arduino.h>
+#include "EARS_versionDef.h"
 #include <SD.h>
 #include <ArduinoJson.h>
 #include "EARS_sdCardLib.h"
+
+
+/******************************************************************************
+ * Library Version Information
+ *****************************************************************************/
+namespace EARS_Logger
+{
+    constexpr const char* LIB_NAME = "EARS_Logger";
+    constexpr const char* VERSION_MAJOR = "3";
+    constexpr const char* VERSION_MINOR = "0";
+    constexpr const char* VERSION_PATCH = "0";
+    constexpr const char* VERSION_DATE = "2026-02-10";
+}
+
 
 /**
  * @brief Hierarchical log level enumeration
@@ -63,6 +78,13 @@ public:
      */
     static EARS_logger& getInstance();
     
+
+    // Version information getters
+    static const char* getLibraryName();
+    static uint32_t getVersionEncoded();
+    static const char* getVersionDate();
+    static void getVersionString(char* buffer);
+
     /**
      * @brief Initialize logger
      * 

@@ -16,6 +16,8 @@ Create Tagfile=0
 CTags Legacy Support=0
 [FilesU]
 0=.+AFw-
+1=..+AFw-..+AFw-Users+AFw-julia+AFw-Downloads+AFw-New Libraries for EARS+AFw-EARS+AF8-errorsLib.cpp
+2=..+AFw-..+AFw-Users+AFw-julia+AFw-Downloads+AFw-New Libraries for EARS+AFw-EARS+AF8-errorsLib.h
 [uemakeXp]
 ReleaseMode=0
 [Debug Settings]

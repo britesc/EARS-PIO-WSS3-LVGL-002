@@ -3,8 +3,8 @@
  * EARS_errorsLib.h
  *  * @author JTB & Claude Sonnet 4.2
  * @brief Error Management Library for EARS Project
- * @version 1.7.0
- * @date 20260116
+ * @version 2.0.0
+ * @date 20260210
  * 
  * @copyright Copyright (c) 2025
  */
@@ -17,8 +17,23 @@
  * Includes Information
  *****************************************************************************/
 #include <Arduino.h>
+#include "EARS_versionDef.h"
 #include <SD.h>
 #include <ArduinoJson.h>
+
+
+/******************************************************************************
+ * Library Version Information
+ *****************************************************************************/
+namespace EARS_Errors
+{
+    constexpr const char* LIB_NAME = "EARS_Errors";
+    constexpr const char* VERSION_MAJOR = "2";
+    constexpr const char* VERSION_MINOR = "0";
+    constexpr const char* VERSION_PATCH = "0";
+    constexpr const char* VERSION_DATE = "2026-02-10";
+}
+
 
 class EARS_errors {
 public:
@@ -34,6 +49,13 @@ public:
     
     // Destructor
     ~EARS_errors();
+
+
+    // Version information getters
+    static const char* getLibraryName();
+    static uint32_t getVersionEncoded();
+    static const char* getVersionDate();
+    static void getVersionString(char* buffer);
 
     // Initialize the library (load error messages from TF card)
     bool begin(const char* errorJsonPath = "/config/errors.json", 
