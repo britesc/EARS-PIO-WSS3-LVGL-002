@@ -16,8 +16,8 @@
  * - performFullInitialization() method matching NVS/SD pattern
  * ============================================================================
  *
- * @version 0.11.0
- * @date 20260207
+ * @version 0.15.0
+ * @date 20260210
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  */
 
@@ -30,21 +30,30 @@
 #include <freertos/semphr.h>
 
 // Project Headers
-#include "EARS_versionDef.h"
-#include "EARS_systemDef.h"
+#include "EARS_versionDef.h" // Project version definitions - must come first.
+#include "EARS_systemDef.h"  // System-wide definitions and enums - must come second.
+
+// EARS Modular Definitions
 #include "EARS_toolsVersionDef.h"
-#include "EARS_ws35tlcdPins.h" // Updated with correct touch pins
+#include "EARS_ws35tlcdPins.h"
 #include "EARS_rgb565ColoursDef.h"
+
+// MAIN Modular Libraries
 #include "MAIN_drawingLib.h"
-#include "MAIN_displayLib.h"    // STEP 1 + STEP 6: Display + PWM backlight
-#include "MAIN_lvglLib.h"       // STEP 2: LVGL library
-#include "MAIN_core0TasksLib.h" // STEP 3a: Core 0 UI task
-#include "MAIN_core1TasksLib.h" // STEP 3b: Core 1 background task
+#include "MAIN_displayLib.h"
+#include "MAIN_lvglLib.h"
+#include "MAIN_core0TasksLib.h"
+#include "MAIN_core1TasksLib.h"
 #include "MAIN_sysinfoLib.h"
-#include "EARS_nvsEepromLib.h"        // STEP 4: Enhanced NVS
-#include "EARS_sdCardLib.h"           // STEP 5: Enhanced SD Card
-#include "EARS_backLightManagerLib.h" // STEP 6: PWM backlight manager
-#include "EARS_touchLib.h"            // STEP 7: Touch controller
+
+// EARS Modular Libraries
+#include "EARS_nvsEepromLib.h"
+#include "EARS_sdCardLib.h"
+#include "EARS_backLightManagerLib.h"
+#include "EARS_touchLib.h"
+#include "EARS_hapticLib.h"
+#include "EARS_screenSaverLib.h"
+
 //  #include "EARS_touchDemoUI.h"         // STEP 7: Touch demo UI - NEW!
 
 // Development tools (compile out in production)
