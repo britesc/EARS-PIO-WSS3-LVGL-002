@@ -3,8 +3,8 @@
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief Display initialisation and management for EARS
  * @details Handles Arduino GFX library initialisation for Waveshare 3.5" LCD
- * @version 0.3.0
- * @date 20260204
+ * @version 1.0.0
+ * @date 20260210
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -17,17 +17,37 @@
  * Includes
  *****************************************************************************/
 #include <Arduino.h>
+#include "EARS_versionDef.h"
 #include <Arduino_GFX_Library.h>
 #include "EARS_ws35tlcdPins.h"
 #include "EARS_rgb565ColoursDef.h"
 #include "EARS_backLightManagerLib.h"
 
 /******************************************************************************
+ * Library Version Information
+ *****************************************************************************/
+namespace MAIN_Display
+{
+    constexpr const char* LIB_NAME = "MAIN_Display";
+    constexpr const char* VERSION_MAJOR = "1";
+    constexpr const char* VERSION_MINOR = "0";
+    constexpr const char* VERSION_PATCH = "0";
+    constexpr const char* VERSION_DATE = "2026-02-10";
+}
+
+
+// Version information getters
+const char* MAIN_Display_getLibraryName();
+uint32_t MAIN_Display_getVersionEncoded();
+const char* MAIN_Display_getVersionDate();
+void MAIN_Display_getVersionString(char* buffer);
+
+/******************************************************************************
  * Function Prototypes
  *****************************************************************************/
 
 /**
- * @brief Initialise the display hardware with PWM backlight control
+ * @brief Initialise the display hardware and backlight
  * @param gfx Pointer to Arduino_GFX object
  * @return true if successful, false if failed
  */
