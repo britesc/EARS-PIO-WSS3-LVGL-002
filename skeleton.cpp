@@ -16,7 +16,7 @@
  * - performFullInitialization() method matching NVS/SD pattern
  * ============================================================================
  *
- * @version 0.15.0
+ * @version 0.24.0
  * @date 20260210
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  */
@@ -428,5 +428,5 @@ void initialise_sd()
 }
 
 // ============================================================================
-// END OF FILE - v0.11.0 TOUCH CONTROLLER INTEGRATED! 🎉
+// End of file main.cpp
 // ============================================================================
