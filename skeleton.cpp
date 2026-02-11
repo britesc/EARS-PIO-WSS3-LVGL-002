@@ -1,69 +1,67 @@
 /**
- * @file main.cpp - v0.11.0 TOUCH CONTROLLER INTEGRATION
+ * @file main.cpp - v0.13.0 STARTUP ANIMATION INTEGRATED
  * @author JTB
- * @brief EARS Main Application - LVGL 9.3.0 + Touch + Fully Modular Architecture
+ * @brief EARS Main Application - LVGL 9.3.0 + Touch + Animation
  * @details Equipment & Ammunition Reporting System
  *          Dual-core ESP32-S3 implementation using FreeRTOS
  *
  * ============================================================================
- * VERSION v0.11.0 - 20260207
+ * VERSION v0.13.0 - 20260210
  * NEW FEATURES:
- * - FT6236U/FT3267 touch controller integration (STEP 7)
- * - I2C pins corrected: SDA=8, SCL=7 (verified via I2C scanner)
- * - LVGL touch input device driver
- * - Touch library based on Waveshare TouchDrvFT6X36
- * - EARS_touchLib modular library following established EARS pattern
- * - performFullInitialization() method matching NVS/SD pattern
+ * - Startup animation integration (marching soldier)
+ * - Animation object passed to Core0 task for updates
+ * - Clean modular architecture with MAIN_initializationLib
  * ============================================================================
  *
- * @version 0.24.0
+ * @version 0.13.0
  * @date 20260210
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  */
 
 // ============================================================================
-// INCLUDES
+// INCLUDES - Organized by category for clarity and maintainability
 // ============================================================================
+
+// 1. SYSTEM HEADERS (Arduino framework)
 #include <Arduino.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/semphr.h>
 
-// Project Headers
-#include "EARS_versionDef.h" // Project version definitions - must come first.
-#include "EARS_systemDef.h"  // System-wide definitions and enums - must come second.
+// 2. THIRD-PARTY LIBRARIES
+#include <Arduino_GFX_Library.h>
 
-// EARS Modular Definitions
-#include "EARS_toolsVersionDef.h"
-#include "EARS_ws35tlcdPins.h"
-#include "EARS_rgb565ColoursDef.h"
+// 3. PROJECT DEFINITION HEADERS (system-wide)
+#include "EARS_versionDef.h"       // Project version definitions - must come first
+#include "EARS_systemDef.h"        // System-wide definitions and enums - must come second
+#include "EARS_toolsVersionDef.h"  // Build tools version tracking
+#include "EARS_ws35tlcdPins.h"     // Hardware pin definitions
+#include "EARS_rgb565ColoursDef.h" // Colour palette definitions
+#include "EARS_rgb888ColoursDef.h" // Colour palette definitions
 
-// MAIN Modular Libraries
-#include "MAIN_drawingLib.h"
-#include "MAIN_displayLib.h"
-#include "MAIN_lvglLib.h"
+// 4. EARS LIBRARY HEADERS (alphabetical within group)
+#include "EARS_backLightManagerLib.h"
+#include "EARS_hapticLib.h"
+#include "EARS_nvsEepromLib.h"
+#include "EARS_screenSaverLib.h"
+#include "EARS_sdCardLib.h"
+#include "EARS_touchLib.h"
+
+// 5. MAIN LIBRARY HEADERS (alphabetical)
+#include "MAIN_animationLib.h" // NEW! Startup animation
 #include "MAIN_core0TasksLib.h"
 #include "MAIN_core1TasksLib.h"
+#include "MAIN_displayLib.h"
+#include "MAIN_drawingLib.h"
+#include "MAIN_initializationLib.h"
+#include "MAIN_lvglLib.h"
 #include "MAIN_sysinfoLib.h"
 
-// EARS Modular Libraries
-#include "EARS_nvsEepromLib.h"
-#include "EARS_sdCardLib.h"
-#include "EARS_backLightManagerLib.h"
-#include "EARS_touchLib.h"
-#include "EARS_hapticLib.h"
-#include "EARS_screenSaverLib.h"
-
-//  #include "EARS_touchDemoUI.h"         // STEP 7: Touch demo UI - NEW!
-
-// Development tools (compile out in production)
+// 6. DEVELOPMENT TOOLS (compile out in production)
 #if EARS_DEBUG == 1
 #include "MAIN_ledLib.h"
 #include "MAIN_developmentFeaturesLib.h"
 #endif
-
-// Display driver
-#include <Arduino_GFX_Library.h>
 
 // ============================================================================
 // DISPLAY SETTINGS
@@ -85,37 +83,9 @@ TaskHandle_t Core1_Task_Handle = NULL;
 SemaphoreHandle_t xDisplayMutex = NULL;
 
 // ============================================================================
-// TOUCH CONTROLLER STATE MACHINE
+// GLOBAL ANIMATION OBJECT (shared between setup and Core0 task)
 // ============================================================================
-volatile TouchState touch_state = TOUCH_NOT_INITIALIZED;
-volatile bool touch_initialized = false;
-
-// ============================================================================
-// NVS STATE MACHINE
-// ============================================================================
-enum NVSInitState
-{
-    NVS_NOT_INITIALIZED,
-    NVS_INITIALIZED_EMPTY,
-    NVS_NEEDS_ZAPNUMBER,
-    NVS_NEEDS_PASSWORD,
-    NVS_READY
-};
-
-volatile NVSInitState nvs_state = NVS_NOT_INITIALIZED;
-
-// ============================================================================
-// SD CARD STATE MACHINE
-// ============================================================================
-volatile SDCardState sd_card_state = SD_NOT_INITIALIZED;
-
-// ============================================================================
-// FUNCTION PROTOTYPES
-// ============================================================================
-void initialise_nvs();
-void initialise_sd();
-void initialise_touch();
-//  void create_touch_demo_ui(); // Touch demo UI
+lv_obj_t *g_animation_img = NULL;
 
 // ============================================================================
 // ARDUINO SETUP - Runs once on Core 1
@@ -181,17 +151,45 @@ void setup()
             delay(1000);
     }
 
-    // STEP 7: Initialize Touch Controller - NEW!
-    initialise_touch();
+    // Set screen background to TRUE_BLACK
+    lv_obj_t *screen = lv_screen_active();
+    lv_obj_set_style_bg_color(screen, lv_color_hex(EARS_RGB888_TRUE_BLACK), LV_PART_MAIN);
 
-    // STEP 4: Initialize NVS (BEFORE creating tasks)
-    initialise_nvs();
+#if EARS_DEBUG == 1
+    Serial.println("[OK] Screen background set to EARS_RGB888_TRUE_BLACK");
+#endif
 
-    // STEP 5: Initialize SD Card (BEFORE creating tasks)
-    initialise_sd();
+    // STEP 7: Initialize Touch Controller (via MAIN_initializationLib)
+    MAIN_initialise_touch();
 
-    // // Create touch demo UI (replaces simple test UI)
-    // create_touch_demo_ui();
+    // STEP 4: Initialize NVS (via MAIN_initializationLib)
+    MAIN_initialise_nvs();
+
+    // STEP 5: Initialize SD Card (via MAIN_initializationLib)
+    MAIN_initialise_sd();
+
+    // ========================================================================
+    // STEP 8: Create Startup Animation - NEW!
+    // ========================================================================
+#if EARS_DEBUG == 1
+    Serial.println("[INIT] Creating startup animation...");
+#endif
+
+    g_animation_img = MAIN_create_startup_animation();
+
+    if (g_animation_img == NULL)
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[WARNING] Failed to create startup animation");
+        Serial.println("          Continuing without animation");
+#endif
+    }
+    else
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[OK] Startup animation created");
+#endif
+    }
 
     // STEP 3: Create FreeRTOS tasks
 #if EARS_DEBUG == 1
@@ -222,7 +220,8 @@ void setup()
 
 #if EARS_DEBUG == 1
     Serial.println("[OK] All tasks created");
-    Serial.println("[INIT] System initialization complete\n");
+    Serial.println("[INIT] System initialization complete");
+    Serial.println("[ANIM] Marching soldier animation running!\n");
 #endif
 }
 
@@ -235,198 +234,5 @@ void loop()
 }
 
 // ============================================================================
-// Could these be moved to a their appropraite fils? main.cpp is getting crowded with all the new features! Thank you.
-// ============================================================================
-
-// ============================================================================
-// INITIALIZATION FUNCTIONS
-// ============================================================================
-
-/**
- * @brief Initialize Touch Controller
- * @details Uses EARS_touchLib::performFullInitialization()
- */
-void initialise_touch()
-{
-    // Guard against duplicate initialization
-    if (touch_state != TOUCH_NOT_INITIALIZED)
-    {
-#if EARS_DEBUG == 1
-        Serial.println("[TOUCH] Already initialized, skipping");
-#endif
-        return;
-    }
-
-    TouchInitResult result = using_touch().performFullInitialization(TOUCH_SDA, TOUCH_SCL);
-    touch_state = result.state;
-
-    switch (result.state)
-    {
-    case TOUCH_INIT_FAILED:
-#if EARS_DEBUG == 1
-        Serial.println("[WARNING] Touch initialization failed");
-        Serial.println("          System will continue without touch input");
-        MAIN_led_warning_pattern(3);
-#endif
-        touch_initialized = false;
-        break;
-
-    case TOUCH_READY:
-#if EARS_DEBUG == 1
-        Serial.printf("[OK] Touch ready: %s\n", result.modelName.c_str());
-        Serial.printf("     I2C: 0x%02X @ SDA=%d, SCL=%d\n",
-                      result.i2cAddress, result.sdaPin, result.sclPin);
-        Serial.printf("     Max Touch Points: %d\n", result.maxTouchPoints);
-        MAIN_led_success_pattern();
-#endif
-        touch_initialized = true;
-        break;
-
-    default:
-        break;
-    }
-}
-
-/**
- * @brief Initialize NVS (Non-Volatile Storage)
- * @details Uses EARS_nvsEepromLib::performFullInitialization()
- */
-void initialise_nvs()
-{
-    // Guard against duplicate initialization
-    if (nvs_state != NVS_NOT_INITIALIZED)
-    {
-#if EARS_DEBUG == 1
-        Serial.println("[NVS] Already initialized, skipping");
-#endif
-        return;
-    }
-
-#if EARS_DEBUG == 1
-    Serial.println("[INIT] Initializing NVS...");
-#endif
-
-    NVSValidationResult result = using_nvseeprom().performFullInitialization();
-
-    switch (result.status)
-    {
-    case NVSStatus::INITIALIZATION_FAILED:
-#if EARS_DEBUG == 1
-        Serial.println("[ERROR] NVS flash initialization failed!");
-        MAIN_led_error_pattern(10);
-        MAIN_led_red_on();
-#endif
-        nvs_state = NVS_NOT_INITIALIZED;
-        break;
-
-    case NVSStatus::MISSING_ZAPNUMBER:
-        if (result.currentVersion == result.expectedVersion &&
-            !result.zapNumberValid && !result.passwordHashValid)
-        {
-#if EARS_DEBUG == 1
-            Serial.println("[INFO] First boot - NVS initialized with defaults");
-            MAIN_led_warning_pattern(3);
-            MAIN_led_yellow_on();
-#endif
-            nvs_state = NVS_INITIALIZED_EMPTY;
-        }
-        else
-        {
-#if EARS_DEBUG == 1
-            Serial.println("[INFO] NVS needs ZapNumber");
-            MAIN_led_warning_pattern(3);
-            MAIN_led_yellow_on();
-#endif
-            nvs_state = NVS_NEEDS_ZAPNUMBER;
-        }
-        break;
-
-    case NVSStatus::MISSING_PASSWORD:
-#if EARS_DEBUG == 1
-        Serial.printf("[OK] ZapNumber valid: %s\n", result.zapNumber);
-        Serial.println("[INFO] NVS needs Password");
-        MAIN_led_warning_pattern(3);
-        MAIN_led_yellow_on();
-#endif
-        nvs_state = NVS_NEEDS_PASSWORD;
-        break;
-
-    case NVSStatus::VALID:
-#if EARS_DEBUG == 1
-        Serial.println("[OK] NVS fully validated and ready");
-        MAIN_led_success_pattern();
-#endif
-        nvs_state = NVS_READY;
-        break;
-
-    case NVSStatus::UPGRADED:
-#if EARS_DEBUG == 1
-        Serial.printf("[INFO] NVS upgraded from v%d to v%d\n",
-                      result.currentVersion, result.expectedVersion);
-        Serial.println("[OK] NVS fully validated and ready");
-        MAIN_led_success_pattern();
-#endif
-        nvs_state = NVS_READY;
-        break;
-
-    case NVSStatus::INVALID_VERSION:
-    case NVSStatus::CRC_FAILED:
-    default:
-#if EARS_DEBUG == 1
-        Serial.println("[ERROR] NVS validation failed");
-        MAIN_led_error_pattern(5);
-        MAIN_led_yellow_on();
-#endif
-        nvs_state = NVS_INITIALIZED_EMPTY;
-        break;
-    }
-}
-
-/**
- * @brief Initialize SD Card (SD_MMC mode)
- * @details Uses EARS_sdCardLib::performFullInitialization()
- */
-void initialise_sd()
-{
-    // Guard against duplicate initialization
-    if (sd_card_state != SD_NOT_INITIALIZED)
-    {
-#if EARS_DEBUG == 1
-        Serial.println("[SD] Already initialized, skipping");
-#endif
-        return;
-    }
-
-    SDCardInitResult result = using_sdcard().performFullInitialization();
-    sd_card_state = result.state;
-
-    switch (result.state)
-    {
-    case SD_INIT_FAILED:
-#if EARS_DEBUG == 1
-        MAIN_led_error_pattern(3);
-        MAIN_led_red_on();
-#endif
-        break;
-
-    case SD_NO_CARD:
-#if EARS_DEBUG == 1
-        MAIN_led_warning_pattern(3);
-        MAIN_led_yellow_on();
-#endif
-        break;
-
-    case SD_CARD_READY:
-#if EARS_DEBUG == 1
-        MAIN_led_success_pattern();
-#endif
-        break;
-
-    default:
-        break;
-    }
-}
-
-// ============================================================================
-// End of file main.cpp
+// END OF FILE - v0.13.0 MARCHING SOLDIER IS ALIVE! 🚶‍♂️
 // ============================================================================
