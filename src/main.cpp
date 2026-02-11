@@ -1,20 +1,19 @@
 /**
- * @file main.cpp - v0.12.0 MODULAR INITIALIZATION
+ * @file main.cpp - v0.13.0 STARTUP ANIMATION INTEGRATED
  * @author JTB
- * @brief EARS Main Application - LVGL 9.3.0 + Touch + Fully Modular Architecture
+ * @brief EARS Main Application - LVGL 9.3.0 + Touch + Animation
  * @details Equipment & Ammunition Reporting System
  *          Dual-core ESP32-S3 implementation using FreeRTOS
  *
  * ============================================================================
- * VERSION v0.12.0 - 20260210
+ * VERSION v0.13.0 - 20260210
  * NEW FEATURES:
- * - MAIN_initializationLib created - initialization functions extracted
- * - Cleaner main.cpp structure - only setup() and loop()
- * - Proper include organization following best practices
- * - All state machines and init functions in dedicated library
+ * - Startup animation integration (marching soldier)
+ * - Animation object passed to Core0 task for updates
+ * - Clean modular architecture with MAIN_initializationLib
  * ============================================================================
  *
- * @version 0.12.0
+ * @version 0.13.0
  * @date 20260210
  * @copyright Copyright (c) 2026 JTB All Rights Reserved
  */
@@ -38,6 +37,7 @@
 #include "EARS_toolsVersionDef.h"  // Build tools version tracking
 #include "EARS_ws35tlcdPins.h"     // Hardware pin definitions
 #include "EARS_rgb565ColoursDef.h" // Colour palette definitions
+#include "EARS_rgb888ColoursDef.h" // Colour palette definitions
 
 // 4. EARS LIBRARY HEADERS (alphabetical within group)
 #include "EARS_backLightManagerLib.h"
@@ -48,11 +48,12 @@
 #include "EARS_touchLib.h"
 
 // 5. MAIN LIBRARY HEADERS (alphabetical)
+#include "MAIN_animationLib.h" // NEW! Startup animation
 #include "MAIN_core0TasksLib.h"
 #include "MAIN_core1TasksLib.h"
 #include "MAIN_displayLib.h"
 #include "MAIN_drawingLib.h"
-#include "MAIN_initializationLib.h" // NEW! Centralized initialization
+#include "MAIN_initializationLib.h"
 #include "MAIN_lvglLib.h"
 #include "MAIN_sysinfoLib.h"
 
@@ -80,6 +81,11 @@ Arduino_GFX *gfx = new Arduino_ST7796(bus, LCD_RST, 1, true, TFT_HEIGHT, TFT_WID
 TaskHandle_t Core0_Task_Handle = NULL;
 TaskHandle_t Core1_Task_Handle = NULL;
 SemaphoreHandle_t xDisplayMutex = NULL;
+
+// ============================================================================
+// GLOBAL ANIMATION OBJECT (shared between setup and Core0 task)
+// ============================================================================
+lv_obj_t *g_animation_img = NULL;
 
 // ============================================================================
 // ARDUINO SETUP - Runs once on Core 1
@@ -145,6 +151,14 @@ void setup()
             delay(1000);
     }
 
+    // Set screen background to TRUE_BLACK
+    lv_obj_t *screen = lv_screen_active();
+    lv_obj_set_style_bg_color(screen, lv_color_hex(EARS_RGB888_TRUE_BLACK), LV_PART_MAIN);
+
+#if EARS_DEBUG == 1
+    Serial.println("[OK] Screen background set to EARS_RGB888_TRUE_BLACK");
+#endif
+
     // STEP 7: Initialize Touch Controller (via MAIN_initializationLib)
     MAIN_initialise_touch();
 
@@ -153,6 +167,29 @@ void setup()
 
     // STEP 5: Initialize SD Card (via MAIN_initializationLib)
     MAIN_initialise_sd();
+
+    // ========================================================================
+    // STEP 8: Create Startup Animation - NEW!
+    // ========================================================================
+#if EARS_DEBUG == 1
+    Serial.println("[INIT] Creating startup animation...");
+#endif
+
+    g_animation_img = MAIN_create_startup_animation();
+
+    if (g_animation_img == NULL)
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[WARNING] Failed to create startup animation");
+        Serial.println("          Continuing without animation");
+#endif
+    }
+    else
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[OK] Startup animation created");
+#endif
+    }
 
     // STEP 3: Create FreeRTOS tasks
 #if EARS_DEBUG == 1
@@ -183,7 +220,8 @@ void setup()
 
 #if EARS_DEBUG == 1
     Serial.println("[OK] All tasks created");
-    Serial.println("[INIT] System initialization complete\n");
+    Serial.println("[INIT] System initialization complete");
+    Serial.println("[ANIM] Marching soldier animation running!\n");
 #endif
 }
 
@@ -196,5 +234,5 @@ void loop()
 }
 
 // ============================================================================
-// END OF FILE - v0.12.0 MODULAR INITIALIZATION! 🎯
+// END OF FILE - v0.13.0 MARCHING SOLDIER IS ALIVE! 🚶‍♂️
 // ============================================================================

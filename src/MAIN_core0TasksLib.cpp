@@ -1,10 +1,10 @@
 /**
  * @file MAIN_core0TasksLib.cpp
  * @author Julian (51fiftyone51fiftyone@gmail.com)
- * @brief Core 0 UI Task implementation (extracted from main.cpp)
- * @details Manages Core 0 UI task - LVGL processing at 200Hz
- * @version 0.1.0
- * @date 20260204
+ * @brief Core 0 UI Task implementation with animation support
+ * @details Manages Core 0 UI task - LVGL processing at 200Hz + Animation updates
+ * @version 1.1.0
+ * @date 20260210
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -14,6 +14,7 @@
  *****************************************************************************/
 #include "MAIN_core0TasksLib.h"
 #include "EARS_systemDef.h"
+#include "MAIN_animationLib.h"  // NEW! Animation support
 #include <lvgl.h>
 
 // Development tools (compile out in production)
@@ -22,24 +23,36 @@
 #endif
 
 /******************************************************************************
+ * External Global Variables
+ *****************************************************************************/
+
+// Animation object created in main.cpp
+extern lv_obj_t* g_animation_img;
+
+/******************************************************************************
  * Core 0 UI Task Function
  *****************************************************************************/
 
 /**
  * @brief Core 0 UI Task (runs on Core 0)
  * @param parameter Task parameter (unused)
- * @details Handles LVGL UI processing at 200Hz
+ * @details Handles LVGL UI processing at 200Hz + Animation frame updates
  *
  * This task is responsible for:
  * - Running LVGL timer handler (updates widgets, animations)
  * - Processing UI events
+ * - Updating animation frames (marching soldier)
  * - Maintaining smooth display updates
- * - Future: Touch input processing
+ * - Future: Touch input processing, transitions
  */
 void MAIN_core0_ui_task(void *parameter)
 {
 #if EARS_DEBUG == 1
     Serial.println("[CORE0] UI Task started");
+    if (g_animation_img != NULL)
+    {
+        Serial.println("[CORE0] Animation enabled - soldier will march!");
+    }
 #endif
 
     TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -53,6 +66,12 @@ void MAIN_core0_ui_task(void *parameter)
 
         // Run LVGL task handler (processes timers, animations, redraws)
         lv_timer_handler();
+
+        // Update animation frame if animation object exists
+        if (g_animation_img != NULL)
+        {
+            MAIN_update_animation_frame(g_animation_img);
+        }
 
         // Wait for next cycle
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
