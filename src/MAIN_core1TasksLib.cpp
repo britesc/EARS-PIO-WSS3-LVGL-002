@@ -14,20 +14,13 @@
  *****************************************************************************/
 #include "MAIN_core1TasksLib.h"
 #include "EARS_systemDef.h"
+#include "MAIN_initializationLib.h"  // For MAIN_initialise_nvs() and MAIN_initialise_sd()
 
 // Development tools (compile out in production)
 #if EARS_DEBUG == 1
 #include "MAIN_ledLib.h"
 #include "MAIN_developmentFeaturesLib.h"
 #endif
-
-/******************************************************************************
- * External Function Prototypes
- *****************************************************************************/
-
-// These functions are defined in main.cpp (will be moved to libraries in Steps 4 & 5)
-extern void initialise_nvs();
-extern void initialise_sd();
 
 /******************************************************************************
  * Core 1 Background Task Function
@@ -51,8 +44,8 @@ void MAIN_core1_background_task(void *parameter)
 #endif
 
     // One-time initialization tasks
-    initialise_nvs();
-    initialise_sd();
+    MAIN_initialise_nvs();
+    MAIN_initialise_sd();
 
     // Continuous background loop
     TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -127,6 +120,33 @@ bool MAIN_create_core1_task(TaskHandle_t *taskHandle)
 #endif
 
     return true;
+}
+
+/******************************************************************************
+ * Library Version Information Getters
+ *****************************************************************************/
+
+// Get library name
+const char* MAIN_Core1Tasks_getLibraryName() {
+    return MAIN_Core1Tasks::LIB_NAME;
+}
+
+// Get encoded version as integer
+uint32_t MAIN_Core1Tasks_getVersionEncoded() {
+    return VERS_ENCODE(MAIN_Core1Tasks::VERSION_MAJOR, 
+                       MAIN_Core1Tasks::VERSION_MINOR, 
+                       MAIN_Core1Tasks::VERSION_PATCH);
+}
+
+// Get version date
+const char* MAIN_Core1Tasks_getVersionDate() {
+    return MAIN_Core1Tasks::VERSION_DATE;
+}
+
+// Format version as string
+void MAIN_Core1Tasks_getVersionString(char* buffer) {
+    uint32_t encoded = MAIN_Core1Tasks_getVersionEncoded();
+    VERS_FORMAT(encoded, buffer);
 }
 
 /******************************************************************************

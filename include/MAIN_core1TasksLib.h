@@ -19,6 +19,19 @@
 #include <Arduino.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include "EARS_versionDef.h"
+
+/******************************************************************************
+ * Library Version Information
+ *****************************************************************************/
+namespace MAIN_Core1Tasks
+{
+    constexpr const char* LIB_NAME = "MAIN_Core1Tasks";
+    constexpr const char* VERSION_MAJOR = "1";
+    constexpr const char* VERSION_MINOR = "0";
+    constexpr const char* VERSION_PATCH = "0";
+    constexpr const char* VERSION_DATE = "2026-02-04";
+}
 
 /******************************************************************************
  * Core 1 Configuration
@@ -58,6 +71,14 @@ bool MAIN_create_core1_task(TaskHandle_t *taskHandle);
  * - Future: WiFi, BLE, sensors, logging
  */
 void MAIN_core1_background_task(void *parameter);
+
+/******************************************************************************
+ * Version Information Getters
+ *****************************************************************************/
+const char* MAIN_Core1Tasks_getLibraryName();
+uint32_t MAIN_Core1Tasks_getVersionEncoded();
+const char* MAIN_Core1Tasks_getVersionDate();
+void MAIN_Core1Tasks_getVersionString(char* buffer);
 
 #endif // __MAIN_CORE1_TASKS_LIB_H__
 

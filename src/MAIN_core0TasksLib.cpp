@@ -108,5 +108,32 @@ bool MAIN_create_core0_task(TaskHandle_t *taskHandle)
 }
 
 /******************************************************************************
+ * Library Version Information Getters
+ *****************************************************************************/
+
+// Get library name
+const char* MAIN_Core0Tasks_getLibraryName() {
+    return MAIN_Core0Tasks::LIB_NAME;
+}
+
+// Get encoded version as integer
+uint32_t MAIN_Core0Tasks_getVersionEncoded() {
+    return VERS_ENCODE(MAIN_Core0Tasks::VERSION_MAJOR, 
+                       MAIN_Core0Tasks::VERSION_MINOR, 
+                       MAIN_Core0Tasks::VERSION_PATCH);
+}
+
+// Get version date
+const char* MAIN_Core0Tasks_getVersionDate() {
+    return MAIN_Core0Tasks::VERSION_DATE;
+}
+
+// Format version as string
+void MAIN_Core0Tasks_getVersionString(char* buffer) {
+    uint32_t encoded = MAIN_Core0Tasks_getVersionEncoded();
+    VERS_FORMAT(encoded, buffer);
+}
+
+/******************************************************************************
  * End of MAIN_core0TasksLib.cpp
  *****************************************************************************/

@@ -19,6 +19,19 @@
 #include <Arduino.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include "EARS_versionDef.h"
+
+/******************************************************************************
+ * Library Version Information
+ *****************************************************************************/
+namespace MAIN_Core0Tasks
+{
+    constexpr const char* LIB_NAME = "MAIN_Core0Tasks";
+    constexpr const char* VERSION_MAJOR = "1";
+    constexpr const char* VERSION_MINOR = "0";
+    constexpr const char* VERSION_PATCH = "0";
+    constexpr const char* VERSION_DATE = "2026-02-04";
+}
 
 /******************************************************************************
  * Core 0 Configuration
@@ -57,6 +70,14 @@ bool MAIN_create_core0_task(TaskHandle_t *taskHandle);
  * - Display rendering
  */
 void MAIN_core0_ui_task(void *parameter);
+
+/******************************************************************************
+ * Version Information Getters
+ *****************************************************************************/
+const char* MAIN_Core0Tasks_getLibraryName();
+uint32_t MAIN_Core0Tasks_getVersionEncoded();
+const char* MAIN_Core0Tasks_getVersionDate();
+void MAIN_Core0Tasks_getVersionString(char* buffer);
 
 #endif // __MAIN_CORE0_TASKS_LIB_H__
 
