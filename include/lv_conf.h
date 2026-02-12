@@ -1,3 +1,5 @@
+#if 1 /* Set this to "1" to enable content */
+
 #ifndef LV_CONF_H
 #define LV_CONF_H
 
@@ -71,3 +73,5 @@
 #define LV_LOG_PRINTF 1
 
 #endif /*LV_CONF_H*/
+
+#endif /*End of "Content enable"*/
