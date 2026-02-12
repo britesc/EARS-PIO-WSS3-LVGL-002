@@ -1,10 +1,13 @@
 """
-EEZ Studio LVGL 9.x Compatibility Fix
+EEZ Studio LVGL 9.3.0 Compatibility Fix
 This script fixes LVGL function calls in EEZ Studio generated code
-to be compatible with LVGL 9.x
+to be compatible with LVGL 9.3.0
 
-Author: Claude Sonnet 4.2
-Updated: 20250123 - Fixed regex patterns to properly match animation parameters
+ESF 0.25.1 generates calls without animation parameters
+LVGL 9.3.0 requires animation parameters
+
+Author: Claude Sonnet 4.5
+Updated: 20250212 - Fixed to ADD animation parameters for LVGL 9.3.0
 """
 
 # type: ignore - PlatformIO build script
@@ -14,14 +17,15 @@ import re
 
 def fix_eez_lvgl9_compatibility(source, target, env):
     """
-    Fix LVGL 9.x compatibility issues in eez-flow.cpp
+    Fix LVGL 9.3.0 compatibility issues in eez-flow.cpp
     
-    In LVGL 9.x, several functions no longer accept animation parameters.
-    This script removes the animation parameter from these function calls:
+    In LVGL 9.3.0, these functions REQUIRE animation parameters.
+    ESF 0.25.1 generates calls WITHOUT them.
+    This script ADDS the missing LV_ANIM_OFF parameter:
     - lv_bar_set_value()
     - lv_roller_set_selected()
     - lv_slider_set_value()
-    - lv_slider_set_left_value()
+    - lv_slider_set_start_value()
     - lv_dropdown_set_selected()
     """
     
@@ -33,7 +37,7 @@ def fix_eez_lvgl9_compatibility(source, target, env):
         print(f"⚠️  EEZ flow file not found: {eez_flow_path}")
         return
     
-    print(f"🔧 Checking EEZ Studio compatibility: {eez_flow_path}")
+    print(f"🔧 Checking EEZ Studio LVGL 9.3.0 compatibility: {eez_flow_path}")
     
     # Read the file
     with open(eez_flow_path, 'r', encoding='utf-8') as f:
@@ -43,48 +47,51 @@ def fix_eez_lvgl9_compatibility(source, target, env):
     fixes_applied = 0
     
     # Define function patterns to fix
-    # Each pattern removes the animation parameter (third parameter)
+    # Each pattern ADDS the missing animation parameter (third parameter)
     
     function_fixes = [
         {
             'name': 'lv_bar_set_value',
-            # Matches: lv_bar_set_value(obj, value, animated ? LV_ANIM_ON : LV_ANIM_OFF)
-            # Replaces with: lv_bar_set_value(obj, value)
-            'pattern': r'lv_bar_set_value\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*[^)]+\?\s*LV_ANIM_ON\s*:\s*LV_ANIM_OFF\s*\)',
-            'replacement': r'lv_bar_set_value(\1, \2)'
+            # Matches: lv_bar_set_value(obj, value)
+            # Replaces with: lv_bar_set_value(obj, value, LV_ANIM_OFF)
+            'pattern': r'lv_bar_set_value\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)',
+            'replacement': r'lv_bar_set_value(\1, \2, LV_ANIM_OFF)'
         },
         {
             'name': 'lv_roller_set_selected',
-            # Matches: lv_roller_set_selected(obj, value, animated ? LV_ANIM_ON : LV_ANIM_OFF)
-            # Replaces with: lv_roller_set_selected(obj, value)
-            'pattern': r'lv_roller_set_selected\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*[^)]+\?\s*LV_ANIM_ON\s*:\s*LV_ANIM_OFF\s*\)',
-            'replacement': r'lv_roller_set_selected(\1, \2)'
+            # Matches: lv_roller_set_selected(obj, value)
+            # Replaces with: lv_roller_set_selected(obj, value, LV_ANIM_OFF)
+            'pattern': r'lv_roller_set_selected\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)',
+            'replacement': r'lv_roller_set_selected(\1, \2, LV_ANIM_OFF)'
         },
         {
             'name': 'lv_slider_set_value',
-            # Matches: lv_slider_set_value(obj, value, animated ? LV_ANIM_ON : LV_ANIM_OFF)
-            # Replaces with: lv_slider_set_value(obj, value)
-            'pattern': r'lv_slider_set_value\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*[^)]+\?\s*LV_ANIM_ON\s*:\s*LV_ANIM_OFF\s*\)',
-            'replacement': r'lv_slider_set_value(\1, \2)'
+            # Matches: lv_slider_set_value(obj, value)
+            # Replaces with: lv_slider_set_value(obj, value, LV_ANIM_OFF)
+            'pattern': r'lv_slider_set_value\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)',
+            'replacement': r'lv_slider_set_value(\1, \2, LV_ANIM_OFF)'
         },
         {
-            'name': 'lv_slider_set_left_value',
-            # Matches: lv_slider_set_left_value(obj, value, animated ? LV_ANIM_ON : LV_ANIM_OFF)
-            # Replaces with: lv_slider_set_left_value(obj, value)
-            'pattern': r'lv_slider_set_left_value\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*[^)]+\?\s*LV_ANIM_ON\s*:\s*LV_ANIM_OFF\s*\)',
-            'replacement': r'lv_slider_set_left_value(\1, \2)'
+            'name': 'lv_slider_set_start_value',
+            # Matches: lv_slider_set_start_value(obj, value)
+            # Replaces with: lv_slider_set_start_value(obj, value, LV_ANIM_OFF)
+            'pattern': r'lv_slider_set_start_value\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)',
+            'replacement': r'lv_slider_set_start_value(\1, \2, LV_ANIM_OFF)'
         },
         {
             'name': 'lv_dropdown_set_selected',
-            # Matches: lv_dropdown_set_selected(obj, value, LV_ANIM_ON) or LV_ANIM_OFF
-            # Replaces with: lv_dropdown_set_selected(obj, value)
-            'pattern': r'lv_dropdown_set_selected\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*LV_ANIM_(?:ON|OFF)\s*\)',
-            'replacement': r'lv_dropdown_set_selected(\1, \2)'
+            # Matches: lv_dropdown_set_selected(obj, value)
+            # Replaces with: lv_dropdown_set_selected(obj, value, LV_ANIM_OFF)
+            'pattern': r'lv_dropdown_set_selected\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)',
+            'replacement': r'lv_dropdown_set_selected(\1, \2, LV_ANIM_OFF)'
         }
     ]
     
     # Apply each fix
     for fix in function_fixes:
+        # Only match calls that DON'T already have LV_ANIM parameter
+        # This prevents double-fixing
+        pattern_with_check = fix['pattern'].replace(')', r'(?!.*LV_ANIM)')
         content_before = content
         content, count = re.subn(fix['pattern'], fix['replacement'], content)
         
@@ -96,11 +103,11 @@ def fix_eez_lvgl9_compatibility(source, target, env):
     if content != original_content:
         with open(eez_flow_path, 'w', encoding='utf-8') as f:
             f.write(content)
-        print(f"✅ EEZ Studio compatibility fixes applied: {fixes_applied} total changes")
+        print(f"✅ EEZ Studio LVGL 9.3.0 compatibility fixes applied: {fixes_applied} total changes")
     else:
         print("✅ EEZ Studio code already compatible - no fixes needed")
 
 # Register the callback to run before building
 env.AddPreAction("$BUILD_DIR/${PROGNAME}.elf", fix_eez_lvgl9_compatibility)
 
-print("🔍 EEZ Studio LVGL 9.x compatibility fixer loaded")
+print("🔍 EEZ Studio LVGL 9.3.0 compatibility fixer loaded")

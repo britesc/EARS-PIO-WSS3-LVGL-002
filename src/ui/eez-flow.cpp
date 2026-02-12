@@ -4023,7 +4023,7 @@ void executeLVGLComponent(FlowState *flowState, unsigned componentIndex) {
                     if (specific->property == ARC_VALUE) {
                         lv_arc_set_value(target, intValue);
                     } else if (specific->property == BAR_VALUE) {
-                        lv_bar_set_value(target, intValue);
+                        lv_bar_set_value(target, intValue, specific->animated ? LV_ANIM_ON : LV_ANIM_OFF);
                     } else if (specific->property == BASIC_X) {
                         lv_obj_set_x(target, intValue);
                     } else if (specific->property == BASIC_Y) {
@@ -4041,9 +4041,9 @@ void executeLVGLComponent(FlowState *flowState, unsigned componentIndex) {
                     } else if (specific->property == IMAGE_ZOOM) {
                         lv_img_set_zoom(target, intValue);
                     } else if (specific->property == ROLLER_SELECTED) {
-                        lv_roller_set_selected(target, intValue);
+                        lv_roller_set_selected(target, intValue, specific->animated ? LV_ANIM_ON : LV_ANIM_OFF);
                     } else if (specific->property == SLIDER_VALUE) {
-                        lv_slider_set_value(target, intValue);
+                        lv_slider_set_value(target, intValue, specific->animated ? LV_ANIM_ON : LV_ANIM_OFF);
                     }
                 }
             }
@@ -4520,7 +4520,7 @@ ACTION_START(barSetValue)
     WIDGET_PROP(obj);
     INT32_PROP(value);
     BOOL_PROP(animated);
-    lv_bar_set_value(obj, value);
+    lv_bar_set_value(obj, value, animated ? LV_ANIM_ON : LV_ANIM_OFF);
 ACTION_END
 ACTION_START(dropdownSetSelected)
     WIDGET_PROP(obj);
@@ -4571,22 +4571,22 @@ ACTION_START(rollerSetSelected)
     UINT32_PROP(selected);
     BOOL_PROP(animated);
 #if LVGL_VERSION_MAJOR >= 9
-    lv_roller_set_selected(obj, selected);
+    lv_roller_set_selected(obj, selected, animated ? LV_ANIM_ON : LV_ANIM_OFF);
 #else
-    lv_roller_set_selected(obj, (uint16_t)selected);
+    lv_roller_set_selected(obj, (uint16_t)selected, animated ? LV_ANIM_ON : LV_ANIM_OFF);
 #endif
 ACTION_END
 ACTION_START(sliderSetValue)
     WIDGET_PROP(obj);
     INT32_PROP(value);
     BOOL_PROP(animated);
-    lv_slider_set_value(obj, value);
+    lv_slider_set_value(obj, value, animated ? LV_ANIM_ON : LV_ANIM_OFF);
 ACTION_END
 ACTION_START(sliderSetValueLeft)
     WIDGET_PROP(obj);
     INT32_PROP(valueLeft);
     BOOL_PROP(animated);
-    lv_slider_set_left_value(obj, valueLeft);
+    lv_slider_set_left_value(obj, valueLeft, animated ? LV_ANIM_ON : LV_ANIM_OFF);
 ACTION_END
 ACTION_START(sliderSetRange)
     WIDGET_PROP(obj);
