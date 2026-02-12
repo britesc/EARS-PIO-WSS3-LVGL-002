@@ -39,8 +39,8 @@
 namespace MAIN_Initialization
 {
     constexpr const char *LIB_NAME = "MAIN_Initialization";
-    constexpr const char *VERSION_MAJOR = "0";
-    constexpr const char *VERSION_MINOR = "1";
+    constexpr const char *VERSION_MAJOR = "1";
+    constexpr const char *VERSION_MINOR = "0";
     constexpr const char *VERSION_PATCH = "0";
     constexpr const char *VERSION_DATE = "2026-02-10";
 }

@@ -34,19 +34,18 @@
  *****************************************************************************/
 namespace MAIN_DevFeatures
 {
-    constexpr const char* LIB_NAME = "MAIN_DevelopmentFeatures";
-    constexpr const char* VERSION_MAJOR = "1";
-    constexpr const char* VERSION_MINOR = "0";
-    constexpr const char* VERSION_PATCH = "0";
-    constexpr const char* VERSION_DATE = "2026-02-02";
+    constexpr const char *LIB_NAME = "MAIN_DevelopmentFeatures";
+    constexpr const char *VERSION_MAJOR = "1";
+    constexpr const char *VERSION_MINOR = "0";
+    constexpr const char *VERSION_PATCH = "0";
+    constexpr const char *VERSION_DATE = "2026-02-10";
 }
 
-
 // Version information getters
-const char* MAIN_DevelopmentFeatures_getLibraryName();
+const char *MAIN_DevelopmentFeatures_getLibraryName();
 uint32_t MAIN_DevelopmentFeatures_getVersionEncoded();
-const char* MAIN_DevelopmentFeatures_getVersionDate();
-void MAIN_DevelopmentFeatures_getVersionString(char* buffer);
+const char *MAIN_DevelopmentFeatures_getVersionDate();
+void MAIN_DevelopmentFeatures_getVersionString(char *buffer);
 
 /******************************************************************************
  * Development Mode Variables
