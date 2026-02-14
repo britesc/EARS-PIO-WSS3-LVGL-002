@@ -3,6 +3,8 @@
 #ifndef LV_CONF_H
 #define LV_CONF_H
 
+#define LV_CONF_VERSION 9
+
 #include <stdint.h>
 
 /* Color settings */

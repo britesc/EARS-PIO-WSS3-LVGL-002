@@ -48,7 +48,7 @@
 #include "EARS_touchLib.h"
 
 // 5. MAIN LIBRARY HEADERS (alphabetical)
-#include "MAIN_animationLib.h" // NEW! Startup animation
+// #include "MAIN_animationLib.h" // NEW! Startup animation
 #include "MAIN_core0TasksLib.h"
 #include "MAIN_core1TasksLib.h"
 #include "MAIN_displayLib.h"
@@ -85,7 +85,7 @@ SemaphoreHandle_t xDisplayMutex = NULL;
 // ============================================================================
 // GLOBAL ANIMATION OBJECT (shared between setup and Core0 task)
 // ============================================================================
-lv_obj_t *g_animation_img = NULL;
+// lv_obj_t *g_animation_img = NULL;
 
 // ============================================================================
 // ARDUINO SETUP - Runs once on Core 1
@@ -175,22 +175,22 @@ void setup()
     Serial.println("[INIT] Creating startup animation...");
 #endif
 
-    g_animation_img = MAIN_create_startup_animation();
+    // g_animation_img = MAIN_create_startup_animation();
 
-    if (g_animation_img == NULL)
-    {
-#if EARS_DEBUG == 1
-        Serial.println("[WARNING] Failed to create startup animation");
-        Serial.println("          Continuing without animation");
-#endif
-    }
-    else
-    {
-#if EARS_DEBUG == 1
-        Serial.println("[OK] Startup animation created");
-#endif
-    }
-
+    /*     if (g_animation_img == NULL)
+        {
+    #if EARS_DEBUG == 1
+            Serial.println("[WARNING] Failed to create startup animation");
+            Serial.println("          Continuing without animation");
+    #endif
+        }
+        else
+        {
+    #if EARS_DEBUG == 1
+            Serial.println("[OK] Startup animation created");
+    #endif
+        }
+     */
     // STEP 3: Create FreeRTOS tasks
 #if EARS_DEBUG == 1
     Serial.println("[INIT] Creating FreeRTOS tasks...");

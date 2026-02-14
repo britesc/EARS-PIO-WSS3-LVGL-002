@@ -14,7 +14,7 @@
  *****************************************************************************/
 #include "MAIN_core0TasksLib.h"
 #include "EARS_systemDef.h"
-#include "MAIN_animationLib.h"  // NEW! Animation support
+// #include "MAIN_animationLib.h"  // NEW! Animation support
 #include <lvgl.h>
 
 // Development tools (compile out in production)
@@ -27,7 +27,7 @@
  *****************************************************************************/
 
 // Animation object created in main.cpp
-extern lv_obj_t* g_animation_img;
+// extern lv_obj_t* g_animation_img;
 
 /******************************************************************************
  * Core 0 UI Task Function
@@ -47,14 +47,14 @@ extern lv_obj_t* g_animation_img;
  */
 void MAIN_core0_ui_task(void *parameter)
 {
-#if EARS_DEBUG == 1
-    Serial.println("[CORE0] UI Task started");
-    if (g_animation_img != NULL)
-    {
-        Serial.println("[CORE0] Animation enabled - soldier will march!");
-    }
-#endif
-
+    /* #if EARS_DEBUG == 1
+        Serial.println("[CORE0] UI Task started");
+        if (g_animation_img != NULL)
+        {
+            Serial.println("[CORE0] Animation enabled - soldier will march!");
+        }
+    #endif
+     */
     TickType_t xLastWakeTime = xTaskGetTickCount();
     const TickType_t xFrequency = pdMS_TO_TICKS(1000 / CORE0_FREQUENCY_HZ); // 5ms for 200Hz
 
@@ -68,11 +68,11 @@ void MAIN_core0_ui_task(void *parameter)
         lv_timer_handler();
 
         // Update animation frame if animation object exists
-        if (g_animation_img != NULL)
-        {
-            MAIN_update_animation_frame(g_animation_img);
-        }
-
+        /*         if (g_animation_img != NULL)
+                {
+                    MAIN_update_animation_frame(g_animation_img);
+                }
+         */
         // Wait for next cycle
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }
@@ -131,24 +131,28 @@ bool MAIN_create_core0_task(TaskHandle_t *taskHandle)
  *****************************************************************************/
 
 // Get library name
-const char* MAIN_Core0Tasks_getLibraryName() {
+const char *MAIN_Core0Tasks_getLibraryName()
+{
     return MAIN_Core0Tasks::LIB_NAME;
 }
 
 // Get encoded version as integer
-uint32_t MAIN_Core0Tasks_getVersionEncoded() {
-    return VERS_ENCODE(MAIN_Core0Tasks::VERSION_MAJOR, 
-                       MAIN_Core0Tasks::VERSION_MINOR, 
+uint32_t MAIN_Core0Tasks_getVersionEncoded()
+{
+    return VERS_ENCODE(MAIN_Core0Tasks::VERSION_MAJOR,
+                       MAIN_Core0Tasks::VERSION_MINOR,
                        MAIN_Core0Tasks::VERSION_PATCH);
 }
 
 // Get version date
-const char* MAIN_Core0Tasks_getVersionDate() {
+const char *MAIN_Core0Tasks_getVersionDate()
+{
     return MAIN_Core0Tasks::VERSION_DATE;
 }
 
 // Format version as string
-void MAIN_Core0Tasks_getVersionString(char* buffer) {
+void MAIN_Core0Tasks_getVersionString(char *buffer)
+{
     uint32_t encoded = MAIN_Core0Tasks_getVersionEncoded();
     VERS_FORMAT(encoded, buffer);
 }
