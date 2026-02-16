@@ -22,7 +22,7 @@
 #include "MAIN_displayLib.h"        // Display initialization (PWM backlight)
 #include "MAIN_initializationLib.h" // Touch initialization
 #include <lvgl.h>
-#include "ui/ui.h" // ESF generated
+#include "ui/ui.h" // ESF generated UI
 
 // Development tools (compile out in production)
 #if EARS_DEBUG == 1
@@ -80,48 +80,62 @@ static void loadESFScreen(uint8_t screenID)
 
     // TODO: When ESF ui/ files are in src/ui/, uncomment this section
     // and comment out the placeholder labels above
+    // Screen ID mapping: 0=Start/Error, 1=Config, 2=Main
     /*
     switch (screenID)
     {
     case 0:
     {
 #if EARS_DEBUG == 1
-        Serial.println("[CORE0]   -> Configuration Screen");
+        Serial.println("[CORE0]   -> Start/Error Screen");
 #endif
-        loadScreen(SCREEN_ID_SCREEN_CONFIG);
+        loadScreen(SCREEN_ID_SCREEN_START);  // ESF ID 1
         break;
     }
     case 1:
     {
 #if EARS_DEBUG == 1
-        Serial.println("[CORE0]   -> Main Menu Screen");
+        Serial.println("[CORE0]   -> Configuration Screen");
 #endif
-        loadScreen(SCREEN_ID_SCREEN_MAIN);
+        loadScreen(SCREEN_ID_SCREEN_CONFIG);  // ESF ID 2
         break;
     }
     case 2:
     {
 #if EARS_DEBUG == 1
-        Serial.println("[CORE0]   -> Error/Warning Screen");
+        Serial.println("[CORE0]   -> Main Menu Screen");
 #endif
-        loadScreen(SCREEN_ID_SCREEN_START);
+        loadScreen(SCREEN_ID_SCREEN_MAIN);  // ESF ID 3
         break;
     }
     default:
     {
 #if EARS_DEBUG == 1
-        Serial.printf("[CORE0]   -> Unknown Screen ID %d\n", screenID);
+        Serial.printf("[CORE0]   -> Unknown Screen ID %d, defaulting to Config\n", screenID);
 #endif
-        loadScreen(SCREEN_ID_SCREEN_CONFIG);
+        loadScreen(SCREEN_ID_SCREEN_CONFIG);  // Default to config
         break;
     }
     }
     */
 
     // Temporary screen-specific indicators (until ESF integrated)
+    // Screen ID mapping: 0=Start/Error, 1=Config, 2=Main
     switch (screenID)
     {
     case 0:
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[CORE0]   -> Start/Error Screen (placeholder)");
+#endif
+        lv_obj_t *errorLabel = lv_label_create(screen);
+        lv_label_set_text(errorLabel, "Start/Error Screen");
+        lv_obj_set_style_text_color(errorLabel, lv_color_make(255, 0, 0), LV_PART_MAIN);
+        lv_obj_align(errorLabel, LV_ALIGN_TOP_MID, 0, 20);
+        break;
+    }
+
+    case 1:
     {
 #if EARS_DEBUG == 1
         Serial.println("[CORE0]   -> Configuration Screen (placeholder)");
@@ -133,7 +147,7 @@ static void loadESFScreen(uint8_t screenID)
         break;
     }
 
-    case 1:
+    case 2:
     {
 #if EARS_DEBUG == 1
         Serial.println("[CORE0]   -> Main Menu Screen (placeholder)");
@@ -142,18 +156,6 @@ static void loadESFScreen(uint8_t screenID)
         lv_label_set_text(menuLabel, "Main Menu");
         lv_obj_set_style_text_color(menuLabel, lv_color_make(0, 255, 0), LV_PART_MAIN);
         lv_obj_align(menuLabel, LV_ALIGN_TOP_MID, 0, 20);
-        break;
-    }
-
-    case 2:
-    {
-#if EARS_DEBUG == 1
-        Serial.println("[CORE0]   -> Error/Warning Screen (placeholder)");
-#endif
-        lv_obj_t *errorLabel = lv_label_create(screen);
-        lv_label_set_text(errorLabel, "Error/Warning");
-        lv_obj_set_style_text_color(errorLabel, lv_color_make(255, 0, 0), LV_PART_MAIN);
-        lv_obj_align(errorLabel, LV_ALIGN_TOP_MID, 0, 20);
         break;
     }
 
@@ -225,8 +227,9 @@ void MAIN_core0_ui_task(void *parameter)
             // Update animation
             MAIN_AnimationGfxLib::update();
 
-            // Check if animation complete
-            if (MAIN_AnimationGfxLib::isComplete())
+            // Check if Core1 has signaled to stop (NOT just time-based completion)
+            // This ensures we wait for Core1's configuration check to complete
+            if (MAIN_AnimationGfxLib::animationStopRequested)
             {
 #if EARS_DEBUG == 1
                 Serial.println("\n[CORE0] ========================================");

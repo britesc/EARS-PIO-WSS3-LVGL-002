@@ -69,29 +69,30 @@ static uint8_t checkDeviceConfiguration()
 #endif
 
     // Determine which screen to show
+    // Screen ID mapping: 0=Start/Error, 1=Config, 2=Main
     if (!hasZapNumber || !hasPassword)
     {
 #if EARS_DEBUG == 1
         Serial.println("[CORE1] → Device requires configuration");
-        Serial.println("[CORE1] → Will display Configuration Screen (ID 0)");
+        Serial.println("[CORE1] → Will display Configuration Screen (ID 1)");
 #endif
-        return 0; // Configuration screen
+        return 1; // Configuration screen (ESF SCREEN_ID_SCREEN_CONFIG)
     }
     else if (!sdCardReady)
     {
 #if EARS_DEBUG == 1
         Serial.println("[CORE1] → SD Card issue detected");
-        Serial.println("[CORE1] → Will display Error/Warning Screen (ID 2)");
+        Serial.println("[CORE1] → Will display Start/Error Screen (ID 0)");
 #endif
-        return 2; // Error/Warning screen
+        return 0; // Start/Error screen (ESF SCREEN_ID_SCREEN_START)
     }
     else
     {
 #if EARS_DEBUG == 1
         Serial.println("[CORE1] → Device fully configured and ready");
-        Serial.println("[CORE1] → Will display Main Menu Screen (ID 1)");
+        Serial.println("[CORE1] → Will display Main Menu Screen (ID 2)");
 #endif
-        return 1; // Main menu screen
+        return 2; // Main menu screen (ESF SCREEN_ID_SCREEN_MAIN)
     }
 }
 
@@ -170,22 +171,17 @@ void MAIN_core1_background_task(void *parameter)
     // Check device configuration and determine screen
     determinedScreenID = checkDeviceConfiguration();
 
-    // Calculate elapsed time and wait for minimum animation duration
-    uint32_t elapsedTime = millis() - startTime;
-    const uint32_t MIN_ANIMATION_DURATION_MS = 3000; // 3 seconds minimum
+    // AND condition: Config complete AND minimum duration met
+    constexpr uint32_t MIN_ANIMATION_DURATION_MS = 3000;
 
-    if (elapsedTime < MIN_ANIMATION_DURATION_MS)
+    // Wait until both conditions satisfied (config done, now wait for time)
+    while (millis() - startTime < MIN_ANIMATION_DURATION_MS)
     {
-        uint32_t remainingTime = MIN_ANIMATION_DURATION_MS - elapsedTime;
-#if EARS_DEBUG == 1
-        Serial.printf("[CORE1] Config check complete in %d ms\n", elapsedTime);
-        Serial.printf("[CORE1] Waiting %d ms for minimum animation duration...\n", remainingTime);
-#endif
-        vTaskDelay(pdMS_TO_TICKS(remainingTime));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 
-    // Signal Core0 which screen to display (via animation library)
 #if EARS_DEBUG == 1
+    Serial.printf("[CORE1] Both conditions met at %d ms\n", millis() - startTime);
     Serial.println("[CORE1] ========================================");
     Serial.printf("[CORE1] Signaling Core0 to load Screen ID %d\n", determinedScreenID);
     Serial.println("[CORE1] ========================================");

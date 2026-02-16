@@ -138,12 +138,8 @@ void setup()
     // STEP 3: Clear screen once (black background for animation)
     gfx->fillScreen(BLACK);
 
-    // STEP 4: Turn backlight ON immediately (so animation will be visible)
-    // Use direct PWM instead of full MAIN_initialise_display() to save time
-    pinMode(LCD_BL, OUTPUT);
-    ledcSetup(BACKLIGHT_PWM_CHANNEL, BACKLIGHT_PWM_FREQ, BACKLIGHT_PWM_RES);
-    ledcAttachPin(LCD_BL, BACKLIGHT_PWM_CHANNEL);
-    ledcWrite(BACKLIGHT_PWM_CHANNEL, 255); // Full brightness immediately
+    // STEP 4: Turn backlight ON (use existing function - fast enough)
+    MAIN_initialise_display(gfx);
 
     // STEP 5: Initialize and START animation library
     if (!MAIN_AnimationGfxLib::initialise(gfx))
@@ -174,8 +170,8 @@ void setup()
     Serial.println("\n\n================================================================");
     Serial.println("  EARS - Equipment & Ammunition Reporting System");
     Serial.println("================================================================");
-    Serial.printf("  Version:    %s Development\n", EARS_VERSION_STRING);
-    Serial.printf("  Build:      %d\n", EARS_BUILD_NUMBER);
+    Serial.printf("  Version:    %s.%s.%s Development\n",
+                  EARS_APP_VERSION_MAJOR, EARS_APP_VERSION_MINOR, EARS_APP_VERSION_PATCH);
     Serial.println("================================================================\n");
 
     Serial.println("[OK] Animation started - soldier marching!");

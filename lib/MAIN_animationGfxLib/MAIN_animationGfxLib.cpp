@@ -170,29 +170,14 @@ namespace MAIN_AnimationGfxLib
             lastFrameTime = currentTime;
             currentFrameIndex++;
 
-            // Check if animation is complete
+            // Loop animation frames indefinitely until stop signal received
             if (currentFrameIndex >= FRAME_COUNT)
             {
-                // Loop back to start or complete based on total time
-                uint32_t totalElapsed = currentTime - animationStartTime;
-
-                if (totalElapsed >= ANIMATION_MIN_DURATION_MS)
-                {
-                    // Minimum duration reached, complete animation
-                    currentState = AnimationState::COMPLETED;
-                }
-                else
-                {
-                    // Loop frames until minimum duration reached
-                    currentFrameIndex = 0;
-                }
+                currentFrameIndex = 0; // Loop back to first frame
             }
 
-            // Display the new frame if still running
-            if (currentState == AnimationState::RUNNING)
-            {
-                displayCurrentFrame();
-            }
+            // Display the new frame
+            displayCurrentFrame();
         }
 
         return currentState;
