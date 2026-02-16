@@ -1,10 +1,10 @@
 /**
  * @file MAIN_core0TasksLib.h
  * @author Julian (51fiftyone51fiftyone@gmail.com)
- * @brief Core 0 UI Task management for EARS (extracted from main.cpp)
- * @details Manages Core 0 UI task - LVGL processing at 200Hz
- * @version 0.1.0
- * @date 20260204
+ * @brief Core 0 UI Task management for EARS
+ * @details Manages Core 0 UI task - Animation → LVGL transition → UI processing at 200Hz
+ * @version 1.2.0
+ * @date 20260215
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -28,9 +28,9 @@ namespace MAIN_Core0Tasks
 {
     constexpr const char* LIB_NAME = "MAIN_Core0Tasks";
     constexpr const char* VERSION_MAJOR = "1";
-    constexpr const char* VERSION_MINOR = "0";
+    constexpr const char* VERSION_MINOR = "2";
     constexpr const char* VERSION_PATCH = "0";
-    constexpr const char* VERSION_DATE = "2026-02-04";
+    constexpr const char* VERSION_DATE = "2026-02-14";
 }
 
 /******************************************************************************
@@ -44,7 +44,7 @@ namespace MAIN_Core0Tasks
 #define CORE0_PRIORITY 2
 
 // Task update frequency
-#define CORE0_FREQUENCY_HZ 200 // 200Hz for smooth LVGL
+#define CORE0_FREQUENCY_HZ 200 // 200Hz for smooth LVGL and animation updates
 
 /******************************************************************************
  * Function Prototypes
@@ -61,13 +61,27 @@ bool MAIN_create_core0_task(TaskHandle_t *taskHandle);
 /**
  * @brief Core 0 UI Task function (runs on Core 0)
  * @param parameter Task parameter (unused)
- * @details Handles LVGL UI processing at 200Hz
+ * @details Handles animation updates → LVGL initialization → UI processing
  *
- * Responsibilities:
- * - LVGL timer handler (lv_timer_handler)
- * - UI updates and animations
- * - Touch input processing (future)
- * - Display rendering
+ * Three-phase operation:
+ *
+ * PHASE 1 - ANIMATION MODE:
+ * - Update animation frames (200ms per frame)
+ * - Monitor completion status
+ * - Runs until animation finishes (3 seconds minimum)
+ *
+ * PHASE 2 - TRANSITION MODE (one-time):
+ * - Initialize LVGL subsystem
+ * - Initialize PWM backlight
+ * - Initialize touch controller
+ * - Get target screen ID from Core1 (via animation library)
+ * - Load appropriate ESF screen
+ *
+ * PHASE 3 - UI OPERATION MODE (continuous):
+ * - Run LVGL timer handler at 200Hz
+ * - Process touch input
+ * - Update UI widgets and animations
+ * - Handle user interactions
  */
 void MAIN_core0_ui_task(void *parameter);
 

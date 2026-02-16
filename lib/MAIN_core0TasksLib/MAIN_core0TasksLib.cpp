@@ -2,9 +2,9 @@
  * @file MAIN_core0TasksLib.cpp
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief Core 0 UI Task implementation with animation support
- * @details Manages Core 0 UI task - LVGL processing at 200Hz + Animation updates
- * @version 1.1.0
- * @date 20260210
+ * @details Manages Core 0 UI task - Animation updates → LVGL initialization → UI processing
+ * @version 1.2.0
+ * @date 20260215
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -14,8 +14,15 @@
  *****************************************************************************/
 #include "MAIN_core0TasksLib.h"
 #include "EARS_systemDef.h"
-// #include "MAIN_animationLib.h"  // NEW! Animation support
+#include "EARS_ws35tlcdPins.h"      // For TFT_WIDTH and TFT_HEIGHT
+#include "EARS_rgb565ColoursDef.h"  // RGB565 color definitions
+#include "EARS_rgb888ColoursDef.h"  // RGB888 color definitions
+#include "MAIN_animationGfxLib.h"   // Animation support (Arduino GFX)
+#include "MAIN_lvglLib.h"           // LVGL initialization
+#include "MAIN_displayLib.h"        // Display initialization (PWM backlight)
+#include "MAIN_initializationLib.h" // Touch initialization
 #include <lvgl.h>
+#include "ui/ui.h" // ESF generated
 
 // Development tools (compile out in production)
 #if EARS_DEBUG == 1
@@ -23,11 +30,150 @@
 #endif
 
 /******************************************************************************
- * External Global Variables
+ * External References
+ *****************************************************************************/
+extern Arduino_GFX *gfx;                // Display object from main.cpp
+extern SemaphoreHandle_t xDisplayMutex; // Display mutex from main.cpp
+
+/******************************************************************************
+ * Private Variables
+ *****************************************************************************/
+static bool lvglInitialised = false;
+
+/******************************************************************************
+ * Private Helper Functions
  *****************************************************************************/
 
-// Animation object created in main.cpp
-// extern lv_obj_t* g_animation_img;
+/**
+ * @brief Load appropriate ESF screen based on target screen ID
+ * @param screenID Screen ID from Core1 (via animation library)
+ */
+static void loadESFScreen(uint8_t screenID)
+{
+#if EARS_DEBUG == 1
+    Serial.printf("[CORE0] Loading ESF Screen ID: %d\n", screenID);
+#endif
+
+    // Get active screen
+    lv_obj_t *screen = lv_screen_active();
+
+    // Set background to TRUE_BLACK
+    lv_obj_set_style_bg_color(screen, lv_color_hex(EARS_RGB888_TRUE_BLACK), LV_PART_MAIN);
+
+    // TEMPORARY PLACEHOLDER LABELS (until ESF files copied to src/ui/)
+    // Create visible test labels to verify LVGL is working
+
+    // Center label with system info
+    lv_obj_t *label = lv_label_create(screen);
+    lv_label_set_text(label, "EARS v0.21.0\n\nSystem Initialized\n\nReady for ESF Screens");
+    lv_obj_set_style_text_color(label, lv_color_white(), LV_PART_MAIN);
+    lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+
+    // Bottom label with screen ID
+    lv_obj_t *screenLabel = lv_label_create(screen);
+    char screenText[64];
+    snprintf(screenText, sizeof(screenText), "Screen ID: %d", screenID);
+    lv_label_set_text(screenLabel, screenText);
+    lv_obj_set_style_text_color(screenLabel, lv_color_make(255, 255, 0), LV_PART_MAIN);
+    lv_obj_align(screenLabel, LV_ALIGN_BOTTOM_MID, 0, -20);
+
+    // TODO: When ESF ui/ files are in src/ui/, uncomment this section
+    // and comment out the placeholder labels above
+    /*
+    switch (screenID)
+    {
+    case 0:
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[CORE0]   -> Configuration Screen");
+#endif
+        loadScreen(SCREEN_ID_SCREEN_CONFIG);
+        break;
+    }
+    case 1:
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[CORE0]   -> Main Menu Screen");
+#endif
+        loadScreen(SCREEN_ID_SCREEN_MAIN);
+        break;
+    }
+    case 2:
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[CORE0]   -> Error/Warning Screen");
+#endif
+        loadScreen(SCREEN_ID_SCREEN_START);
+        break;
+    }
+    default:
+    {
+#if EARS_DEBUG == 1
+        Serial.printf("[CORE0]   -> Unknown Screen ID %d\n", screenID);
+#endif
+        loadScreen(SCREEN_ID_SCREEN_CONFIG);
+        break;
+    }
+    }
+    */
+
+    // Temporary screen-specific indicators (until ESF integrated)
+    switch (screenID)
+    {
+    case 0:
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[CORE0]   -> Configuration Screen (placeholder)");
+#endif
+        lv_obj_t *configLabel = lv_label_create(screen);
+        lv_label_set_text(configLabel, "Configuration Required");
+        lv_obj_set_style_text_color(configLabel, lv_color_make(255, 128, 0), LV_PART_MAIN);
+        lv_obj_align(configLabel, LV_ALIGN_TOP_MID, 0, 20);
+        break;
+    }
+
+    case 1:
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[CORE0]   -> Main Menu Screen (placeholder)");
+#endif
+        lv_obj_t *menuLabel = lv_label_create(screen);
+        lv_label_set_text(menuLabel, "Main Menu");
+        lv_obj_set_style_text_color(menuLabel, lv_color_make(0, 255, 0), LV_PART_MAIN);
+        lv_obj_align(menuLabel, LV_ALIGN_TOP_MID, 0, 20);
+        break;
+    }
+
+    case 2:
+    {
+#if EARS_DEBUG == 1
+        Serial.println("[CORE0]   -> Error/Warning Screen (placeholder)");
+#endif
+        lv_obj_t *errorLabel = lv_label_create(screen);
+        lv_label_set_text(errorLabel, "Error/Warning");
+        lv_obj_set_style_text_color(errorLabel, lv_color_make(255, 0, 0), LV_PART_MAIN);
+        lv_obj_align(errorLabel, LV_ALIGN_TOP_MID, 0, 20);
+        break;
+    }
+
+    default:
+    {
+#if EARS_DEBUG == 1
+        Serial.printf("[CORE0]   -> Unknown Screen ID %d (placeholder)\n", screenID);
+#endif
+        lv_obj_t *unknownLabel = lv_label_create(screen);
+        lv_label_set_text(unknownLabel, "Unknown Screen");
+        lv_obj_set_style_text_color(unknownLabel, lv_color_make(255, 0, 0), LV_PART_MAIN);
+        lv_obj_align(unknownLabel, LV_ALIGN_TOP_MID, 0, 20);
+        break;
+    }
+    }
+
+#if EARS_DEBUG == 1
+    Serial.println("[CORE0] [OK] Screen loaded (placeholder)");
+#endif
+}
 
 /******************************************************************************
  * Core 0 UI Task Function
@@ -36,25 +182,32 @@
 /**
  * @brief Core 0 UI Task (runs on Core 0)
  * @param parameter Task parameter (unused)
- * @details Handles LVGL UI processing at 200Hz + Animation frame updates
+ * @details Handles animation updates → LVGL initialization → UI processing
  *
- * This task is responsible for:
- * - Running LVGL timer handler (updates widgets, animations)
- * - Processing UI events
- * - Updating animation frames (marching soldier)
- * - Maintaining smooth display updates
- * - Future: Touch input processing, transitions
+ * PHASE 1: ANIMATION (runs until animation completes)
+ * - Update animation frames (200ms per frame, 3 seconds minimum)
+ * - Monitor animation completion status
+ *
+ * PHASE 2: TRANSITION (one-time when animation completes)
+ * - Initialize LVGL subsystem
+ * - Initialize PWM backlight
+ * - Initialize touch controller
+ * - Get target screen ID from animation library (set by Core1)
+ * - Load appropriate ESF screen
+ *
+ * PHASE 3: UI OPERATION (continuous after initialization)
+ * - Run LVGL timer handler at 200Hz
+ * - Process touch input
+ * - Update UI widgets and animations
+ * - Handle user interactions
  */
 void MAIN_core0_ui_task(void *parameter)
 {
-    /* #if EARS_DEBUG == 1
-        Serial.println("[CORE0] UI Task started");
-        if (g_animation_img != NULL)
-        {
-            Serial.println("[CORE0] Animation enabled - soldier will march!");
-        }
-    #endif
-     */
+#if EARS_DEBUG == 1
+    Serial.println("[CORE0] UI Task started");
+    Serial.println("[CORE0] Phase 1: Animation mode");
+#endif
+
     TickType_t xLastWakeTime = xTaskGetTickCount();
     const TickType_t xFrequency = pdMS_TO_TICKS(1000 / CORE0_FREQUENCY_HZ); // 5ms for 200Hz
 
@@ -64,15 +217,100 @@ void MAIN_core0_ui_task(void *parameter)
         DEV_increment_core0_heartbeat();
 #endif
 
-        // Run LVGL task handler (processes timers, animations, redraws)
-        lv_timer_handler();
+        // ====================================================================
+        // PHASE 1 + 2: ANIMATION AND TRANSITION
+        // ====================================================================
+        if (!lvglInitialised)
+        {
+            // Update animation
+            MAIN_AnimationGfxLib::update();
 
-        // Update animation frame if animation object exists
-        /*         if (g_animation_img != NULL)
+            // Check if animation complete
+            if (MAIN_AnimationGfxLib::isComplete())
+            {
+#if EARS_DEBUG == 1
+                Serial.println("\n[CORE0] ========================================");
+                Serial.println("[CORE0] Animation Complete!");
+                Serial.println("[CORE0] Phase 2: Transition to LVGL");
+                Serial.println("[CORE0] ========================================");
+
+                // Show animation statistics
+                Serial.printf("[CORE0] Animation ran for: %d ms\n",
+                              (MAIN_AnimationGfxLib::getProgress() * 30)); // Approximate
+                Serial.printf("[CORE0] Total frames displayed: %d\n",
+                              MAIN_AnimationGfxLib::getFrameCount() * 5); // 5 cycles
+#endif
+
+                // Get target screen from animation library (set by Core1)
+                uint8_t targetScreen = MAIN_AnimationGfxLib::getTargetScreenID();
+
+#if EARS_DEBUG == 1
+                Serial.printf("[CORE0] Target Screen ID: %d\n", targetScreen);
+                Serial.println("[CORE0] Initializing LVGL subsystem...");
+#endif
+
+                // Initialize LVGL
+                if (!MAIN_initialise_lvgl(gfx, xDisplayMutex, TFT_WIDTH, TFT_HEIGHT))
                 {
-                    MAIN_update_animation_frame(g_animation_img);
+#if EARS_DEBUG == 1
+                    Serial.println("[CORE0] [ERROR] LVGL initialization failed!");
+                    MAIN_led_red_on();
+#endif
+                    while (1)
+                        delay(1000); // Halt on critical error
                 }
-         */
+
+#if EARS_DEBUG == 1
+                Serial.println("[CORE0] [OK] LVGL initialized");
+                // TODO: Uncomment when ESF files copied to src/ui/
+                // Serial.println("[CORE0] Initializing ESF UI system...");
+#endif
+
+                // TODO: Uncomment when ESF files copied to src/ui/
+                // ui_init();
+                // Serial.println("[CORE0] [OK] ESF UI initialized");
+
+#if EARS_DEBUG == 1
+                Serial.println("[CORE0] Initializing touch controller...");
+#endif
+
+                // Initialize touch controller
+                MAIN_initialise_touch();
+
+#if EARS_DEBUG == 1
+                Serial.println("[CORE0] [OK] Touch controller initialized");
+                Serial.println("[CORE0] Loading ESF screen...");
+#endif
+
+                // Load appropriate screen
+                loadESFScreen(targetScreen);
+
+#if EARS_DEBUG == 1
+                Serial.println("[CORE0] [OK] ESF screen loaded");
+                Serial.println("[CORE0] ========================================");
+                Serial.println("[CORE0] Phase 3: UI Operation mode");
+                Serial.println("[CORE0] Running LVGL at 200Hz");
+                Serial.println("[CORE0] ========================================\n");
+#endif
+
+                lvglInitialised = true;
+            }
+        }
+
+        // ====================================================================
+        // PHASE 3: UI OPERATION
+        // ====================================================================
+        else
+        {
+            // Run LVGL task handler (processes timers, animations, redraws)
+            lv_timer_handler();
+
+            // TODO: Uncomment when ESF files copied to src/ui/
+            // ui_tick();  // Run ESF UI tick (updates screens, handles events)
+
+            // Future: Touch input processing, gesture detection, etc.
+        }
+
         // Wait for next cycle
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }

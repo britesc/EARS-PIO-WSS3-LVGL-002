@@ -1,10 +1,10 @@
 /**
  * @file MAIN_core1TasksLib.h
  * @author Julian (51fiftyone51fiftyone@gmail.com)
- * @brief Core 1 Background Task management for EARS (extracted from main.cpp)
- * @details Manages Core 1 background task - System initialization and monitoring
- * @version 0.1.0
- * @date 20260204
+ * @brief Core 1 Background Task management for EARS
+ * @details Manages Core 1 background task - Config checking → Screen routing → Monitoring
+ * @version 1.2.0
+ * @date 20260215
  *
  * @copyright Copyright (c) 2026 JTB. All rights reserved.
  */
@@ -28,9 +28,9 @@ namespace MAIN_Core1Tasks
 {
     constexpr const char* LIB_NAME = "MAIN_Core1Tasks";
     constexpr const char* VERSION_MAJOR = "1";
-    constexpr const char* VERSION_MINOR = "0";
+    constexpr const char* VERSION_MINOR = "2";
     constexpr const char* VERSION_PATCH = "0";
-    constexpr const char* VERSION_DATE = "2026-02-04";
+    constexpr const char* VERSION_DATE = "2026-02-14";
 }
 
 /******************************************************************************
@@ -61,14 +61,26 @@ bool MAIN_create_core1_task(TaskHandle_t *taskHandle);
 /**
  * @brief Core 1 Background Task function (runs on Core 1)
  * @param parameter Task parameter (unused)
- * @details Handles system initialization and background monitoring at 10Hz
+ * @details Handles configuration checking → screen routing → background monitoring
  *
- * Responsibilities:
- * - NVS initialization (once at startup)
- * - SD card initialization (once at startup)
- * - System monitoring (continuous)
- * - LED heartbeat (continuous)
- * - Future: WiFi, BLE, sensors, logging
+ * Two-phase operation:
+ *
+ * STARTUP PHASE (one-time):
+ * - Initialize NVS (non-volatile storage)
+ * - Initialize SD Card
+ * - Check for ZapNumber in NVS
+ * - Check for Password in NVS
+ * - Check SD Card readiness
+ * - Determine appropriate screen to display:
+ *   → 0: Configuration screen (no ZapNumber or Password)
+ *   → 1: Main menu (device fully configured)
+ *   → 2: Error/Warning screen (SD card issues)
+ * - Signal Core0 via MAIN_AnimationLib::stop(screenID)
+ *
+ * MONITORING PHASE (continuous):
+ * - Monitor system health at 10Hz
+ * - LED heartbeat indication (development mode)
+ * - Future: WiFi/BLE, sensors, data logging
  */
 void MAIN_core1_background_task(void *parameter);
 
