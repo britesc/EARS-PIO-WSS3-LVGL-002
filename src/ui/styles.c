@@ -108,6 +108,8 @@ void init_style_dark_icon_bar_text_MAIN_DEFAULT(lv_style_t *style) {
     lv_style_set_bg_opa(style, 0);
     lv_style_set_text_font(style, &lv_font_montserrat_10);
     lv_style_set_text_align(style, LV_TEXT_ALIGN_LEFT);
+    lv_style_set_pad_left(style, 2);
+    lv_style_set_pad_right(style, 2);
 };
 
 lv_style_t *get_style_dark_icon_bar_text_MAIN_DEFAULT() {

@@ -731,7 +731,9 @@
                 "text_color": "#FF6B6B",
                 "bg_opa": 0,
                 "text_font": "MONTSERRAT_10",
-                "text_align": "LEFT"
+                "text_align": "LEFT",
+                "pad_left": 2,
+                "pad_right": 2
               }
             }
           }
