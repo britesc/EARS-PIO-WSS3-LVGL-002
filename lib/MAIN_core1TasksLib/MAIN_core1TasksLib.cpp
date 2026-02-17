@@ -17,6 +17,7 @@
 #include "MAIN_animationGfxLib.h"   // For signaling screen ID to Core0
 #include "MAIN_initializationLib.h" // For MAIN_initialise_nvs() and MAIN_initialise_sd()
 #include "EARS_nvsEepromLib.h"      // For checking ZapNumber/Password
+#include "EARS_sdCardLib.h"         // For checking SD card status
 
 // Development tools (compile out in production)
 #if EARS_DEBUG == 1
@@ -45,25 +46,19 @@ static uint8_t checkDeviceConfiguration()
 #endif
 
     // Check NVS for ZapNumber
-    bool hasZapNumber = false;
-    // TODO: Implement actual NVS check
-    // hasZapNumber = EARS_NVS::hasKey("ZapNumber");
+    bool hasZapNumber = (using_nvseeprom().getZapNumber().length() > 0);
 #if EARS_DEBUG == 1
     Serial.printf("[CORE1]   ZapNumber: %s\n", hasZapNumber ? "FOUND" : "NOT FOUND");
 #endif
 
     // Check NVS for Password
-    bool hasPassword = false;
-    // TODO: Implement actual NVS check
-    // hasPassword = EARS_NVS::hasKey("Password");
+    bool hasPassword = using_nvseeprom().hasPassword();
 #if EARS_DEBUG == 1
     Serial.printf("[CORE1]   Password: %s\n", hasPassword ? "FOUND" : "NOT FOUND");
 #endif
 
     // Check SD Card status
-    bool sdCardReady = false;
-    // TODO: Implement actual SD card check
-    // sdCardReady = EARS_SDCard::isReady();
+    bool sdCardReady = using_sdcard().isAvailable();
 #if EARS_DEBUG == 1
     Serial.printf("[CORE1]   SD Card: %s\n", sdCardReady ? "READY" : "NOT READY");
 #endif

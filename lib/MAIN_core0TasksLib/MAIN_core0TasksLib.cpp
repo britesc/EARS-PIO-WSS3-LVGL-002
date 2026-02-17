@@ -22,7 +22,8 @@
 #include "MAIN_displayLib.h"        // Display initialization (PWM backlight)
 #include "MAIN_initializationLib.h" // Touch initialization
 #include <lvgl.h>
-#include "ui/ui.h" // ESF generated UI
+#include "ui/ui.h"      // ESF generated UI
+#include "ui/screens.h" // ESF screen enums
 
 // Development tools (compile out in production)
 #if EARS_DEBUG == 1
@@ -60,28 +61,7 @@ static void loadESFScreen(uint8_t screenID)
     // Set background to TRUE_BLACK
     lv_obj_set_style_bg_color(screen, lv_color_hex(EARS_RGB888_TRUE_BLACK), LV_PART_MAIN);
 
-    // TEMPORARY PLACEHOLDER LABELS (until ESF files copied to src/ui/)
-    // Create visible test labels to verify LVGL is working
-
-    // Center label with system info
-    lv_obj_t *label = lv_label_create(screen);
-    lv_label_set_text(label, "EARS v0.21.0\n\nSystem Initialized\n\nReady for ESF Screens");
-    lv_obj_set_style_text_color(label, lv_color_white(), LV_PART_MAIN);
-    lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
-
-    // Bottom label with screen ID
-    lv_obj_t *screenLabel = lv_label_create(screen);
-    char screenText[64];
-    snprintf(screenText, sizeof(screenText), "Screen ID: %d", screenID);
-    lv_label_set_text(screenLabel, screenText);
-    lv_obj_set_style_text_color(screenLabel, lv_color_make(255, 255, 0), LV_PART_MAIN);
-    lv_obj_align(screenLabel, LV_ALIGN_BOTTOM_MID, 0, -20);
-
-    // TODO: When ESF ui/ files are in src/ui/, uncomment this section
-    // and comment out the placeholder labels above
-    // Screen ID mapping: 0=Start/Error, 1=Config, 2=Main
-    /*
+    // ESF Screen Loading - Screen ID mapping: 0=Start/Error, 1=Config, 2=Main
     switch (screenID)
     {
     case 0:
@@ -89,7 +69,7 @@ static void loadESFScreen(uint8_t screenID)
 #if EARS_DEBUG == 1
         Serial.println("[CORE0]   -> Start/Error Screen");
 #endif
-        loadScreen(SCREEN_ID_SCREEN_START);  // ESF ID 1
+        lv_scr_load(objects.screen_start);
         break;
     }
     case 1:
@@ -97,7 +77,7 @@ static void loadESFScreen(uint8_t screenID)
 #if EARS_DEBUG == 1
         Serial.println("[CORE0]   -> Configuration Screen");
 #endif
-        loadScreen(SCREEN_ID_SCREEN_CONFIG);  // ESF ID 2
+        lv_scr_load(objects.screen_config);
         break;
     }
     case 2:
@@ -105,7 +85,7 @@ static void loadESFScreen(uint8_t screenID)
 #if EARS_DEBUG == 1
         Serial.println("[CORE0]   -> Main Menu Screen");
 #endif
-        loadScreen(SCREEN_ID_SCREEN_MAIN);  // ESF ID 3
+        lv_scr_load(objects.screen_main);
         break;
     }
     default:
@@ -113,67 +93,13 @@ static void loadESFScreen(uint8_t screenID)
 #if EARS_DEBUG == 1
         Serial.printf("[CORE0]   -> Unknown Screen ID %d, defaulting to Config\n", screenID);
 #endif
-        loadScreen(SCREEN_ID_SCREEN_CONFIG);  // Default to config
-        break;
-    }
-    }
-    */
-
-    // Temporary screen-specific indicators (until ESF integrated)
-    // Screen ID mapping: 0=Start/Error, 1=Config, 2=Main
-    switch (screenID)
-    {
-    case 0:
-    {
-#if EARS_DEBUG == 1
-        Serial.println("[CORE0]   -> Start/Error Screen (placeholder)");
-#endif
-        lv_obj_t *errorLabel = lv_label_create(screen);
-        lv_label_set_text(errorLabel, "Start/Error Screen");
-        lv_obj_set_style_text_color(errorLabel, lv_color_make(255, 0, 0), LV_PART_MAIN);
-        lv_obj_align(errorLabel, LV_ALIGN_TOP_MID, 0, 20);
-        break;
-    }
-
-    case 1:
-    {
-#if EARS_DEBUG == 1
-        Serial.println("[CORE0]   -> Configuration Screen (placeholder)");
-#endif
-        lv_obj_t *configLabel = lv_label_create(screen);
-        lv_label_set_text(configLabel, "Configuration Required");
-        lv_obj_set_style_text_color(configLabel, lv_color_make(255, 128, 0), LV_PART_MAIN);
-        lv_obj_align(configLabel, LV_ALIGN_TOP_MID, 0, 20);
-        break;
-    }
-
-    case 2:
-    {
-#if EARS_DEBUG == 1
-        Serial.println("[CORE0]   -> Main Menu Screen (placeholder)");
-#endif
-        lv_obj_t *menuLabel = lv_label_create(screen);
-        lv_label_set_text(menuLabel, "Main Menu");
-        lv_obj_set_style_text_color(menuLabel, lv_color_make(0, 255, 0), LV_PART_MAIN);
-        lv_obj_align(menuLabel, LV_ALIGN_TOP_MID, 0, 20);
-        break;
-    }
-
-    default:
-    {
-#if EARS_DEBUG == 1
-        Serial.printf("[CORE0]   -> Unknown Screen ID %d (placeholder)\n", screenID);
-#endif
-        lv_obj_t *unknownLabel = lv_label_create(screen);
-        lv_label_set_text(unknownLabel, "Unknown Screen");
-        lv_obj_set_style_text_color(unknownLabel, lv_color_make(255, 0, 0), LV_PART_MAIN);
-        lv_obj_align(unknownLabel, LV_ALIGN_TOP_MID, 0, 20);
+        lv_scr_load(objects.screen_config);
         break;
     }
     }
 
 #if EARS_DEBUG == 1
-    Serial.println("[CORE0] [OK] Screen loaded (placeholder)");
+    Serial.println("[CORE0] [OK] ESF screen loaded");
 #endif
 }
 
@@ -265,13 +191,15 @@ void MAIN_core0_ui_task(void *parameter)
 
 #if EARS_DEBUG == 1
                 Serial.println("[CORE0] [OK] LVGL initialized");
-                // TODO: Uncomment when ESF files copied to src/ui/
-                // Serial.println("[CORE0] Initializing ESF UI system...");
+                Serial.println("[CORE0] Initializing ESF UI system...");
 #endif
 
-                // TODO: Uncomment when ESF files copied to src/ui/
-                // ui_init();
-                // Serial.println("[CORE0] [OK] ESF UI initialized");
+                // Initialize ESF UI system
+                ui_init();
+
+#if EARS_DEBUG == 1
+                Serial.println("[CORE0] [OK] ESF UI initialized");
+#endif
 
 #if EARS_DEBUG == 1
                 Serial.println("[CORE0] Initializing touch controller...");
@@ -308,8 +236,8 @@ void MAIN_core0_ui_task(void *parameter)
             // Run LVGL task handler (processes timers, animations, redraws)
             lv_timer_handler();
 
-            // TODO: Uncomment when ESF files copied to src/ui/
-            // ui_tick();  // Run ESF UI tick (updates screens, handles events)
+            // Run ESF UI tick (updates screens, handles events)
+            ui_tick();
 
             // Future: Touch input processing, gesture detection, etc.
         }
