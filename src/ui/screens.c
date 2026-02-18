@@ -47,6 +47,19 @@ void create_screen_screen_start() {
             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
             create_user_widget_w1_icon_bar(obj, getFlowState(flowState, 2), 4);
         }
+        {
+            lv_obj_t *obj = lv_obj_create(parent_obj);
+            objects.obj1 = obj;
+            lv_obj_set_pos(obj, 0, 307);
+            lv_obj_set_size(obj, 480, 14);
+            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            create_user_widget_w5_info_bar(obj, getFlowState(flowState, 3), 8);
+        }
     }
     
     tick_screen_screen_start();
@@ -56,6 +69,7 @@ void tick_screen_screen_start() {
     void *flowState = getFlowState(0, 0);
     (void)flowState;
     tick_user_widget_w1_icon_bar(getFlowState(flowState, 2), 4);
+    tick_user_widget_w5_info_bar(getFlowState(flowState, 3), 8);
 }
 
 void create_screen_screen_config() {
@@ -79,7 +93,7 @@ void create_screen_screen_config() {
         }
         {
             lv_obj_t *obj = lv_obj_create(parent_obj);
-            objects.obj1 = obj;
+            objects.obj2 = obj;
             lv_obj_set_pos(obj, 0, 0);
             lv_obj_set_size(obj, 480, 14);
             lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -88,7 +102,20 @@ void create_screen_screen_config() {
             lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-            create_user_widget_w1_icon_bar(obj, getFlowState(flowState, 2), 8);
+            create_user_widget_w1_icon_bar(obj, getFlowState(flowState, 2), 11);
+        }
+        {
+            lv_obj_t *obj = lv_obj_create(parent_obj);
+            objects.obj3 = obj;
+            lv_obj_set_pos(obj, -1, 306);
+            lv_obj_set_size(obj, 480, 14);
+            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            create_user_widget_w5_info_bar(obj, getFlowState(flowState, 3), 15);
         }
     }
     
@@ -98,7 +125,8 @@ void create_screen_screen_config() {
 void tick_screen_screen_config() {
     void *flowState = getFlowState(0, 1);
     (void)flowState;
-    tick_user_widget_w1_icon_bar(getFlowState(flowState, 2), 8);
+    tick_user_widget_w1_icon_bar(getFlowState(flowState, 2), 11);
+    tick_user_widget_w5_info_bar(getFlowState(flowState, 3), 15);
 }
 
 void create_screen_screen_main() {
@@ -120,6 +148,32 @@ void create_screen_screen_main() {
             lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
             lv_label_set_text(obj, "Screen_Main");
         }
+        {
+            lv_obj_t *obj = lv_obj_create(parent_obj);
+            objects.obj4 = obj;
+            lv_obj_set_pos(obj, 0, 0);
+            lv_obj_set_size(obj, 480, 14);
+            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            create_user_widget_w1_icon_bar(obj, getFlowState(flowState, 2), 18);
+        }
+        {
+            lv_obj_t *obj = lv_obj_create(parent_obj);
+            objects.obj5 = obj;
+            lv_obj_set_pos(obj, 0, 306);
+            lv_obj_set_size(obj, 480, 14);
+            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            create_user_widget_w5_info_bar(obj, getFlowState(flowState, 3), 22);
+        }
     }
     
     tick_screen_screen_main();
@@ -128,6 +182,8 @@ void create_screen_screen_main() {
 void tick_screen_screen_main() {
     void *flowState = getFlowState(0, 2);
     (void)flowState;
+    tick_user_widget_w1_icon_bar(getFlowState(flowState, 2), 18);
+    tick_user_widget_w5_info_bar(getFlowState(flowState, 3), 22);
 }
 
 void create_user_widget_w1_icon_bar(lv_obj_t *parent_obj, void *flowState, int startWidgetIndex) {
@@ -184,13 +240,57 @@ void tick_user_widget_w1_icon_bar(void *flowState, int startWidgetIndex) {
     (void)startWidgetIndex;
 }
 
+void create_user_widget_w5_info_bar(lv_obj_t *parent_obj, void *flowState, int startWidgetIndex) {
+    (void)flowState;
+    (void)startWidgetIndex;
+    lv_obj_t *obj = parent_obj;
+    {
+        lv_obj_t *parent_obj = obj;
+        {
+            // W5_InfoBar_Container
+            lv_obj_t *obj = lv_obj_create(parent_obj);
+            ((lv_obj_t **)&objects)[startWidgetIndex + 0] = obj;
+            lv_obj_set_pos(obj, 0, 0);
+            lv_obj_set_size(obj, 480, 14);
+            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            add_style_dark_icon_bar_background_(obj);
+            lv_obj_set_style_bg_opa(obj, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_color(obj, lv_color_hex(0xff0a0b0b), LV_PART_MAIN | LV_STATE_DEFAULT);
+            {
+                lv_obj_t *parent_obj = obj;
+                {
+                    // W5_InfoBar_Container_Label_Scroll
+                    lv_obj_t *obj = lv_label_create(parent_obj);
+                    ((lv_obj_t **)&objects)[startWidgetIndex + 1] = obj;
+                    lv_obj_set_pos(obj, 0, 0);
+                    lv_obj_set_size(obj, 480, 14);
+                    lv_label_set_long_mode(obj, LV_LABEL_LONG_SCROLL_CIRCULAR);
+                    lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
+                    add_style_dark_info_bar_scroll_text(obj);
+                    lv_label_set_text(obj, "This is a very long line of text that should eventually scroll from the righthand side towards the left handside.");
+                }
+            }
+        }
+    }
+}
+
+void tick_user_widget_w5_info_bar(void *flowState, int startWidgetIndex) {
+    (void)flowState;
+    (void)startWidgetIndex;
+}
+
 
 extern void add_style(lv_obj_t *obj, int32_t styleIndex);
 extern void remove_style(lv_obj_t *obj, int32_t styleIndex);
 
 static const char *screen_names[] = { "Screen_Start", "Screen_Config", "Screen_Main" };
-static const char *object_names[] = { "screen_start", "screen_config", "screen_main", "obj0", "obj0__w1_icon_bar_container", "obj0__w1_icon_bar_container_label_time", "obj0__w1_icon_bar_container_label_battery", "obj1", "obj1__w1_icon_bar_container", "obj1__w1_icon_bar_container_label_time", "obj1__w1_icon_bar_container_label_battery", "label_trash_0", "label_trash_1", "label_trash_2" };
-static const char *style_names[] = { "Light_Default_Screen", "Dark_Default_Screen", "Dark_IconBar_Background ", "Dark_IconBar_Text" };
+static const char *object_names[] = { "screen_start", "screen_config", "screen_main", "obj0", "obj0__w1_icon_bar_container", "obj0__w1_icon_bar_container_label_time", "obj0__w1_icon_bar_container_label_battery", "obj1", "obj1__w5_info_bar_container", "obj1__w5_info_bar_container_label_scroll", "obj2", "obj2__w1_icon_bar_container", "obj2__w1_icon_bar_container_label_time", "obj2__w1_icon_bar_container_label_battery", "obj3", "obj3__w5_info_bar_container", "obj3__w5_info_bar_container_label_scroll", "obj4", "obj4__w1_icon_bar_container", "obj4__w1_icon_bar_container_label_time", "obj4__w1_icon_bar_container_label_battery", "obj5", "obj5__w5_info_bar_container", "obj5__w5_info_bar_container_label_scroll", "label_trash_0", "label_trash_1", "label_trash_2" };
+static const char *style_names[] = { "Light_Default_Screen", "Dark_Default_Screen", "Dark_IconBar_Background ", "Dark_IconBar_Text", "Dark_InfoBar_ScrollText" };
 
 
 typedef void (*tick_screen_func_t)();

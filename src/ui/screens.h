@@ -16,9 +16,22 @@ typedef struct _objects_t {
     lv_obj_t *obj0__w1_icon_bar_container_label_time;
     lv_obj_t *obj0__w1_icon_bar_container_label_battery;
     lv_obj_t *obj1;
-    lv_obj_t *obj1__w1_icon_bar_container;
-    lv_obj_t *obj1__w1_icon_bar_container_label_time;
-    lv_obj_t *obj1__w1_icon_bar_container_label_battery;
+    lv_obj_t *obj1__w5_info_bar_container;
+    lv_obj_t *obj1__w5_info_bar_container_label_scroll;
+    lv_obj_t *obj2;
+    lv_obj_t *obj2__w1_icon_bar_container;
+    lv_obj_t *obj2__w1_icon_bar_container_label_time;
+    lv_obj_t *obj2__w1_icon_bar_container_label_battery;
+    lv_obj_t *obj3;
+    lv_obj_t *obj3__w5_info_bar_container;
+    lv_obj_t *obj3__w5_info_bar_container_label_scroll;
+    lv_obj_t *obj4;
+    lv_obj_t *obj4__w1_icon_bar_container;
+    lv_obj_t *obj4__w1_icon_bar_container_label_time;
+    lv_obj_t *obj4__w1_icon_bar_container_label_battery;
+    lv_obj_t *obj5;
+    lv_obj_t *obj5__w5_info_bar_container;
+    lv_obj_t *obj5__w5_info_bar_container_label_scroll;
     lv_obj_t *label_trash_0;
     lv_obj_t *label_trash_1;
     lv_obj_t *label_trash_2;
@@ -43,6 +56,9 @@ void tick_screen_screen_main();
 
 void create_user_widget_w1_icon_bar(lv_obj_t *parent_obj, void *flowState, int startWidgetIndex);
 void tick_user_widget_w1_icon_bar(void *flowState, int startWidgetIndex);
+
+void create_user_widget_w5_info_bar(lv_obj_t *parent_obj, void *flowState, int startWidgetIndex);
+void tick_user_widget_w5_info_bar(void *flowState, int startWidgetIndex);
 
 void tick_screen_by_id(enum ScreensEnum screenId);
 void tick_screen(int screen_index);
