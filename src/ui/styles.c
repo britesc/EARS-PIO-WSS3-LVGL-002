@@ -167,6 +167,42 @@ void remove_style_dark_info_bar_scroll_text(lv_obj_t *obj) {
 };
 
 //
+// Style: Dark_HeaderBar_Title
+//
+
+void init_style_dark_header_bar_title_MAIN_DEFAULT(lv_style_t *style) {
+    lv_style_set_text_color(style, lv_color_hex(0xffff6b6b));
+    lv_style_set_text_opa(style, 255);
+    lv_style_set_text_font(style, &lv_font_montserrat_28);
+    lv_style_set_text_align(style, LV_TEXT_ALIGN_CENTER);
+    lv_style_set_border_color(style, lv_color_hex(0xffff6b6b));
+    lv_style_set_border_opa(style, 255);
+    lv_style_set_border_width(style, 1);
+    lv_style_set_border_side(style, LV_BORDER_SIDE_BOTTOM|LV_BORDER_SIDE_TOP|LV_BORDER_SIDE_LEFT|LV_BORDER_SIDE_RIGHT);
+    lv_style_set_radius(style, 8);
+};
+
+lv_style_t *get_style_dark_header_bar_title_MAIN_DEFAULT() {
+    static lv_style_t *style;
+    if (!style) {
+        style = (lv_style_t *)lv_malloc(sizeof(lv_style_t));
+        lv_style_init(style);
+        init_style_dark_header_bar_title_MAIN_DEFAULT(style);
+    }
+    return style;
+};
+
+void add_style_dark_header_bar_title(lv_obj_t *obj) {
+    (void)obj;
+    lv_obj_add_style(obj, get_style_dark_header_bar_title_MAIN_DEFAULT(), LV_PART_MAIN | LV_STATE_DEFAULT);
+};
+
+void remove_style_dark_header_bar_title(lv_obj_t *obj) {
+    (void)obj;
+    lv_obj_remove_style(obj, get_style_dark_header_bar_title_MAIN_DEFAULT(), LV_PART_MAIN | LV_STATE_DEFAULT);
+};
+
+//
 //
 //
 
@@ -178,6 +214,7 @@ void add_style(lv_obj_t *obj, int32_t styleIndex) {
         add_style_dark_icon_bar_background_,
         add_style_dark_icon_bar_text,
         add_style_dark_info_bar_scroll_text,
+        add_style_dark_header_bar_title,
     };
     add_style_funcs[styleIndex](obj);
 }
@@ -190,6 +227,7 @@ void remove_style(lv_obj_t *obj, int32_t styleIndex) {
         remove_style_dark_icon_bar_background_,
         remove_style_dark_icon_bar_text,
         remove_style_dark_info_bar_scroll_text,
+        remove_style_dark_header_bar_title,
     };
     remove_style_funcs[styleIndex](obj);
 }

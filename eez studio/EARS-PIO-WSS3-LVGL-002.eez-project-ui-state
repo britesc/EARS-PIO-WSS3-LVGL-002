@@ -1,7 +1,7 @@
 {
   "navigation": {
     "selectedUserPageObject": "[EARS-PIO-WSS3-LVGL-002.eez-project]:/userPages/1",
-    "selectedBitmapObject": "[EARS-PIO-WSS3-LVGL-002.eez-project]:/bitmaps/3",
+    "selectedUserWidgetObject": "[EARS-PIO-WSS3-LVGL-002.eez-project]:/userWidgets/0",
     "subnavigationSelectedItems": {}
   },
   "layoutModel": {
@@ -22,7 +22,6 @@
           },
           {
             "type": "border",
-            "selected": 2,
             "size": 240,
             "location": "right",
             "children": [
@@ -124,12 +123,13 @@
             {
               "type": "row",
               "id": "#4ed5b802-7be8-48cf-b4ac-9543e652369c",
-              "weight": 15,
+              "weight": 20.325075700482458,
               "children": [
                 {
                   "type": "tabset",
                   "id": "#37f1d488-9ccb-4f49-8883-bd6330e08a9f",
                   "weight": 1,
+                  "selected": 1,
                   "enableClose": false,
                   "children": [
                     {
@@ -195,10 +195,21 @@
             {
               "type": "tabset",
               "id": "EDITORS",
-              "weight": 65,
+              "weight": 35.655629106413926,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
+                {
+                  "type": "tab",
+                  "id": "#fddccc4b-86ea-4e7d-b928-2e34d6f64559",
+                  "name": "W1_IconBar",
+                  "component": "editor",
+                  "config": {
+                    "objectPath": "[EARS-PIO-WSS3-LVGL-002.eez-project]:/userWidgets/0",
+                    "permanent": false
+                  },
+                  "icon": "svg:user_widget"
+                },
                 {
                   "type": "tab",
                   "id": "#dacf72af-292e-49f4-bcd7-e8323e3c5233",
@@ -210,18 +221,17 @@
                   },
                   "icon": "svg:page"
                 }
-              ],
-              "active": true
+              ]
             },
             {
               "type": "row",
               "id": "#b6967f39-c1d6-4f38-95a5-aa1b62bfcbe2",
-              "weight": 20,
+              "weight": 44.01929519310361,
               "children": [
                 {
                   "type": "tabset",
                   "id": "#90d1e96b-9ad8-4b05-9b6b-fc03689a27f1",
-                  "weight": 2,
+                  "weight": 2.783505154639175,
                   "children": [
                     {
                       "type": "tab",
@@ -231,12 +241,13 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
                   "id": "#98b0e004-1b94-4d5b-9ce2-fe0977311f97",
-                  "weight": 1,
+                  "weight": 0.21649484536082475,
                   "children": [
                     {
                       "type": "tab",
@@ -1014,6 +1025,28 @@
         "secondToPx": 200,
         "scrollLeft": 0
       }
+    },
+    "[EARS-PIO-WSS3-LVGL-002.eez-project]:/userWidgets/0[flow-state]": {
+      "selection": {
+        "0": {
+          "1": {
+            "$selected": true
+          }
+        }
+      },
+      "transform": {
+        "translate": {
+          "x": -233.58895874023438,
+          "y": 65.7599288490732
+        },
+        "scale": 1
+      },
+      "timeline": {
+        "isEditorActive": false,
+        "position": 0,
+        "secondToPx": 200,
+        "scrollLeft": 0
+      }
     }
   },
   "activeOutputSection": 0,
@@ -1030,7 +1063,9 @@
   "selectedStylePropertyName": "",
   "lvglPart": "MAIN",
   "lvglState": "DEFAULT",
-  "lvglExpandedPropertiesGroup": [],
+  "lvglExpandedPropertiesGroup": [
+    "LAYOUT"
+  ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
   "flowZoom": 1,

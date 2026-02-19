@@ -32,6 +32,11 @@ lv_style_t *get_style_dark_info_bar_scroll_text_MAIN_DEFAULT();
 void add_style_dark_info_bar_scroll_text(lv_obj_t *obj);
 void remove_style_dark_info_bar_scroll_text(lv_obj_t *obj);
 
+// Style: Dark_HeaderBar_Title
+lv_style_t *get_style_dark_header_bar_title_MAIN_DEFAULT();
+void add_style_dark_header_bar_title(lv_obj_t *obj);
+void remove_style_dark_header_bar_title(lv_obj_t *obj);
+
 
 
 #ifdef __cplusplus

@@ -1,8 +1,8 @@
 [Folders]
-.+AFw-="1"
-.+AFw- - lib="1"
-.+AFw- - lib - EARS+AF8-screenSaverLib="1"
-.+AFw- - src="1"
+.+AFw-=1
+.+AFw- - src=1
+.+AFw- - lib=1
+.+AFw- - lib - EARS+AF8-screenSaverLib=1
 
 [Open Files]
 Active File Display Mode=3
