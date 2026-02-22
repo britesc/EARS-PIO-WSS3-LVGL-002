@@ -171,13 +171,13 @@ void remove_style_dark_info_bar_scroll_text(lv_obj_t *obj) {
 //
 
 void init_style_dark_header_bar_title_MAIN_DEFAULT(lv_style_t *style) {
-    lv_style_set_text_color(style, lv_color_hex(0xffff6b6b));
+    lv_style_set_text_color(style, lv_color_hex(0xff7a1e1e));
     lv_style_set_text_opa(style, 255);
     lv_style_set_text_font(style, &lv_font_montserrat_28);
     lv_style_set_text_align(style, LV_TEXT_ALIGN_CENTER);
-    lv_style_set_border_color(style, lv_color_hex(0xffff6b6b));
+    lv_style_set_border_color(style, lv_color_hex(0xff7a1e1e));
     lv_style_set_border_opa(style, 255);
-    lv_style_set_border_width(style, 1);
+    lv_style_set_border_width(style, 0);
     lv_style_set_border_side(style, LV_BORDER_SIDE_BOTTOM|LV_BORDER_SIDE_TOP|LV_BORDER_SIDE_LEFT|LV_BORDER_SIDE_RIGHT);
     lv_style_set_radius(style, 8);
 };

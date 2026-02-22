@@ -7,6 +7,7 @@
 extern "C" {
 #endif
 
+extern void action_invoke_screensaver(lv_event_t * e);
 
 
 #ifdef __cplusplus

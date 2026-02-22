@@ -201,6 +201,68 @@ void MAIN_core0_ui_task(void *parameter)
                 Serial.println("[CORE0] [OK] ESF UI initialized");
 #endif
 
+                // Added on advice from Claude to test the SD card.
+
+                // Initialize ESF UI system
+                ui_init();
+
+#if EARS_DEBUG == 1
+                Serial.println("[CORE0] [OK] ESF UI initialized");
+
+                // ============================================================
+                // SD CARD & LVGL FILESYSTEM DIAGNOSTIC
+                // ============================================================
+                Serial.println("\n========== SD & LVGL DIAGNOSTIC ==========");
+
+                Serial.println("\n[TEST 1] SD Card Status:");
+                if (SD_MMC.cardType() == CARD_NONE)
+                {
+                    Serial.println("  ❌ NO SD CARD!");
+                }
+                else
+                {
+                    Serial.println("  ✅ SD Card OK");
+                    Serial.printf("  Size: %llu MB\n", SD_MMC.cardSize() / (1024 * 1024));
+                }
+
+                Serial.println("\n[TEST 2] Check Root /:");
+                if (SD_MMC.exists("/ui_image_28x28_no_border_blank_icon.bin"))
+                {
+                    Serial.println("  ✅ Image in root /");
+                }
+                else
+                {
+                    Serial.println("  ❌ NOT in root /");
+                }
+
+                Serial.println("\n[TEST 3] Check /images/:");
+                if (SD_MMC.exists("/images/ui_image_28x28_no_border_blank_icon.bin"))
+                {
+                    Serial.println("  ✅ Image in /images/");
+                }
+                else
+                {
+                    Serial.println("  ❌ NOT in /images/");
+                }
+
+                Serial.println("\n[TEST 4] LVGL Filesystem:");
+                lv_fs_drv_t *drv = lv_fs_get_drv('S');
+                if (drv == NULL)
+                {
+                    Serial.println("  ❌ 'S:' NOT registered!");
+                }
+                else
+                {
+                    Serial.println("  ✅ 'S:' registered");
+                }
+
+                Serial.println("\n========================================\n");
+#endif
+
+#if EARS_DEBUG == 1
+                Serial.println("[CORE0] Initializing touch controller...");
+#endif
+
 #if EARS_DEBUG == 1
                 Serial.println("[CORE0] Initializing touch controller...");
 #endif

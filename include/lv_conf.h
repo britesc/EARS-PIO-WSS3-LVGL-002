@@ -34,17 +34,17 @@
 /* Filesystem support */
 #define LV_USE_FS_STDIO 1
 #define LV_FS_STDIO_LETTER 'S'
-#define LV_FS_STDIO_PATH "/sd"
+#define LV_FS_STDIO_PATH "" // Empty - no prefix needed
 #define LV_FS_STDIO_CACHE_SIZE 0
 
 /* Image decoders */
-#define LV_USE_BMP 1
+#define LV_USE_BMP 0
 #define LV_USE_PNG 1
-#define LV_USE_SJPG 1
+#define LV_USE_SJPG 0
 
 /* SVG support (works in 9.3.0) */
-#define LV_USE_VECTOR_GRAPHIC 1
-#define LV_USE_SVG 1
+#define LV_USE_VECTOR_GRAPHIC 0
+#define LV_USE_SVG 0
 
 /* Fonts */
 #define LV_FONT_MONTSERRAT_8 1
