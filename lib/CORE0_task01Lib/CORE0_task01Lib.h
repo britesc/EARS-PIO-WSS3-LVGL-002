@@ -1,5 +1,5 @@
 /**
- * @file MAIN_core0TasksLib.h
+ * @file CORE0_task01Lib.h
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief Core 0 UI Task management for EARS
  * @details Manages Core 0 UI task - Animation → LVGL transition → UI processing at 200Hz
@@ -26,11 +26,11 @@
  *****************************************************************************/
 namespace MAIN_Core0Tasks
 {
-    constexpr const char* LIB_NAME = "MAIN_Core0Tasks";
-    constexpr const char* VERSION_MAJOR = "1";
-    constexpr const char* VERSION_MINOR = "2";
-    constexpr const char* VERSION_PATCH = "0";
-    constexpr const char* VERSION_DATE = "2026-02-14";
+    constexpr const char *LIB_NAME = "MAIN_Core0Tasks";
+    constexpr const char *VERSION_MAJOR = "1";
+    constexpr const char *VERSION_MINOR = "2";
+    constexpr const char *VERSION_PATCH = "0";
+    constexpr const char *VERSION_DATE = "2026-02-14";
 }
 
 /******************************************************************************
@@ -88,13 +88,13 @@ void MAIN_core0_ui_task(void *parameter);
 /******************************************************************************
  * Version Information Getters
  *****************************************************************************/
-const char* MAIN_Core0Tasks_getLibraryName();
+const char *MAIN_Core0Tasks_getLibraryName();
 uint32_t MAIN_Core0Tasks_getVersionEncoded();
-const char* MAIN_Core0Tasks_getVersionDate();
-void MAIN_Core0Tasks_getVersionString(char* buffer);
+const char *MAIN_Core0Tasks_getVersionDate();
+void MAIN_Core0Tasks_getVersionString(char *buffer);
 
 #endif // __MAIN_CORE0_TASKS_LIB_H__
 
 /******************************************************************************
- * End of MAIN_core0TasksLib.h
+ * End of CORE0_task01Lib.h
  *****************************************************************************/

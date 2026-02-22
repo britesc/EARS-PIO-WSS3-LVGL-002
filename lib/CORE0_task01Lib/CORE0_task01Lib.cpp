@@ -1,5 +1,5 @@
 /**
- * @file MAIN_core0TasksLib.cpp
+ * @file CORE0_task01Lib.cpp
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief Core 0 UI Task implementation with animation support
  * @details Manages Core 0 UI task - Animation updates → LVGL initialization → UI processing
@@ -12,7 +12,7 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "MAIN_core0TasksLib.h"
+#include "CORE0_task01Lib.h"
 #include "EARS_systemDef.h"
 #include "EARS_ws35tlcdPins.h"      // For TFT_WIDTH and TFT_HEIGHT
 #include "EARS_rgb565ColoursDef.h"  // RGB565 color definitions
@@ -389,5 +389,5 @@ void MAIN_Core0Tasks_getVersionString(char *buffer)
 }
 
 /******************************************************************************
- * End of MAIN_core0TasksLib.cpp
+ * End of CORE0_task01Lib.cpp
  *****************************************************************************/
