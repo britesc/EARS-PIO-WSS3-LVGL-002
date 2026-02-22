@@ -1,0 +1,22 @@
+{
+  "files": [
+    "actions.h",
+    "eez-flow.cpp",
+    "eez-flow.h",
+    "fonts.h",
+    "images.c",
+    "images.h",
+    "screens.c",
+    "screens.h",
+    "structs.h",
+    "styles.c",
+    "styles.h",
+    "ui.c",
+    "ui.h",
+    "ui_image_28x28_no_border_blank_icon.c",
+    "ui_image_28x28_no_border_close_icon.c",
+    "ui_image_dark_left_swipe_arrow.c",
+    "ui_image_dark_right_swipe_arrow.c",
+    "vars.h"
+  ]
+}

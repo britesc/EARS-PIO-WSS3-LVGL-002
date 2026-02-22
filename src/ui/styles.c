@@ -231,4 +231,3 @@ void remove_style(lv_obj_t *obj, int32_t styleIndex) {
     };
     remove_style_funcs[styleIndex](obj);
 }
-

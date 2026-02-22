@@ -227,7 +227,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "userWidgetPageName": "W1_IconBar",
+              "userWidgetPageName": "B1_IconBar",
               "userPropertyValues": {
                 "objID": "7482326e-d9e0-4f31-b0d6-95568977080d",
                 "values": {}
@@ -271,7 +271,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "userWidgetPageName": "W5_InfoBar",
+              "userWidgetPageName": "B5_InfoBar",
               "userPropertyValues": {
                 "objID": "80160863-248b-4634-e9cd-d511fad3c68b",
                 "values": {}
@@ -315,10 +315,58 @@
               },
               "group": "",
               "groupIndex": 0,
-              "userWidgetPageName": "W2_HeaderBar",
+              "userWidgetPageName": "B2_HeaderBar",
               "userPropertyValues": {
                 "objID": "7aeaf014-f603-4838-e1a4-491fce22ece2",
                 "values": {}
+              }
+            },
+            {
+              "objID": "5cb2250e-f16f-47a1-f91d-46ed1782378e",
+              "type": "LVGLUserWidgetWidget",
+              "left": 0,
+              "top": 189,
+              "width": 480,
+              "height": 50,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "644137d7-e7d8-4697-ec4a-f8bf44875daa",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "px",
+              "heightUnit": "px",
+              "children": [],
+              "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+              "hiddenFlagType": "literal",
+              "clickableFlag": true,
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "2f709e22-5075-4131-ac1b-00b557cee8d1"
+              },
+              "group": "",
+              "groupIndex": 0,
+              "userWidgetPageName": "T1_TestWidget",
+              "userPropertyValues": {
+                "objID": "4a713556-cd19-4fa7-b4c9-926afa300e85",
+                "values": {
+                  "fc0dd785-e648-4c77-e3d6-df163dba68f8": "\"Configuration Screen Widget\"",
+                  "a816eb33-0193-4b33-d64f-e1000eaba160": "0",
+                  "28b62cde-7bd7-495e-bc97-eec53a1379d9": "1"
+                }
               }
             }
           ],
@@ -455,7 +503,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "userWidgetPageName": "W1_IconBar",
+              "userWidgetPageName": "B1_IconBar",
               "userPropertyValues": {
                 "objID": "e658226f-1de9-4122-dfc7-da48c9b36a92",
                 "values": {}
@@ -499,7 +547,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "userWidgetPageName": "W5_InfoBar",
+              "userWidgetPageName": "B5_InfoBar",
               "userPropertyValues": {
                 "objID": "c40b8705-b168-4917-a13b-2b6ec17a40ec",
                 "values": {}
@@ -544,7 +592,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "userWidgetPageName": "W2_HeaderBar",
+              "userWidgetPageName": "B2_HeaderBar",
               "userPropertyValues": {
                 "objID": "6e7410cc-c5c0-40d5-f535-e99cdd4ec8e6",
                 "values": {}
@@ -553,8 +601,8 @@
             {
               "objID": "451fd288-0018-431f-8583-f3a3dab4baaf",
               "type": "LVGLUserWidgetWidget",
-              "left": 5,
-              "top": 183,
+              "left": -1,
+              "top": 182,
               "width": 480,
               "height": 50,
               "customInputs": [],
@@ -733,7 +781,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "userWidgetPageName": "W1_IconBar",
+              "userWidgetPageName": "B1_IconBar",
               "userPropertyValues": {
                 "objID": "461321e5-8754-4a95-ed89-04454887a385",
                 "values": {}
@@ -777,7 +825,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "userWidgetPageName": "W5_InfoBar",
+              "userWidgetPageName": "B5_InfoBar",
               "userPropertyValues": {
                 "objID": "2fddde6f-befc-4267-c635-783e768e9b87",
                 "values": {}
@@ -834,7 +882,7 @@
           },
           "timeline": [],
           "eventHandlers": [],
-          "identifier": "W1_IconBar_Container",
+          "identifier": "B1_IconBar_Container",
           "leftUnit": "px",
           "topUnit": "px",
           "widthUnit": "px",
@@ -858,7 +906,7 @@
               "locked": true,
               "timeline": [],
               "eventHandlers": [],
-              "identifier": "W1_IconBar_Container_Label_Time",
+              "identifier": "B1_IconBar_Container_Label_Time",
               "leftUnit": "px",
               "topUnit": "px",
               "widthUnit": "px",
@@ -909,7 +957,7 @@
               },
               "timeline": [],
               "eventHandlers": [],
-              "identifier": "W1_IconBar_Container_Label_Battery",
+              "identifier": "B1_IconBar_Container_Label_Battery",
               "leftUnit": "px",
               "topUnit": "px",
               "widthUnit": "px",
@@ -975,7 +1023,7 @@
       "localVariables": [],
       "componentGroups": [],
       "userProperties": [],
-      "name": "W1_IconBar",
+      "name": "B1_IconBar",
       "description": "Widget Icon Bar",
       "left": 0,
       "top": 0,
@@ -1005,7 +1053,7 @@
           },
           "timeline": [],
           "eventHandlers": [],
-          "identifier": "W5_InfoBar_Container",
+          "identifier": "B5_InfoBar_Container",
           "leftUnit": "px",
           "topUnit": "px",
           "widthUnit": "px",
@@ -1028,7 +1076,7 @@
               },
               "timeline": [],
               "eventHandlers": [],
-              "identifier": "W5_InfoBar_Container_Label_Scroll",
+              "identifier": "B5_InfoBar_Container_Label_Scroll",
               "leftUnit": "px",
               "topUnit": "px",
               "widthUnit": "px",
@@ -1087,7 +1135,7 @@
       "localVariables": [],
       "componentGroups": [],
       "userProperties": [],
-      "name": "W5_InfoBar",
+      "name": "B5_InfoBar",
       "description": "Widget Info Bar",
       "left": 0,
       "top": 0,
@@ -1119,7 +1167,7 @@
           "hiddenInEditor": false,
           "timeline": [],
           "eventHandlers": [],
-          "identifier": "W5_HeaderBar_Container",
+          "identifier": "B2_HeaderBar_Container",
           "leftUnit": "px",
           "topUnit": "px",
           "widthUnit": "px",
@@ -1176,7 +1224,7 @@
           "hiddenInEditor": false,
           "timeline": [],
           "eventHandlers": [],
-          "identifier": "W2_HeaderBar_Container_Label",
+          "identifier": "B2_HeaderBar_Container_Label",
           "leftUnit": "px",
           "topUnit": "px",
           "widthUnit": "px",
@@ -1237,7 +1285,7 @@
               "userData": 0
             }
           ],
-          "identifier": "W2_HeaderBar_Image_Left",
+          "identifier": "B2_HeaderBar_Image_Left",
           "leftUnit": "px",
           "topUnit": "px",
           "widthUnit": "px",
@@ -1300,7 +1348,7 @@
               "userData": 0
             }
           ],
-          "identifier": "W2_HeaderBar_Image_Right",
+          "identifier": "B2_HeaderBar_Image_Right",
           "leftUnit": "px",
           "topUnit": "px",
           "widthUnit": "px",
@@ -1390,7 +1438,7 @@
       "localVariables": [],
       "componentGroups": [],
       "userProperties": [],
-      "name": "W2_HeaderBar",
+      "name": "B2_HeaderBar",
       "description": "Widget Header Bar",
       "left": 0,
       "top": 0,

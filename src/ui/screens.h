@@ -7,53 +7,63 @@
 extern "C" {
 #endif
 
+// Screens
+
+enum ScreensEnum {
+    _SCREEN_ID_FIRST = 1,
+    SCREEN_ID_SCREEN_START = 1,
+    SCREEN_ID_SCREEN_CONFIG = 2,
+    SCREEN_ID_SCREEN_MAIN = 3,
+    _SCREEN_ID_LAST = 3
+};
+
 typedef struct _objects_t {
     lv_obj_t *screen_start;
     lv_obj_t *screen_config;
     lv_obj_t *screen_main;
     lv_obj_t *obj0;
-    lv_obj_t *obj0__w1_icon_bar_container;
-    lv_obj_t *obj0__w1_icon_bar_container_label_time;
-    lv_obj_t *obj0__w1_icon_bar_container_label_battery;
+    lv_obj_t *obj0__b1_icon_bar_container;
+    lv_obj_t *obj0__b1_icon_bar_container_label_time;
+    lv_obj_t *obj0__b1_icon_bar_container_label_battery;
     lv_obj_t *obj1;
-    lv_obj_t *obj1__w5_info_bar_container;
-    lv_obj_t *obj1__w5_info_bar_container_label_scroll;
+    lv_obj_t *obj1__b5_info_bar_container;
+    lv_obj_t *obj1__b5_info_bar_container_label_scroll;
     lv_obj_t *obj2;
-    lv_obj_t *obj2__w2_header_bar_image_left;
-    lv_obj_t *obj2__w2_header_bar_image_right;
-    lv_obj_t *obj2__w5_header_bar_container;
-    lv_obj_t *obj2__w2_header_bar_container_label;
+    lv_obj_t *obj2__b2_header_bar_container;
+    lv_obj_t *obj2__b2_header_bar_container_label;
+    lv_obj_t *obj2__b2_header_bar_image_left;
+    lv_obj_t *obj2__b2_header_bar_image_right;
     lv_obj_t *obj3;
-    lv_obj_t *obj3__w1_icon_bar_container;
-    lv_obj_t *obj3__w1_icon_bar_container_label_time;
-    lv_obj_t *obj3__w1_icon_bar_container_label_battery;
+    lv_obj_t *obj3__obj0;
+    lv_obj_t *obj3__t1_label_test;
     lv_obj_t *obj4;
-    lv_obj_t *obj4__w5_info_bar_container;
-    lv_obj_t *obj4__w5_info_bar_container_label_scroll;
-    lv_obj_t *w2_header_bar;
-    lv_obj_t *w2_header_bar__w2_header_bar_image_left;
-    lv_obj_t *w2_header_bar__w2_header_bar_image_right;
-    lv_obj_t *w2_header_bar__w5_header_bar_container;
-    lv_obj_t *w2_header_bar__w2_header_bar_container_label;
+    lv_obj_t *obj4__b1_icon_bar_container;
+    lv_obj_t *obj4__b1_icon_bar_container_label_time;
+    lv_obj_t *obj4__b1_icon_bar_container_label_battery;
     lv_obj_t *obj5;
-    lv_obj_t *obj5__w1_icon_bar_container;
-    lv_obj_t *obj5__w1_icon_bar_container_label_time;
-    lv_obj_t *obj5__w1_icon_bar_container_label_battery;
+    lv_obj_t *obj5__b5_info_bar_container;
+    lv_obj_t *obj5__b5_info_bar_container_label_scroll;
+    lv_obj_t *w2_header_bar;
+    lv_obj_t *w2_header_bar__b2_header_bar_container;
+    lv_obj_t *w2_header_bar__b2_header_bar_container_label;
+    lv_obj_t *w2_header_bar__b2_header_bar_image_left;
+    lv_obj_t *w2_header_bar__b2_header_bar_image_right;
     lv_obj_t *obj6;
-    lv_obj_t *obj6__w5_info_bar_container;
-    lv_obj_t *obj6__w5_info_bar_container_label_scroll;
+    lv_obj_t *obj6__obj0;
+    lv_obj_t *obj6__t1_label_test;
+    lv_obj_t *obj7;
+    lv_obj_t *obj7__b1_icon_bar_container;
+    lv_obj_t *obj7__b1_icon_bar_container_label_time;
+    lv_obj_t *obj7__b1_icon_bar_container_label_battery;
+    lv_obj_t *obj8;
+    lv_obj_t *obj8__b5_info_bar_container;
+    lv_obj_t *obj8__b5_info_bar_container_label_scroll;
     lv_obj_t *label_trash_0;
     lv_obj_t *label_trash_1;
     lv_obj_t *label_trash_2;
 } objects_t;
 
 extern objects_t objects;
-
-enum ScreensEnum {
-    SCREEN_ID_SCREEN_START = 1,
-    SCREEN_ID_SCREEN_CONFIG = 2,
-    SCREEN_ID_SCREEN_MAIN = 3,
-};
 
 void create_screen_screen_start();
 void tick_screen_screen_start();
@@ -64,20 +74,22 @@ void tick_screen_screen_config();
 void create_screen_screen_main();
 void tick_screen_screen_main();
 
-void create_user_widget_w1_icon_bar(lv_obj_t *parent_obj, void *flowState, int startWidgetIndex);
-void tick_user_widget_w1_icon_bar(void *flowState, int startWidgetIndex);
+void create_user_widget_b1_icon_bar(lv_obj_t *parent_obj, void *flowState, int startWidgetIndex);
+void tick_user_widget_b1_icon_bar(void *flowState, int startWidgetIndex);
 
-void create_user_widget_w5_info_bar(lv_obj_t *parent_obj, void *flowState, int startWidgetIndex);
-void tick_user_widget_w5_info_bar(void *flowState, int startWidgetIndex);
+void create_user_widget_b5_info_bar(lv_obj_t *parent_obj, void *flowState, int startWidgetIndex);
+void tick_user_widget_b5_info_bar(void *flowState, int startWidgetIndex);
 
-void create_user_widget_w2_header_bar(lv_obj_t *parent_obj, void *flowState, int startWidgetIndex);
-void tick_user_widget_w2_header_bar(void *flowState, int startWidgetIndex);
+void create_user_widget_b2_header_bar(lv_obj_t *parent_obj, void *flowState, int startWidgetIndex);
+void tick_user_widget_b2_header_bar(void *flowState, int startWidgetIndex);
+
+void create_user_widget_t1_test_widget(lv_obj_t *parent_obj, void *flowState, int startWidgetIndex);
+void tick_user_widget_t1_test_widget(void *flowState, int startWidgetIndex);
 
 void tick_screen_by_id(enum ScreensEnum screenId);
 void tick_screen(int screen_index);
 
 void create_screens();
-
 
 #ifdef __cplusplus
 }
