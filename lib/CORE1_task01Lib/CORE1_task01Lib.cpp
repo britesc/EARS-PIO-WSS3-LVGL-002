@@ -1,5 +1,5 @@
 /**
- * @file MAIN_core1TasksLib.cpp
+ * @file CORE1_task01Lib.cpp
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief Core 1 Background Task implementation
  * @details Manages Core 1 background task - Config checking → Screen routing → Monitoring
@@ -12,7 +12,7 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "MAIN_core1TasksLib.h"
+#include "CORE1_task01Lib.h"
 #include "EARS_systemDef.h"
 #include "MAIN_animationGfxLib.h"   // For signaling screen ID to Core0
 #include "MAIN_initializationLib.h" // For MAIN_initialise_nvs() and MAIN_initialise_sd()
@@ -301,5 +301,5 @@ void MAIN_Core1Tasks_getVersionString(char *buffer)
 }
 
 /******************************************************************************
- * End of MAIN_core1TasksLib.cpp
+ * End of CORE1_task01Lib.cpp
  *****************************************************************************/

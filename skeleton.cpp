@@ -60,7 +60,7 @@
 // 5. MAIN LIBRARY HEADERS (alphabetical)
 #include "MAIN_animationGfxLib.h" // Startup animation (Arduino GFX)
 #include "CORE0_task01Lib.h"
-#include "MAIN_core1TasksLib.h"
+#include "CORE1_task01Lib.h"
 #include "MAIN_displayLib.h"
 #include "MAIN_drawingLib.h"
 #include "MAIN_initializationLib.h"

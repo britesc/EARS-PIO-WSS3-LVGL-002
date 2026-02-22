@@ -8,7 +8,7 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/MAIN_core1TasksLib",
+                "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/CORE1_task01Lib",
                 "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/CORE0_task01Lib",
                 "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/MAIN_developmentFeaturesLib",
                 "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/MAIN_sysinfoLib",
@@ -269,7 +269,7 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/MAIN_core1TasksLib",
+                    "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/CORE1_task01Lib",
                     "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/CORE0_task01Lib",
                     "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/MAIN_developmentFeaturesLib",
                     "D:/Dev/EARS-PIO-WSS3-LVGL-002/lib/MAIN_sysinfoLib",

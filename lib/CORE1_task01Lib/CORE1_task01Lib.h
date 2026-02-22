@@ -1,5 +1,5 @@
 /**
- * @file MAIN_core1TasksLib.h
+ * @file CORE1_task01Lib.h
  * @author Julian (51fiftyone51fiftyone@gmail.com)
  * @brief Core 1 Background Task management for EARS
  * @details Manages Core 1 background task - Config checking → Screen routing → Monitoring
@@ -26,11 +26,11 @@
  *****************************************************************************/
 namespace MAIN_Core1Tasks
 {
-    constexpr const char* LIB_NAME = "MAIN_Core1Tasks";
-    constexpr const char* VERSION_MAJOR = "1";
-    constexpr const char* VERSION_MINOR = "2";
-    constexpr const char* VERSION_PATCH = "0";
-    constexpr const char* VERSION_DATE = "2026-02-14";
+    constexpr const char *LIB_NAME = "MAIN_Core1Tasks";
+    constexpr const char *VERSION_MAJOR = "1";
+    constexpr const char *VERSION_MINOR = "2";
+    constexpr const char *VERSION_PATCH = "0";
+    constexpr const char *VERSION_DATE = "2026-02-14";
 }
 
 /******************************************************************************
@@ -87,13 +87,13 @@ void MAIN_core1_background_task(void *parameter);
 /******************************************************************************
  * Version Information Getters
  *****************************************************************************/
-const char* MAIN_Core1Tasks_getLibraryName();
+const char *MAIN_Core1Tasks_getLibraryName();
 uint32_t MAIN_Core1Tasks_getVersionEncoded();
-const char* MAIN_Core1Tasks_getVersionDate();
-void MAIN_Core1Tasks_getVersionString(char* buffer);
+const char *MAIN_Core1Tasks_getVersionDate();
+void MAIN_Core1Tasks_getVersionString(char *buffer);
 
 #endif // __MAIN_CORE1_TASKS_LIB_H__
 
 /******************************************************************************
- * End of MAIN_core1TasksLib.h
+ * End of CORE1_task01Lib.h
  *****************************************************************************/
